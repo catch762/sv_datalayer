@@ -6,7 +6,7 @@
 #include <vector>
 #include <QJsonObject>
 #include <QJsonArray>
-
+#include <format>
 #include "sv_qtcommon.h"
 
 class DataNode;
@@ -92,22 +92,23 @@ public:
         return parent.lock();
     }
 
-    LeafValue* tryGetLeafvalue()
-    {
-        return isLeaf() ? &std::get<LeafValue>(payload) : nullptr;
-    }
+    
     const LeafValue* tryGetLeafvalue() const
     {
         return isLeaf() ? &std::get<LeafValue>(payload) : nullptr;
     }
-
-    CompositeData* tryGetCompositeData()
+    LeafValue* tryGetLeafvalue()
     {
-        return isComposite() ? &std::get<CompositeData>(payload) : nullptr;
+        return removeConst( asConst(this)->tryGetLeafvalue() );
     }
+    
     const CompositeData* tryGetCompositeData() const
     {
         return isComposite() ? &std::get<CompositeData>(payload) : nullptr;
+    }
+    CompositeData* tryGetCompositeData()
+    {
+        return removeConst( asConst(this)->tryGetCompositeData() );
     }
 
     //conforms to Qt models meaning of row: 
@@ -130,8 +131,6 @@ public:
                 }
             }
             
-            //maybe warn if no compdata
-
             return -1;
         }
         else return 0;
@@ -239,17 +238,25 @@ public:
         auto compData = tryGetCompositeData();
         if (!compData)
         {
-            //its a leaf, todo print
+            //its a leaf, but its perfectly fine
             return {};
         }
 
         if (!compData->hasChild(idx))
         {
-            //index out of bounds
+            SV_ERROR(logCategory, formatMsg(std::format("Child index {} out of bounds!", idx)));
             return {};
         }
 
         return compData->getChild(idx);
+    }
+
+    QString basicInfo()
+    {
+        return QString("DataNode{name=%1, type=%2, holds=%3}")
+            .arg(name)
+            .arg(isLeaf() ? "leaf":"comp")
+            .arg(isLeaf() ? "leafvalue" : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
     }
 
 private:
@@ -278,6 +285,11 @@ private:
         }
     }
 
+    std::string formatMsg(const std::string &msg)
+    {
+        return basicInfo().toStdString() + ": " + msg;
+    }
+
 private:
     QString name;
 
@@ -290,4 +302,6 @@ private:
     static inline const QString valueKey = "value"; //mandatory for Leaf nodes
     static inline const QString typeNameKey = "typeName"; //optional for Composite nodes
     static inline const QString childrenKey = "children"; //mandatory for Composite nodes
+
+    static inline const std::string logCategory = "DataNode";
 };

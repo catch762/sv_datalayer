@@ -30,7 +30,7 @@ public:
     /*
     QModelIndex is:
         - {row, column, itemPtr}
-        - it means index of 'itemPtr' which exists in 'row, column' in some other parent item
+        - it means index of 'itemPtr' which exists in 'row, column' in some OTHER parent item
     */
 
     // Obtain QModelIndex for item which exists at 'row, column' inside 'parent'
