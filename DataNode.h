@@ -218,13 +218,10 @@ public:
         else return {};
     }
 
-    //methods with type assumption:
-
+    //These methods can not operate on wrong type, so will assert in case of mismatch:
     void addChild(DataNodeShared child)
     {
-        //todo duplicate names ?
-
-        onOperationWhichRequiresNodeType(NodeType::Composite);
+        SV_ASSERT(isComposite());
 
         if(auto compData = tryGetCompositeData())
         {
@@ -264,25 +261,6 @@ private:
     {
         if (nodeType == NodeType::Leaf) payload = LeafValue();
         else payload = CompositeData();
-    }
-    void onOperationWhichRequiresNodeType(NodeType nodeType)
-    {
-        // Handling incompatible operations:
-        // Lets say we are trying to add child node to Leaf node.
-        // We have two options: 1) either assert / throw exception,
-        // 2) or just change node type to Composite, dropping Leaf content.
-
-        auto leafMismatch       = nodeType == NodeType::Leaf      && !isLeaf();
-        auto CompositeMismatch  = nodeType == NodeType::Composite && !isComposite();
-
-        if (leafMismatch || CompositeMismatch)
-        {
-            // Option 1:
-            assert(false);
-
-            // Option 2: 
-            //initPayload(nodeType);
-        }
     }
 
     std::string formatMsg(const std::string &msg)
