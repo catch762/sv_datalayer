@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <format>
 #include "sv_qtcommon.h"
+#include "tsl/ordered_map.h"
 
 class DataNode;
 SV_DECL_ALIASES(DataNode);
@@ -48,6 +49,7 @@ public:
 
         QString structTypeName;
         std::vector<DataNodeShared> children;
+        //tsl::ordered_map<QString, QString> test;
     };
 
     using PayloadVariant = std::variant<LeafValue, CompositeData>;
