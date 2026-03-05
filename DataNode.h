@@ -21,6 +21,8 @@ SV_DECL_ALIASES(DataNode);
 //
 // Both these types can have 'type name' though: either type name of variable inside Leaf node, or
 // essentially a schema name represnting data layout of Composite node. See 'getTypeName()'
+//
+// The class is written with Qt Model's in mind
 
 class DataNode : public std::enable_shared_from_this<DataNode> 
 {
@@ -78,15 +80,14 @@ public:
     {
         if (auto leaf = tryGetLeafvalue())
         {
-            //return Serialization::typeNameOfAny(getLeafvalue());
-            return "todo";
+            return "todoGetTypeNameFromVariant";
         }
         else if (auto compData = tryGetCompositeData())
         {
             return compData->structTypeName;
         }
 
-        return QString("");//unreachable
+        SV_UNREACHABLE();
     };
 
     DataNodeShared tryGetParent()
@@ -256,6 +257,10 @@ public:
             .arg(name)
             .arg(isLeaf() ? "leaf":"comp")
             .arg(isLeaf() ? "leafvalue" : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
+    }
+    std::string stdBasicInfo()
+    {
+        return basicInfo().toStdString();
     }
 
 private:
