@@ -19,9 +19,6 @@ SV_DECL_ALIASES(DataNode);
 //  1) isLeaf()      - just holds one variable (wrapped in QVariant). Can not have children nodes.
 //  2) isComposite() - the opposite: holds no data, but does have a list of children nodes.
 //
-// Both these types can have 'type name' though: either type name of variable inside Leaf node, or
-// essentially a schema name represnting data layout of Composite node. See 'getTypeName()'
-//
 // The class is written with Qt Model's in mind
 
 class DataNode : public std::enable_shared_from_this<DataNode> 
@@ -49,7 +46,6 @@ public:
             return idx >= 0 && idx < childrenCount();
         }
 
-        QString structTypeName;
         std::vector<DataNodeShared> children;
         //tsl::ordered_map<QString, QString> test;
     };
@@ -76,18 +72,14 @@ public:
     {
         return name;
     }
-    QString getTypeName() const
+    QStringOpt tryGetLeafTypeName() const
     {
         if (auto leaf = tryGetLeafvalue())
         {
-            return "todoGetTypeNameFromVariant";
+            return leaf->typeName();
         }
-        else if (auto compData = tryGetCompositeData())
-        {
-            return compData->structTypeName;
-        }
-
-        SV_UNREACHABLE();
+        
+        return {};
     };
 
     DataNodeShared tryGetParent()
@@ -160,7 +152,6 @@ public:
             }
 
             obj[childrenKey] = childrenArray;
-            obj[typeNameKey] = node.getTypeName();
         }
         //else unreachable
 
@@ -210,12 +201,6 @@ public:
                 }
             }
             
-            //typename for Composite nodes is optional, i guess.
-            if (auto typeName = jsonGetStringOpt(json, typeNameKey))
-            {
-                resCompData->structTypeName = *typeName;
-            }
-
             return result;
         }
         else return {};
@@ -256,11 +241,21 @@ public:
         return QString("DataNode{name=%1, type=%2, holds=%3}")
             .arg(name)
             .arg(isLeaf() ? "leaf":"comp")
-            .arg(isLeaf() ? "leafvalue" : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
+            .arg(isLeaf() ? *tryGetLeafTypeName() : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
     }
     std::string stdBasicInfo()
     {
         return basicInfo().toStdString();
+    }
+
+    template<typename T>
+    bool isLeafWithType()
+    {
+        if (auto leafValue = tryGetLeafvalue())
+        {
+            return qtTypeId<T>() == leafValue->typeId();
+        }
+        else return false;
     }
 
 private:
@@ -284,8 +279,7 @@ private:
 
 private:
     static inline const QString nameKey = "name"; //mandatory
-    static inline const QString valueKey = "value"; //mandatory for Leaf nodes
-    static inline const QString typeNameKey = "typeName"; //optional for Composite nodes
+    static inline const QString valueKey = "leafValue"; //mandatory for Leaf nodes
     static inline const QString childrenKey = "children"; //mandatory for Composite nodes
 
     static inline const std::string logCategory = "DataNode";
