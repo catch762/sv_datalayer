@@ -3,6 +3,35 @@
 #include <typeindex>
 #include <map>
 
+template<typename T>
+class LimitedParam
+{
+public:
+    LimitedParam(T _value, T _min = {}, T _max = {})
+    : value(_value), min(_min), max(_max)
+    {}
+
+    static QJsonValue toJSON(const LimitedParam &param)
+    {
+        QJsonObject obj;
+        
+    }
+
+    static std::optional<LimitedParam> fromJSON(const QJsonValue &jsonValue)
+    {
+        
+    }
+
+private:
+    T value;
+    T min;
+    T max;
+
+    static inline const QString minKey = QString("min");
+    static inline const QString maxKey = QString("max");
+    static inline const QString valKey = QString("val");
+};
+
 class DataLayerSystem
 {
 public:
@@ -52,7 +81,8 @@ public:
         widgetMakers[qMetaTypeId<T>()] = maker;
     }
 
-    //Checks that node is a leaf containing fully registered type T, prints verbose logs if something's wrong
+    // Checks that node is a leaf containing fully registered type T,
+    // prints verbose logs if something's wrong
     template<typename T>
     bool checkIsProperNodeForCreatingWidgetOfType(DataNodeShared node)
     {
