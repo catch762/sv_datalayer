@@ -3,11 +3,11 @@
 // Note, that double, bool and QString are the only, exceptional, basic types
 // that dont save their type names to JSON.
 
-void DefaultSerializers::RegisterAllDefaultTypes()
+void DefaultSerializers::RegisterAllDefaultTypes(SerializationSystem *systemInstance)
 {
-    SerializationSystem::instance().registerSerialization<double> (double_ser,  double_deser);
-    SerializationSystem::instance().registerSerialization<bool>   (bool_ser,    bool_deser);
-    SerializationSystem::instance().registerSerialization<QString>(qstring_ser, qstring_deser);
+    systemInstance->registerSerialization<double> (double_ser,  double_deser);
+    systemInstance->registerSerialization<bool>   (bool_ser,    bool_deser);
+    systemInstance->registerSerialization<QString>(qstring_ser, qstring_deser);
 }
 
 QJsonValue DefaultSerializers::double_ser(const double &v)

@@ -1,3 +1,4 @@
+#pragma once
 #include "sv_qtcommon.h"
 #include <boost/bimap.hpp>
 
@@ -43,137 +44,63 @@ public:
 
 	static inline const QString TypeFieldKey = "_type";
 
-	static SerializationSystem& instance()
-	{
-		static SerializationSystem s;
-		return s;
-	}
+	static SerializationSystem& instance();
+
 
     template<class T>
-	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer)
-	{
-        static_assert(qtTypeIsRegisteredAndNamed<T>());
-
-		serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer} } );
-	}
+	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer);
 
 	//convenience function, that takes serializer/deserializer with concrete type,
 	//wraps them in QVariant and calls version above.
 	template<class T>
-	void registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<T(QJsonValue)> deserializer)
-	{
-		auto wrappedSerializer = [serializer](const QVariant& val)->QJsonValue
-		{
-            SV_ASSERT(qtTypeId<T> == val.typeId());
-			return serializer(val.value<T>());
-		};
-
-		auto wrappedDeserializer = [deserializer](const QJsonValue& json)->QVariant
-		{
-			return deserializer(json);
-		};
-
-		registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
-	}
+	void registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<T(QJsonValue)> deserializer);
 
 
-	QJsonValue qVariantToJson(const QVariant& val)
-	{
-		if (auto * entry = getSerializerByIndex(val.typeId()))
-		{
-			return entry->serializer(val);
-		}
-
-        SV_ERROR("Serialization", QString("Couldnt find serializers for QVariant with type [%1][%2]")
-                                    .arg(val.typeId()).arg(val.typeName()).toStdString());
-		return QJsonValue();
-	}
+	QJsonValue qVariantToJson(const QVariant& val);
 
 	//todo write about type and how its not needed for double bool qstring
-	QVariant jsonToQVariant(const QJsonValue& json)
-	{
-		auto logJsonErr = [&](const QString &err)
-		{
-			SV_ERROR("Serialization", QString("Error trying to deserialize JSON: %1. Json: %2")
-											.arg(err).arg(jsonValueToString(json)).toStdString());
-		};
-
-		QString typeName;
-		if (json.isDouble())
-		{
-			typeName = "double";
-		}
-		else if (json.isBool())
-		{
-			typeName = "bool";
-		}
-		else if (json.isString())
-		{
-			typeName = "QString";
-		}
-		else if (json.isObject())
-		{
-			if (json[TypeFieldKey].isString())
-			{
-				typeName = json[TypeFieldKey].toString();
-			}
-			else
-			{
-				logJsonErr(QString("its object, but it doesnt have [%1] field").arg(TypeFieldKey));
-				return QVariant();
-			}
-		}
-		else
-		{
-			logJsonErr(QString("its something unsupported").arg(TypeFieldKey));
-			return QVariant();
-		}
-
-		if (auto * e = instance().getSerializerByTypeName(typeName))
-		{
-			return e->deserializer(json);
-		}
-		else
-		{
-			//OnError("json_to_any: no deserializer for " + type_name);
-			SV_ERROR("Serialization", "No deserializer found for typeName=" + typeName.toStdString());
-			return QVariant();
-		}
-	}
-
+	QVariant jsonToQVariant(const QJsonValue& json);
 	
 
-	const SerializerEntry* getSerializerByIndex(QtTypeIndex id)
-	{
-		auto found = serializersAsTypeindexMap().find(id);
-		if (found != serializersAsTypeindexMap().end()) return &found->info;
-		else return nullptr;
-	}
+	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
+	
 
-	const SerializerEntry* getSerializerByTypeName(QString typeName)
-	{
-		auto found = serializersAsQStringMap().find(typeName);
-		if (found != serializersAsQStringMap().end()) return &found->info;
-		else return nullptr;
-	}
+	const SerializerEntry* getSerializerByTypeName(QString typeName);
+	
 
 private:
-	/*Serializers()
-	{
-		DefaultSerializers::Load(this);
-		UserSerializers::Load(this);
-	}
-	Serializers(const Serializers&) {}*/
+	SerializationSystem();
 
-	TwoKeysOneValSerializersMap::map_by<QStringTag>::type& serializersAsQStringMap()
-	{
-		return serializerEntries.by<QStringTag>();
-	}
-	TwoKeysOneValSerializersMap::map_by<QtTypeIndexTag>::type& serializersAsTypeindexMap()
-	{
-		return serializerEntries.by<QtTypeIndexTag>();
-	}  
+	TwoKeysOneValSerializersMap::map_by<QStringTag>::type& serializersAsQStringMap();
+	TwoKeysOneValSerializersMap::map_by<QtTypeIndexTag>::type& serializersAsTypeindexMap();
 
 private:
 	TwoKeysOneValSerializersMap serializerEntries;
 };
+
+
+
+template<class T>
+void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer)
+{
+	SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
+
+	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer} } );
+}
+
+template<class T>
+void SerializationSystem::registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<T(QJsonValue)> deserializer)
+{
+	auto wrappedSerializer = [serializer](const QVariant& val)->QJsonValue
+	{
+		SV_ASSERT(qtTypeId<T>() == val.typeId());
+		return serializer(val.value<T>());
+	};
+
+	auto wrappedDeserializer = [deserializer](const QJsonValue& json)->QVariant
+	{
+		return deserializer(json);
+	};
+
+	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
+}

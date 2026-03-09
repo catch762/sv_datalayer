@@ -1,10 +1,12 @@
 #pragma once
 #include <QJsonValue>
 
+class SerializationSystem;
+
 class DefaultSerializers
 {
 public:
-	static void RegisterAllDefaultTypes();
+	static void RegisterAllDefaultTypes(SerializationSystem *systemInstance);
 
 	static QJsonValue double_ser(const double& v);
 	static double double_deser(const QJsonValue& json);
