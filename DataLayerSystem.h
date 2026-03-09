@@ -3,6 +3,7 @@
 #include <typeindex>
 #include <map>
 
+/*
 template<typename T>
 class LimitedParam
 {
@@ -31,6 +32,7 @@ private:
     static inline const QString maxKey = QString("max");
     static inline const QString valKey = QString("val");
 };
+*/
 
 class DataLayerSystem
 {
