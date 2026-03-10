@@ -7,14 +7,18 @@
 // System for serializing/deserializing arbitrary types.
 //
 // Usage: 	
+//
 //	- to register your type simply call: 
 //		SerializationSystem::instance().registerSerialization(serializerFunc, deserializerFunc)
+//
 // 	- then when variable of this type is wrapped in QVariant, you can call:
 // 		qVariantToJson()
 //		jsonToQVariant() for the opposite
 //
-// Requirements:	 
+// Requirements:
+//	 
 //	- the type must be registered and named, as checked by qtTypeIsRegisteredAndNamed() assert
+//
 // 	- the resulting JSON object must have its 'qtTypeName<T>()' saved by key 'SerializationSystem::TypeFieldKey'
 //	  Thats how SerializationSystem knows which deserializer to pick when it receives JSON.
 //	  (just FYI raw 'double', 'bool' and 'QString' types dont save it, but its the only exception)
