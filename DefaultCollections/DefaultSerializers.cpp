@@ -3,7 +3,7 @@
 // Note, that double, bool and QString are the only, exceptional, basic types
 // that dont save their type names to JSON.
 
-void DefaultSerializers::RegisterAllDefaultTypes(SerializationSystem *systemInstance)
+void DefaultSerializers::RegisterEverything(SerializationSystem *systemInstance)
 {
     systemInstance->registerSerialization<double> (double_ser,  double_deser);
     systemInstance->registerSerialization<bool>   (bool_ser,    bool_deser);
@@ -15,9 +15,9 @@ QJsonValue DefaultSerializers::double_ser(const double &v)
     return QJsonValue(v);
 }
 
-double DefaultSerializers::double_deser(const QJsonValue &json)
+doubleOpt DefaultSerializers::double_deser(const QJsonValue &json)
 {
-    return json.toDouble();
+    return json.isDouble() ? json.toDouble() : doubleOpt();
 }
 
 QJsonValue DefaultSerializers::bool_ser(const bool &v)
@@ -25,9 +25,9 @@ QJsonValue DefaultSerializers::bool_ser(const bool &v)
     return QJsonValue(v);
 }
 
-bool DefaultSerializers::bool_deser(const QJsonValue &json)
+boolOpt DefaultSerializers::bool_deser(const QJsonValue &json)
 {
-    return json.toBool();
+    return json.isBool() ? json.toBool() : boolOpt();
 }
 
 QJsonValue DefaultSerializers::qstring_ser(const QString &v)
@@ -35,7 +35,7 @@ QJsonValue DefaultSerializers::qstring_ser(const QString &v)
     return QJsonValue(v);
 }
 
-QString DefaultSerializers::qstring_deser(const QJsonValue &json)
+QStringOpt DefaultSerializers::qstring_deser(const QJsonValue &json)
 {
-    return json.toString();
+    return json.isString() ? json.toString() : QStringOpt();
 }

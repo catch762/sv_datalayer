@@ -1,7 +1,8 @@
 #pragma once
-#include "SerializationSystem.h"
 
+static constexpr auto TypeFieldKey = "_type";
 
+/*
 void sereializeAndDeserialize(QVariant val, QString testName)
 {
     SV_LOG("DataLayerTest", "****** " + testName.toStdString() + "*****");
@@ -22,3 +23,4 @@ void dl_testing()
     sereializeAndDeserialize(QVariant(QString("kek")),  "string");
     sereializeAndDeserialize(QVariant(5.0),             "double");
 }
+*/

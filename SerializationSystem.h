@@ -1,6 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include <boost/bimap.hpp>
+#include "DataLayerUtils.h"
 
 //**************************************************************************************************************
 //
@@ -19,7 +20,7 @@
 //	 
 //	- the type must be registered and named, as checked by qtTypeIsRegisteredAndNamed() assert
 //
-// 	- the resulting JSON object must have its 'qtTypeName<T>()' saved by key 'SerializationSystem::TypeFieldKey'
+// 	- the resulting JSON object must have its 'qtTypeName<T>()' saved by key 'TypeFieldKey' (defined in utils)
 //	  Thats how SerializationSystem knows which deserializer to pick when it receives JSON.
 //	  (just FYI raw 'double', 'bool' and 'QString' types dont save it, but its the only exception)
 //
@@ -46,8 +47,6 @@ public:
 		boost::bimaps::with_info<SerializerEntry>
 	>;
 
-	static inline const QString TypeFieldKey = "_type";
-
 	static SerializationSystem& instance();
 
 
@@ -57,7 +56,7 @@ public:
 	//convenience function, that takes serializer/deserializer with concrete type,
 	//wraps them in QVariant and calls version above.
 	template<class T>
-	void registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<T(QJsonValue)> deserializer);
+	void registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<std::optional<T>(QJsonValue)> deserializer);
 
 
 	QJsonValue qVariantToJson(const QVariant& val);
@@ -93,7 +92,7 @@ void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, J
 }
 
 template<class T>
-void SerializationSystem::registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<T(QJsonValue)> deserializer)
+void SerializationSystem::registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<std::optional<T>(QJsonValue)> deserializer)
 {
 	auto wrappedSerializer = [serializer](const QVariant& val)->QJsonValue
 	{
@@ -103,7 +102,11 @@ void SerializationSystem::registerSerialization(std::function<QJsonValue(const T
 
 	auto wrappedDeserializer = [deserializer](const QJsonValue& json)->QVariant
 	{
-		return deserializer(json);
+		if (auto valueOpt = deserializer(json))
+		{
+			return *valueOpt;
+		}
+		else return QVariant();
 	};
 
 	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);

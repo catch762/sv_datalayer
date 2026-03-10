@@ -3,36 +3,7 @@
 #include <typeindex>
 #include <map>
 
-/*
-template<typename T>
-class LimitedParam
-{
-public:
-    LimitedParam(T _value, T _min = {}, T _max = {})
-    : value(_value), min(_min), max(_max)
-    {}
 
-    static QJsonValue toJSON(const LimitedParam &param)
-    {
-        QJsonObject obj;
-        
-    }
-
-    static std::optional<LimitedParam> fromJSON(const QJsonValue &jsonValue)
-    {
-        
-    }
-
-private:
-    T value;
-    T min;
-    T max;
-
-    static inline const QString minKey = QString("min");
-    static inline const QString maxKey = QString("max");
-    static inline const QString valKey = QString("val");
-};
-*/
 
 
 //************************************************************************************************
@@ -45,22 +16,28 @@ private:
 //    The tree wraps arbitrary type variables in QVariant.
 //    This tree is your data model.
 //
+//    (Note: tree is 'model' that will be updated when 'view' (widgets) change; but it works
+//    one way. As of now, theres no mechanism to update 'view' if you change 'model'
+//    other than delete and rebuild entire tree of widgets.)
+//
 //  - For every type T that is wrapped in QVariant's in the DataNode tree,
 //    there must exist a registered 'WidgetMakerForTypeT'.
 //    You do register types with 'WidgetMakerSystem::instance().registerWidgetMaker(widgetMaker)'
 //
 //    See 'WidgetMakerForTypeT' definition and details below, in the class.
 //
-//  - Then you call 'WidgetMakerSystem::instance().getWidgetForNode(rootDataNode)'
+//  - Then you call 'WidgetMakerSystem::instance().makeWidgetForNode(rootDataNode)'
 //    And it will build widgets for your entire tree, walking through every node.
+//
+// WidgetMakerSystem comes with some types already registered: thats because
+// in its constructor it loads registrations from DefaultWidgetMakers class.
+// You may want to look into it, and load your own widget makers collection in a simillar fashion.
 //
 //************************************************************************************************
 
 class WidgetMakerSystem
 {
 public:
-    using QtTypeId = int;
-
     //************************************************************************************************
     //  - 'WidgetMakerForTypeT' must create appropriate widget and initialize it with node's value
     //
@@ -83,21 +60,24 @@ public:
 
     static WidgetMakerSystem& instance();
 
-    QWidget* getWidgetForNode(DataNodeShared node);
+    QWidget* makeWidgetForNode(DataNodeShared node);
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker);
 
+public:    
     // Checks that node is a leaf containing fully registered type T,
-    // prints verbose logs if something's wrong
+    // prints verbose logs if something's wrong.
+    // Should be first line in 'WidgetMakerForTypeT' to check its argument node.
     template<typename T>
     static bool checkIsProperLeafNodeForCreatingWidgetOfType(DataNodeShared node);
 
 private:
     const WidgetMakerForTypeT* getWidgetMakerForContentType(const QVariant &var);
+    WidgetMakerSystem();
 
 private:
-    std::map<QtTypeId, WidgetMakerForTypeT> widgetMakers;
+    std::map<QtTypeIndex, WidgetMakerForTypeT> widgetMakers;
 };
 
 

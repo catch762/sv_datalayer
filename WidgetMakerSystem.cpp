@@ -1,4 +1,6 @@
 #include "WidgetMakerSystem.h"
+#include "DefaultCollections/DefaultWidgetMakers.h"
+#include "TypesAndWidgets/DataNodeWrapperWidget.h"
 
 WidgetMakerSystem& WidgetMakerSystem::instance()
 {
@@ -6,7 +8,7 @@ WidgetMakerSystem& WidgetMakerSystem::instance()
     return system;
 }
 
-QWidget* WidgetMakerSystem::getWidgetForNode(DataNodeShared node)
+QWidget* WidgetMakerSystem::makeWidgetForNode(DataNodeShared node)
 {
     if (!node)
     {
@@ -17,12 +19,20 @@ QWidget* WidgetMakerSystem::getWidgetForNode(DataNodeShared node)
     {
         if (auto widgetmaker = getWidgetMakerForContentType(*leafValue))
         {
-            return (*widgetmaker)(node);
+            if (auto createdInnerWidget = (*widgetmaker)(node))
+            {
+                return new DataNodeWrapperWidget({createdInnerWidget}, node->getName());
+            }
+            else
+            {
+                SV_ERROR("WidgetMakerSystem", "widget maker returned nullptr for: " + node->stdBasicInfo());
+                return nullptr;
+            }
         }
         else
         {
             //todo bad inspection
-            SV_ERROR("WidgetMakerSystem", QString("No widget maker exist for:%1").arg(leafValue->toString()).toStdString());
+            SV_ERROR("WidgetMakerSystem", "No widget maker exist for: " + node->stdBasicInfo());
             return nullptr;
         }
     }
@@ -42,4 +52,9 @@ const WidgetMakerSystem::WidgetMakerForTypeT* WidgetMakerSystem::getWidgetMakerF
     if (found == widgetMakers.end()) return nullptr;
 
     return &found->second;
+}
+
+WidgetMakerSystem::WidgetMakerSystem()
+{
+    DefaultWidgetMakers::RegisterEverything(this);
 }

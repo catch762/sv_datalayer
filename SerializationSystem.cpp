@@ -1,6 +1,6 @@
 #include "SerializationSystem.h"
 
-#include "DefaultSerializers.h"
+#include "DefaultCollections/DefaultSerializers.h"
 
 SerializationSystem &SerializationSystem::instance()
 {
@@ -87,7 +87,7 @@ const SerializationSystem::SerializerEntry *SerializationSystem::getSerializerBy
 
 SerializationSystem::SerializationSystem()
 {
-    DefaultSerializers::RegisterAllDefaultTypes(this);
+    DefaultSerializers::RegisterEverything(this);
 }
 
 SerializationSystem::TwoKeysOneValSerializersMap::map_by<QStringTag>::type& SerializationSystem::serializersAsQStringMap()
