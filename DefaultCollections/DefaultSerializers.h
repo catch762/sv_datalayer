@@ -17,4 +17,7 @@ public:
 
 	static QJsonValue qstring_ser(const QString& v);
 	static QStringOpt qstring_deser(const QJsonValue& json);
+
+	//static QJsonValue 		limitedDouble_toJson	(const LimitedDouble& val);
+	//static LimitedDoubleOpt limitedDouble_fromJson	(const QJsonValue& json);
 };

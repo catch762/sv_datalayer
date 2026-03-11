@@ -104,7 +104,7 @@ void SerializationSystem::registerSerialization(std::function<QJsonValue(const T
 	{
 		if (auto valueOpt = deserializer(json))
 		{
-			return *valueOpt;
+			return QVariant::fromValue(*valueOpt);
 		}
 		else return QVariant();
 	};

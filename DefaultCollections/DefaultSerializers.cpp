@@ -1,5 +1,7 @@
 #include "DefaultSerializers.h"
 #include "SerializationSystem.h"
+#include "TypesAndWidgets/LimitedValue.h"
+
 // Note, that double, bool and QString are the only, exceptional, basic types
 // that dont save their type names to JSON.
 
@@ -8,6 +10,8 @@ void DefaultSerializers::RegisterEverything(SerializationSystem *systemInstance)
     systemInstance->registerSerialization<double> (double_ser,  double_deser);
     systemInstance->registerSerialization<bool>   (bool_ser,    bool_deser);
     systemInstance->registerSerialization<QString>(qstring_ser, qstring_deser);
+
+    systemInstance->registerSerialization<LimitedDouble>(LimitedDouble::toJSON, LimitedDouble::fromJSON);
 }
 
 QJsonValue DefaultSerializers::double_ser(const double &v)
