@@ -1,6 +1,9 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include <algorithm>
+#include "DataLayerUtils.h"
+
+//todo rewrite for if float, if integer, not type names
 
 //******************************************************************************
 //
@@ -11,12 +14,12 @@
 // Storing 'min' and 'max' directly would conflict with idea of corresponding
 // UI element, which might be setting bigger value in 'min' than in 'max'
 //
-// The <T> is only expected to be int or double.
+// The <T> is only expected to be integer or floating point.
 //
 //******************************************************************************
 
 template<typename T>
-concept LimitedValueAllowedType = std::same_as<T, int> || std::same_as<T, double>;
+concept LimitedValueAllowedType = std::is_arithmetic_v<T>; //only integer or floating point
 
 template<LimitedValueAllowedType T>
 class LimitedValue
@@ -91,13 +94,13 @@ public:
     {
         const QString err = "LimitedParam::fromJSON failed";
 
-        auto jsonObjOpt = jsonGetObjectOptAndLogError(jsonValue, err);
+        auto jsonObjOpt = convertJsonAndLogError<QJsonObject>(jsonValue, err);
         if (!jsonObjOpt) return {};
 
-        auto valueOpt   = jsonGetDoubleOptAndLogError (*jsonObjOpt, ValKey,   err);
-        auto leftOpt    = jsonGetDoubleOptAndLogError (*jsonObjOpt, LeftKey,  err);
-        auto rightOpt   = jsonGetDoubleOptAndLogError (*jsonObjOpt, RightKey, err);
-        auto typeOpt    = jsonGetStringOptAndLogError (*jsonObjOpt, TypeFieldKey, err);
+        auto valueOpt   = getFromJsonAndLogError<double> (*jsonObjOpt, ValKey,   err);
+        auto leftOpt    = getFromJsonAndLogError<double> (*jsonObjOpt, LeftKey,  err);
+        auto rightOpt   = getFromJsonAndLogError<double> (*jsonObjOpt, RightKey, err);
+        auto typeOpt    = getFromJsonAndLogError<QString>(*jsonObjOpt, TypeFieldKey, err);
 
         if (typeOpt && *typeOpt != thisTypeName())
         {
@@ -119,7 +122,7 @@ public:
         return qtTypeName<LimitedValue<T>>();
     }
 
-    QString toString()
+    QString toString() const
     {
         return QString("%1[left=%2][right=%3][val=%4]").arg(thisTypeName()).arg(left).arg(right).arg(value);
     }

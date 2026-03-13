@@ -1,9 +1,12 @@
 #include "DefaultWidgetMakers.h"
 #include "WidgetMakerSystem.h"
 
+#include "TypesAndWidgets/TypesAndWidgets.h"
+
 void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
 {
     system->registerWidgetMaker<QString>(widgetMakerForQString);
+    system->registerWidgetMaker<LimitedDouble>(widgetMakerForLimitedDouble);
 }
 
 QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString)
@@ -24,7 +27,32 @@ QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQStri
         {
             if (auto leaf = nodeShared->tryGetLeafvalue())
             {
-                *leaf = s;
+                *leaf = QVariant::fromValue(s);
+            }
+        }
+    });
+
+    return widget;
+}
+
+QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDouble>(leafWithLimitedDouble))
+    {
+        return nullptr;
+    }
+
+    auto *widget = new LimitedDoubleWidget(leafWithLimitedDouble->tryGetLeafvalue()->value<LimitedDouble>());
+
+    auto nodeWeak = DataNodeWeak(leafWithLimitedDouble);
+
+    QObject::connect(widget, &LimitedDoubleWidget::valueChanged, widget, [nodeWeak](const LimitedDouble &v)
+    {
+        if (auto nodeShared = nodeWeak.lock())
+        {
+            if (auto leaf = nodeShared->tryGetLeafvalue())
+            {
+                *leaf = QVariant::fromValue(v);
             }
         }
     });

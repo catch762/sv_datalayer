@@ -58,12 +58,17 @@ public:
 	template<class T>
 	void registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<std::optional<T>(QJsonValue)> deserializer);
 
+	//convenience function, wraps in QVariant and calls 'qVariantToJson'
+	template<class T>
+	QJsonValue toJson(const T& value);
 
 	QJsonValue qVariantToJson(const QVariant& val);
 
 	//todo write about type and how its not needed for double bool qstring
 	QVariant jsonToQVariant(const QJsonValue& json);
 	
+	template<class T>
+	std::optional<T> fromJson(const QJsonValue& json);
 
 	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
 	
@@ -111,3 +116,27 @@ void SerializationSystem::registerSerialization(std::function<QJsonValue(const T
 
 	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
 }
+
+template<class T>
+QJsonValue SerializationSystem::toJson(const T& value)
+{
+	return qVariantToJson(QVariant::fromValue(value));
+}
+
+template<class T>
+std::optional<T> SerializationSystem::fromJson(const QJsonValue& json)
+{
+	auto qvariant = jsonToQVariant(json);
+	if (!qvariant.isValid()) return {};
+
+	if (qvariant.typeId() != qtTypeId<T>())
+	{
+		SV_ERROR(("SerializationSystem::fromJson, while trying to deserialize type " + qtTypeName<T>()
+			  		+ " received mismatching result " + qVariantInfo(qvariant)).toStdString());
+		return {};
+	}
+
+	return qvariant.value<T>();
+}
+
+	

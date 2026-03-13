@@ -59,6 +59,37 @@ public:
         initPayload(_nodeType);
     }
 
+    template<typename LeafValueT>
+    static DataNodeShared makeLeaf(const QString &_name = QString(), const LeafValueT& value = {})
+    {
+        auto node = new DataNode(_name, NodeType::Leaf);
+        *node->tryGetLeafvalue() = QVariant::fromValue(value);
+        return DataNodeShared(node);
+    }
+    static DataNodeShared makeComposite(const QString &_name = QString())
+    {
+        return DataNodeShared(new DataNode(_name, NodeType::Composite));
+    }
+
+    //Returns added node.
+    //If this node is not Composite, it will trigger assert.
+    template<typename LeafValueT>
+    DataNodeShared addLeaf(const QString &_name = QString(), const LeafValueT& value = {})
+    {
+        auto node = makeLeaf(name, value);
+        addChild(node);
+        return node;
+    }
+
+    //Returns added node.
+    //If this node is not Composite, it will trigger assert.
+    DataNodeShared addComposite(const QString &_name = QString())
+    {
+        auto node = makeComposite(name);
+        addChild(node);
+        return node;
+    }
+
     bool isLeaf() const
     {
         return std::holds_alternative<LeafValue>(payload);
@@ -160,18 +191,19 @@ public:
 
     static DataNodeOpt fromJSON(QJsonValue jsonValue)
     {
+        const QString err("DataNode deserialize error");
         DataNode result;
-        if (!jsonValue.isObject()) return {};
 
-        auto json = jsonValue.toObject();
+        auto json = convertJsonAndLogError<QJsonObject>(jsonValue, err);
+        if (!json) return {};
 
-        if (auto name = jsonGetStringOpt(json, nameKey))
+        if (auto name = getFromJsonAndLogError<QString>(*json, nameKey, err))
         {
             result.name = *name;
         }
         else return {};
 
-        auto leafValue = json[valueKey];
+        auto leafValue = json->value(valueKey);
         if (!leafValue.isUndefined()) //Then its Leaf node
         {
             result.initPayload(NodeType::Leaf);
@@ -180,7 +212,7 @@ public:
 
             return result;
         }
-        else if(auto childrenArray = jsonGetArrayOpt(json, childrenKey)) //Then its Composite node
+        else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
         {
             result.initPayload(NodeType::Composite);
             CompositeData* resCompData = result.tryGetCompositeData();

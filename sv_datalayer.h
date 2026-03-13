@@ -6,3 +6,4 @@
 #include "WidgetMakerSystem.h"
 #include "SerializationSystem.h"
 #include "DataLayerUtils.h"
+#include "TypesAndWidgets/TypesAndWidgets.h"
