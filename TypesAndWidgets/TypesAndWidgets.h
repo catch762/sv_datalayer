@@ -12,3 +12,5 @@ Q_DECLARE_METATYPE(LimitedDoubleVec)
 
 SV_DECL_ALIASES(LimitedIntVec)
 SV_DECL_ALIASES(LimitedDoubleVec)
+
+#include "LimitedValue/LimitedDoubleVecWidget.h"

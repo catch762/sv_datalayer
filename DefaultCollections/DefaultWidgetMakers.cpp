@@ -7,6 +7,7 @@ void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
 {
     system->registerWidgetMaker<QString>(widgetMakerForQString);
     system->registerWidgetMaker<LimitedDouble>(widgetMakerForLimitedDouble);
+    system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec);
 }
 
 QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString)
@@ -47,6 +48,32 @@ QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWit
     auto nodeWeak = DataNodeWeak(leafWithLimitedDouble);
 
     QObject::connect(widget, &LimitedDoubleWidget::valueChanged, widget, [nodeWeak](const LimitedDouble &v)
+    {
+        if (auto nodeShared = nodeWeak.lock())
+        {
+            if (auto leaf = nodeShared->tryGetLeafvalue())
+            {
+                *leaf = QVariant::fromValue(v);
+            }
+        }
+    });
+
+    return widget;
+}
+
+
+QWidget *DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDoubleVec>(leafWithLimitedDoubleVec))
+    {
+        return nullptr;
+    }
+
+    auto *widget = new LimitedDoubleVecWidget(leafWithLimitedDoubleVec->tryGetLeafvalue()->value<LimitedDoubleVec>());
+
+    auto nodeWeak = DataNodeWeak(leafWithLimitedDoubleVec);
+
+    QObject::connect(widget, &LimitedDoubleVecWidget::valueChanged, widget, [nodeWeak](const LimitedDoubleVec &v)
     {
         if (auto nodeShared = nodeWeak.lock())
         {

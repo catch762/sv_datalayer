@@ -76,7 +76,7 @@ public:
     template<typename LeafValueT>
     DataNodeShared addLeaf(const QString &_name = QString(), const LeafValueT& value = {})
     {
-        auto node = makeLeaf(name, value);
+        auto node = makeLeaf(_name, value);
         addChild(node);
         return node;
     }
@@ -85,7 +85,7 @@ public:
     //If this node is not Composite, it will trigger assert.
     DataNodeShared addComposite(const QString &_name = QString())
     {
-        auto node = makeComposite(name);
+        auto node = makeComposite(_name);
         addChild(node);
         return node;
     }

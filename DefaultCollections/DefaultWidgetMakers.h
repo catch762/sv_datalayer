@@ -14,6 +14,8 @@ public:
 
     static QWidget* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble);
 
+    static QWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec);
+
     //e.g Leaf node must hold "std::vector<LimitedValue< T_OfLimitedValue >>"
     /*template<typename T_OfLimitedValue>
     static QWidget* widgetMakerForLimitedValueVec(DataNodeShared leafWithQString)

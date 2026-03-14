@@ -8,6 +8,9 @@ class LimitedDoubleWidget : public QFrame
 public:
     LimitedDoubleWidget(const LimitedDouble &initialValue = {}, QWidget *parent = nullptr);
 
+    void setValue(const LimitedDouble &value);
+    LimitedDouble currentValue() const;
+
 signals:
     void valueChanged(const LimitedDouble& value);
 
@@ -16,16 +19,15 @@ private:
 
 private slots:
     void onSomethingChanged(QWidget *changedWidget);
-    LimitedDouble currentValue();
-    void setValue(const LimitedDouble &value);
 
+private:
     //e.g.  if spinboxValue is at spinboxLeftLimit  -> 0.0 
     //      if spinboxValue is at spinboxRightLimit -> 1.0 
-    double getValue01BasedOnSpinboxes();
+    double getValue01BasedOnSpinboxes() const;
 
     //e.g   if slider is in leftmost position       -> spinboxLeftLimit->value()
     //      if slider is in rightmost position      -> spinboxRightLimit->value()
-    double getValueBasedOnSlider();
+    double getValueBasedOnSlider() const;
 
 private:
     QDoubleSpinBox* spinboxValue            = nullptr; // this is the widget holding current Value.

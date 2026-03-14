@@ -40,6 +40,7 @@ QWidget* WidgetMakerSystem::makeWidgetForNode(DataNodeShared node)
     {
         //This node doesnt contain QVariant value, it does contain list of other DataNode's -
         //this is a special case handled here.
+        SV_ASSERT(false && "not impl yet");
         return nullptr;
     }
 

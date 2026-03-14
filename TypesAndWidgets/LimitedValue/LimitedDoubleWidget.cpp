@@ -1,6 +1,6 @@
 #include "LimitedDoubleWidget.h"
 
-LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWidget *parent)
+LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWidget *parent) : QFrame(parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setSpacing(2);
@@ -68,11 +68,11 @@ void LimitedDoubleWidget::onSomethingChanged(QWidget *changedWidget)
     }
 
 
-    SV_LOG(("Changed: " + currentValue().toString()).toStdString());
+    //SV_LOG(("Changed: " + currentValue().toString()).toStdString());
     emit valueChanged(currentValue());
 }
 
-LimitedDouble LimitedDoubleWidget::currentValue()
+LimitedDouble LimitedDoubleWidget::currentValue() const
 {
     double left     = spinboxLeftLimit->value();
     double right    = spinboxRightLimit->value();
@@ -83,19 +83,30 @@ LimitedDouble LimitedDoubleWidget::currentValue()
 
 void LimitedDoubleWidget::setValue(const LimitedDouble &value)
 {
-    spinboxLeftLimit->setValue(value.left());
-    spinboxRightLimit->setValue(value.right());
-    spinboxValue->setValue(value.value());
+    {
+        QSignalBlocker  a(spinboxLeftLimit),
+                        b(spinboxRightLimit),
+                        c(spinboxValue),
+                        d(sliderValueLeftToRight);
+
+        spinboxLeftLimit->setValue(value.left());
+        spinboxRightLimit->setValue(value.right());
+        spinboxValue->setValue(value.value());
+        setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
+    }
+
+    //SV_LOG(("Set: " + currentValue().toString()).toStdString());
+    emit valueChanged(currentValue());
 }
 
-double LimitedDoubleWidget::getValue01BasedOnSpinboxes()
+double LimitedDoubleWidget::getValue01BasedOnSpinboxes() const
 {
     return getValue01Clamped(spinboxValue->value(),
                              spinboxLeftLimit->value(),
                              spinboxRightLimit->value());
 }
 
-double LimitedDoubleWidget::getValueBasedOnSlider()
+double LimitedDoubleWidget::getValueBasedOnSlider() const
 {
     return mix( spinboxLeftLimit->value(),
                 spinboxRightLimit->value(),
