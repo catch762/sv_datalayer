@@ -4,7 +4,7 @@ LimitedIntWidget::LimitedIntWidget(const LimitedInt &initialValue, QWidget *pare
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
 
-    slider = new QSlider(this);
+    slider = new QSlider(Qt::Horizontal, this);
     {
         slider->setMinimum(0);
         slider->setMaximum(10'000);

@@ -26,53 +26,65 @@ class LimitedValue
 {
 public:
     LimitedValue(T theValue = 0, T theLeft = 0, T theRight = 1)
-    : value(theValue), left(theLeft), right(theRight)
+    : _value(theValue), _left(theLeft), _right(theRight)
     {
         setValue(theValue);
     }
 
+    T value() const
+    {
+        return _value;
+    }
     //sets 'value' and applies limits to it
     void setValue(T theValue)
     {
-        value = std::clamp(value, min(), max());
+        _value = std::clamp(theValue, min(), max());
     }
 
+    T left() const
+    {
+        return _left;
+    }
     //sets and applies new limits to 'value'
     void setLeft(T theLeft)
     {
         left = theLeft;
-        value = setValue(value);
+        setValue(_value);
     }
 
+    T right() const
+    {
+        return _right;
+    }
     //sets and applies new limits to 'value'
     void setRight(T theRight)
     {
-        right = theRight;
-        value = setValue(value);
+        _right = theRight;
+        setValue(_value);
     }
 
     T min() const
     {
-        return std::min(left, right);
+        return std::min(_left, _right);
     }
 
     T max() const
     {
-        return std::max(left, right);
+        return std::max(_left, _right);
     }
 
     //at 0.0 sets value to left, at 1.0 to right.
     void setValue01(double toRight01)
     {
         toRight01 = std::clamp(toRight01, 0.0, 1.0);
-        setValue( mix(left, right, toRight01) );
+        setValue( mix(_left, _right, toRight01) );
     }
 
     //if value==left, returns 0.0, if value==right returns 1.0
-    double getValue01()
+    double getValue01() const
     {
-        T diffFromLeft = value - left;
-        T span = right - left;
+        T diffFromLeft = _value - _left;
+        T span = _right - _left;
 
         //avoiding dividing by both 'int, zero' and 'double, practically zero'
         if (double(abs(span)) < std::numeric_limits<double>::epsilon()) return 0.0;
@@ -83,9 +95,9 @@ public:
     static QJsonValue toJSON(const LimitedValue &param)
     {
         QJsonObject obj;
-        obj[LeftKey]      = param.left;
-        obj[RightKey]     = param.right;
-        obj[ValKey]       = param.value;
+        obj[LeftKey]      = param.left();
+        obj[RightKey]     = param.right();
+        obj[ValKey]       = param.value();
         obj[TypeFieldKey] = thisTypeName();
         return obj;
     }
@@ -124,16 +136,16 @@ public:
 
     QString toString() const
     {
-        return QString("%1[left=%2][right=%3][val=%4]").arg(thisTypeName()).arg(left).arg(right).arg(value);
+        return QString("%1[left=%2][right=%3][val=%4]").arg(thisTypeName()).arg(_left).arg(_right).arg(_value);
     }
 
 private:
 
 
 private:
-    T value;
-    T left;
-    T right;
+    T _value;
+    T _left;
+    T _right;
 
     static inline const QString LeftKey = QString("left");
     static inline const QString RightKey = QString("right");
