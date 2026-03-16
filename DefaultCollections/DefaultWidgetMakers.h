@@ -10,19 +10,9 @@ class DefaultWidgetMakers
 public:
     static void RegisterEverything(WidgetMakerSystem *system);
 
-    static QWidget* widgetMakerForQString(DataNodeShared leafWithQString);
+    static QWidget* widgetMakerForQString(DataNodeShared leafWithQString, const WidgetOptionsJsonOpt &options);
 
-    static QWidget* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble);
+    static QWidget* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const WidgetOptionsJsonOpt &options);
 
-    static QWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec);
-
-    //e.g Leaf node must hold "std::vector<LimitedValue< T_OfLimitedValue >>"
-    /*template<typename T_OfLimitedValue>
-    static QWidget* widgetMakerForLimitedValueVec(DataNodeShared leafWithQString)
-    {
-        if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<QString>(leafWithQString))
-        {
-            return nullptr;
-        }
-    }*/
+    static QWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const WidgetOptionsJsonOpt &options);
 };

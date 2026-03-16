@@ -5,12 +5,12 @@
 
 void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
 {
-    system->registerWidgetMaker<QString>(widgetMakerForQString);
-    system->registerWidgetMaker<LimitedDouble>(widgetMakerForLimitedDouble);
-    system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec);
+    system->registerWidgetMaker<QString>(widgetMakerForQString, "std");
+    system->registerWidgetMaker<LimitedDouble>(widgetMakerForLimitedDouble, QString("std"));
+    system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec, QString("std"));
 }
 
-QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString)
+QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const WidgetOptionsJsonOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<QString>(leafWithQString))
     {
@@ -36,7 +36,7 @@ QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQStri
     return widget;
 }
 
-QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble)
+QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const WidgetOptionsJsonOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDouble>(leafWithLimitedDouble))
     {
@@ -62,7 +62,7 @@ QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWit
 }
 
 
-QWidget *DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec)
+QWidget *DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const WidgetOptionsJsonOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDoubleVec>(leafWithLimitedDoubleVec))
     {

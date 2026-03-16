@@ -2,7 +2,7 @@
 #include "DataNode.h"
 #include <typeindex>
 #include <map>
-
+#include "WidgetOptions.h"
 
 
 
@@ -56,14 +56,21 @@ public:
     //    You may see examples in
     //  
     //************************************************************************************************
-    using WidgetMakerForTypeT = std::function<QWidget*(DataNodeShared leafNodeContainingValueOfTypeT)>;
+    using WidgetMakerForTypeT = std::function<QWidget*(DataNodeShared leafNodeContainingValueOfTypeT,
+                                                       const WidgetOptionsJsonOpt &options)>;
+
+    struct WidgetMakerCollection
+    {
+        std::map<QString, WidgetMakerForTypeT> widgetMakers;
+        QString defaultWidgetMakerName;
+    };
 
     static WidgetMakerSystem& instance();
 
-    QWidget* makeWidgetForNode(DataNodeShared node);
+    QWidget* makeWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});      
 
     template<class T>
-    void registerWidgetMaker(WidgetMakerForTypeT maker);
+    void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName);
 
 public:    
     // Checks that node is a leaf containing fully registered type T,
@@ -73,20 +80,37 @@ public:
     static bool checkIsProperLeafNodeForCreatingWidgetOfType(DataNodeShared node);
 
 private:
-    const WidgetMakerForTypeT* getWidgetMakerForContentType(const QVariant &var);
+    //returns nullptr if not found
+    WidgetMakerCollection* getCollection(QtTypeIndex typeIndex);
+    //always returns valid ptr
+    WidgetMakerCollection* getCollectionAndCreateIfNotFound(QtTypeIndex typeIndex);
+
+    //if 'widgetMakerNameOpt' is {}, returns default widget maker for this WidgetMakerCollection
+    const WidgetMakerForTypeT* getWidgetMakerForContentType(const QVariant &var, QStringOpt widgetMakerNameOpt = {});
     WidgetMakerSystem();
 
 private:
-    std::map<QtTypeIndex, WidgetMakerForTypeT> widgetMakers;
+    std::map<QtTypeIndex, WidgetMakerCollection> widgetMakerCollections;
 };
 
 
 
 template<class T>
-void WidgetMakerSystem::registerWidgetMaker(WidgetMakerForTypeT maker)
+void WidgetMakerSystem::registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName)
 {
-    //todo check overwrite?
-    widgetMakers[qMetaTypeId<T>()] = maker;
+    QtTypeIndex typeIndex = qMetaTypeId<T>();
+
+    auto *collection = getCollectionAndCreateIfNotFound(typeIndex);
+    SV_ASSERT(collection);
+    SV_ASSERT(!collection->widgetMakers.contains(widgetMakerName) && "You are trying to register widetMaker, but such name already exists");
+
+    //setting default name to first registered maker
+    if (collection->widgetMakers.empty())
+    {
+        collection->defaultWidgetMakerName = widgetMakerName;
+    }
+
+    collection->widgetMakers[widgetMakerName] = maker;
 }
 
 // Checks that node is a leaf containing fully registered type T,
