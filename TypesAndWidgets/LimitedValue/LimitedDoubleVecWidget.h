@@ -2,125 +2,59 @@
 #include "LimitedDoubleWidget.h"
 #include "TypesAndWidgets/TypesAndWidgets.h"
 
-//as of now, no change of vector size is possible, once widget is created
-
+class BaseXYPadWidget;
+class XYPresetsWidget;
 class LimitedDoubleVecWidget : public QFrame
 {
     Q_OBJECT
 public:
-    LimitedDoubleVecWidget(const LimitedDoubleVec& vec, QWidget *parent = nullptr)
-    : QFrame(parent)
+    enum Mode
     {
-        layout = new QVBoxLayout(this);
+        ShowJustLimitedDoubleWidgets,
+        ShowXYPad
+    };
 
-        setValue(vec);
-    }
+    LimitedDoubleVecWidget(const LimitedDoubleVec& vec, QWidget *parent = nullptr);
 
-    const LimitedDoubleVec& getValue()
-    {
-        return value;
-    }
+    const LimitedDoubleVec& getValue() const;
 
     //may add or remove widgets based on difference between current value and new value
-    void setValue(const LimitedDoubleVec& newValue)
-    {
-        value = newValue;
+    void setValue(const LimitedDoubleVec& newValue);
 
-        setWidgetsStateFromValue(value);
-
-        emit valueChanged(value);
-    }
+    void setMode(Mode newMode);
 
 signals:
     void valueChanged(const LimitedDoubleVec &val);
 
 private slots:
-    void onSomethingChanged()
-    {
-        setCurrentValueFromWidgetsState();
-
-        emit valueChanged(value);
-    }
+    void onSomethingChanged();
 
 private:
     //May resize value, if widgets count is different from value size
-    void setCurrentValueFromWidgetsState()
-    {
-        auto valueSize = value.size();
-        auto widgetsSize = subWidgets.size();
+    void setCurrentValueFromWidgetsState();
 
-        if (valueSize != widgetsSize)
-        {
-            SV_LOG(std::format("LimitedDoubleVecWidget, set val from widgets: valueSize[{}] but widgetsSize[{}], will resize",
-                 valueSize, widgetsSize));
-            value.resize(widgetsSize);
-        }
+    //Simply makes sure there are N basicWidgets now: deletes unneeded widgets or adds new ones, if needed.
+    //Added basicWidgets remain with their default value, but their visibility
+    //in regards to 'curMode' is set appropriately.
+    void setBasicWidgetsCount(int requiredBasicWidgetsCount);
 
-        SV_ASSERT(value.size() == subWidgets.size());
-        for (int i = 0; i < widgetsSize; ++i)
-        {
-            value[i] = subWidgets[i]->currentValue();
-        }
-    }
+    //After this call, widgets state will exactly match the argument.
+    //Therefore widgets count may change.
+    //All signals from widgets are blocked during this operation.
+    void setWidgetsStateFromValue(const LimitedDoubleVec& value);
 
-    //Simply makes sure there are N subwidgets now: deletes unneeded widgets or adds new ones, if needed.
-    //Added subwidgets remain with default value.
-    void setSubWidgetsCount(int requiredSubwidgetsCount)
-    {
-        auto existingSubwidgets = subWidgets.size();
+    //void iterateAllWidgets
 
-        if (existingSubwidgets > requiredSubwidgetsCount)
-        {
-            int widgetsToDelete = existingSubwidgets - requiredSubwidgetsCount;
-
-            SV_LOG(std::format("setSubWidgetsCount will delete [{}] widgets", widgetsToDelete));
-
-            for (int i = 0; i < widgetsToDelete; ++i)
-            {
-                delete subWidgets.back();
-                subWidgets.pop_back();
-            }
-        }
-        else if (requiredSubwidgetsCount > existingSubwidgets)
-        {
-            int widgetsToAdd = requiredSubwidgetsCount - existingSubwidgets;
-
-            SV_LOG(std::format("setSubWidgetsCount will add [{}] widgets", widgetsToAdd));
-
-            for (int i = 0; i < widgetsToAdd; ++i)
-            {
-                //not even setting value, well do it later
-                auto widget = new LimitedDoubleWidget(LimitedDouble{}, this);
-
-                connect(widget, &LimitedDoubleWidget::valueChanged, this, &LimitedDoubleVecWidget::onSomethingChanged);
-
-                subWidgets.push_back(widget);
-                layout->addWidget(widget);
-            }
-        }
-        else
-        {
-            SV_LOG("setSubWidgetsCount will do nothing");
-        }
-    }
-
-    void setWidgetsStateFromValue(const LimitedDoubleVec& value)
-    {
-        setSubWidgetsCount(value.size());
-
-        SV_ASSERT(value.size() == subWidgets.size());
-
-        for (int i = 0; i < subWidgets.size(); ++i)
-        {
-            auto widget = subWidgets[i];
-
-            QSignalBlocker blocker(widget);
-            widget->setValue(value[i]);
-        }
-    }
+    bool basicWidgetShouldBeVisible(int index);
 
 private:
     LimitedDoubleVec value;
-    QVBoxLayout* layout = nullptr;
-    std::vector<LimitedDoubleWidget*> subWidgets;
+    QVBoxLayout*                        layout = nullptr;
+    QPushButton*                            tempSwapModesButton = nullptr;
+    QVBoxLayout*                            basicWidgetsLayout = nullptr;
+    std::vector<LimitedDoubleWidget*>           basicWidgets;
+    BaseXYPadWidget*                        xyPad = nullptr;
+    XYPresetsWidget*                        xyPadPresets = nullptr;
+    
+    Mode curMode = Mode::ShowJustLimitedDoubleWidgets;
 };
