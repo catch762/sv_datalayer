@@ -12,10 +12,12 @@ void DefaultSerializers::RegisterEverything(SerializationSystem *systemInstance)
     systemInstance->registerSerialization<bool>   (bool_ser,    bool_deser);
     systemInstance->registerSerialization<QString>(qstring_ser, qstring_deser);
 
-    systemInstance->registerSerialization<LimitedDouble>(LimitedDouble::toJSON, LimitedDouble::fromJSON);
+    //systemInstance->registerSerialization<LimitedDouble>(LimitedDouble::toJSON, LimitedDouble::fromJSON);
+    systemInstance->registerSerialization<LimitedDouble>();
 
     systemInstance->registerSerialization<LimitedDoubleVec>(ContainerSerializers::vector_toJson<LimitedDouble>,
                                                             ContainerSerializers::vector_fromJson<LimitedDouble>);
+    
 }
 
 QJsonValue DefaultSerializers::double_ser(const double &v)

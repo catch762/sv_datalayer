@@ -2,6 +2,7 @@
 #include "sv_qtcommon.h"
 #include <boost/bimap.hpp>
 #include "DataLayerUtils.h"
+#include "SerializerInterface.h"
 
 //**************************************************************************************************************
 //
@@ -49,6 +50,9 @@ public:
 
 	static SerializationSystem& instance();
 
+
+	template <Serializable T>
+	void registerSerialization();
 
     template<class T>
 	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer);
@@ -139,4 +143,23 @@ std::optional<T> SerializationSystem::fromJson(const QJsonValue& json)
 	return qvariant.value<T>();
 }
 
-	
+template <Serializable T>
+void SerializationSystem::registerSerialization()
+{
+	auto wrappedSerializer = [](const QVariant& val)->QJsonValue
+	{
+		SV_ASSERT(qtTypeId<T>() == val.typeId());
+		return Serializer<T>::toJson(val.value<T>());
+	};
+
+	auto wrappedDeserializer = [](const QJsonValue& json)->QVariant
+	{
+		if (auto valueOpt = Serializer<T>::fromJson(json))
+		{
+			return QVariant::fromValue(*valueOpt);
+		}
+		else return QVariant();
+	};
+
+	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
+}

@@ -2,6 +2,7 @@
 #include "sv_qtcommon.h"
 #include <algorithm>
 #include "DataLayerUtils.h"
+#include "SerializerInterface.h"
 
 //todo rewrite for if float, if integer, not type names
 
@@ -164,8 +165,29 @@ private:
     static inline const QString ValKey = QString("val");
 };
 
+
+
+template <typename T>
+class Serializer<LimitedValue<T>>
+{
+public:
+    static QJsonValue toJson(const LimitedValue<T>& value)
+    {
+        return LimitedValue<T>::toJSON(value);
+    }
+    
+    static std::optional<LimitedValue<T>> fromJson(const QJsonValue& json)
+    {
+        return LimitedValue<T>::fromJSON(json);
+    }
+};
+
+
 using LimitedInt    = LimitedValue<int>;
 using LimitedDouble = LimitedValue<double>;
+
+SV_DECL_STD_FORMATTER(LimitedInt,    obj.toString().toStdString());
+SV_DECL_STD_FORMATTER(LimitedDouble, obj.toString().toStdString());
 
 Q_DECLARE_METATYPE(LimitedInt)
 Q_DECLARE_METATYPE(LimitedDouble)
