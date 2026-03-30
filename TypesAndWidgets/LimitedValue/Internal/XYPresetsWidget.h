@@ -12,4 +12,5 @@ private:
 private:
     QHBoxLayout*                layout                      = nullptr;
     HorizontalScrollAreaWidget*     presetsScrollAreaWidget = nullptr;
+    QPushButton*                    addPresetButton         = nullptr;
 };

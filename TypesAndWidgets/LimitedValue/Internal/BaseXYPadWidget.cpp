@@ -3,9 +3,12 @@
 
 BaseXYPadWidget::BaseXYPadWidget(QWidget *parent) : QWidget(parent)
 {
+    
     QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    policy.setHeightForWidth(true);
+    //policy.setHeightForWidth(true);
     setSizePolicy(policy);
+    
+    setMouseTracking(true);
 }
 
 QPointF BaseXYPadWidget::pixcoordToCoord11(QPointF localPixcoord)
@@ -32,24 +35,41 @@ void BaseXYPadWidget::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
 
-    // White filled rect with red border in one operation
-    QPen pen(Qt::red);
+    QPen pen(palette().color(QPalette::Mid).lighter(135));
     pen.setWidth(1);
     p.setPen(pen);
-    p.setBrush(Qt::white);
-    p.drawRect(coordinateArea().adjusted(0, 0, -1, -1));
+
+    p.setBrush(palette().color(QPalette::AlternateBase).lighter(155));
+
+    auto coordArea = coordinateArea();
+    auto fixedCoordArea = coordArea.adjusted(0, 0, -1, -1);
+
+    p.drawRect(fixedCoordArea);
+
+    int midX = coordArea.center().x();
+    int midY = coordArea.center().y();
+
+    QLine verticalMidline = QLine(midX, coordArea.top(), midX, coordArea.bottom());
+    QLine horizontalMidline = QLine(coordArea.left(), midY, coordArea.right(), midY);
+
+    p.drawLine(verticalMidline);
+    p.drawLine(horizontalMidline);
 }
 
+/*
 int BaseXYPadWidget::heightForWidth(int width) const
 {
     return width;
 }
+*/
+
 
 QSize BaseXYPadWidget::sizeHint() const
 {
     const int side = 200;
     return QSize(side, side);
 }
+
 
 QSize BaseXYPadWidget::minimumSizeHint() const
 {
@@ -74,4 +94,23 @@ QRect BaseXYPadWidget::coordinateArea()
     {
         return availableCoordArea;
     }
+}
+
+void BaseXYPadWidget::mousePressEvent(QMouseEvent *event)
+{
+    emit positionChanged( pixcoordToCoord11(event->pos()) );
+    
+    QWidget::mousePressEvent(event);
+}
+
+void BaseXYPadWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    auto buttonIsPressed = event->buttons() & Qt::LeftButton;
+
+    if (buttonIsPressed)
+    {
+        emit positionChanged( pixcoordToCoord11(event->pos()) );
+    }
+
+    QWidget::mouseMoveEvent(event);
 }

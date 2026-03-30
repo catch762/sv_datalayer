@@ -2,9 +2,24 @@
 #include "sv_qtcommon.h"
 #include <QMouseEvent>
 
-// The most base class for creating XY pad widgets:
-// it doesnt really have anything, just provides mapping to normalized space
-// and draws the area.
+//***********************************************************************
+//
+// The most base class for creating XY pad widgets.
+// Pretty much just sets up 'workingArea' mapping and draws it.
+//
+// - The 'workingArea': pixelwise its some rectangle within a widget,
+//   that has a 'Coord11' mapping to and from it: 'Coord11' space is
+//   from -1 to 1 on both axis. 
+//
+//   Bottom left pixel of workingArea is always (-1, -1)
+//   Top right pixel of workingArea is always (1, 1)
+//
+//   You may map this to any range in user classes, but for this class's
+//   perspective, coords are never outside [-1, 1].
+//
+//   Working area may or may not be a square.
+//
+//***********************************************************************
 
 class BaseXYPadWidget : public QWidget
 {
@@ -17,27 +32,23 @@ public:
 
     QPointF coord11ToPixcoord(QPointF coord11);
 
+signals:
+    void positionChanged(QPointF coord11);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
-    int heightForWidth(int width) const;
+    //int heightForWidth(int width) const;
     QSize sizeHint() const;
     QSize minimumSizeHint() const;
 
     QRect coordinateArea();
 
-    void mousePressEvent(QMouseEvent *event) override
-    {
-        auto x = event->pos().x();
-        auto y = event->pos().y();
-        auto z = pixcoordToCoord11(QPoint(x,y)).x();
-        auto w = pixcoordToCoord11(QPoint(x,y)).y();
-
-        SV_LOG( QString("%1 %2 --- %3 %4").arg(x).arg(y).arg(z).arg(w).toStdString() );
-    }
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     //actual coordinateArea() is between [offset.x, width - 2*offset.x], same for height
     QPoint offset = QPoint(10,10);
-    bool constrainAreaToSquared = true;
+    bool constrainAreaToSquared = false;
 };

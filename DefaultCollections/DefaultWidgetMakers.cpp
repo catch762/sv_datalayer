@@ -79,6 +79,7 @@ QWidget *DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leaf
         {
             if (auto leaf = nodeShared->tryGetLeafvalue())
             {
+                SV_LOG("Saving LimitedDoubleVec to node...");
                 *leaf = QVariant::fromValue(v);
             }
         }

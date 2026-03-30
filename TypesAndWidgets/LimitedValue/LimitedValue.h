@@ -80,7 +80,13 @@ public:
         setValue( mix(_left, _right, toRight01) );
     }
 
-    //if value==left, returns 0.0, if value==right returns 1.0
+    //at -1.0 sets value to left, at 1.0 to right.
+    void setValue11(double toRight11)
+    {
+        setValue01(value11To01(toRight11));
+    }
+
+    //returns value from 0.0 (if value==left) to 1.0 (if value==right)
     double getValue01() const
     {
         T diffFromLeft = _value - _left;
@@ -90,6 +96,12 @@ public:
         if (double(abs(span)) < std::numeric_limits<double>::epsilon()) return 0.0;
 
         return diffFromLeft/span;
+    }
+
+    //returns value from -1.0 (if value==left) to 1.0 (if value==right)
+    double getValue11() const
+    {
+        return value01To11(getValue01());
     }
 
     static QJsonValue toJSON(const LimitedValue &param)
@@ -160,3 +172,9 @@ Q_DECLARE_METATYPE(LimitedDouble)
 
 SV_DECL_ALIASES(LimitedInt)
 SV_DECL_ALIASES(LimitedDouble)
+
+using LimitedDoublePair = std::pair<LimitedDouble, LimitedDouble>;
+using LimitedIntPair = std::pair<LimitedDouble, LimitedDouble>;
+
+SV_DECL_ALIASES(LimitedDoublePair)
+SV_DECL_ALIASES(LimitedIntPair)
