@@ -10,8 +10,8 @@
 //
 // Usage: 	
 //
-//	- to register your type simply call: 
-//		SerializationSystem::instance().registerSerialization(serializerFunc, deserializerFunc)
+//	- to register your type simply call either variant of: 
+//		SerializationSystem::instance().registerSerialization()
 //
 // 	- then when variable of this type is wrapped in QVariant, you can call:
 // 		qVariantToJson()
@@ -50,17 +50,11 @@ public:
 
 	static SerializationSystem& instance();
 
-
+	//If has defined Serializer<T>, just call this
 	template <Serializable T>
 	void registerSerialization();
 
-    template<class T>
-	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer);
-
-	//convenience function, that takes serializer/deserializer with concrete type,
-	//wraps them in QVariant and calls version above.
-	template<class T>
-	void registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<std::optional<T>(QJsonValue)> deserializer);
+	
 
 	//convenience function, wraps in QVariant and calls 'qVariantToJson'
 	template<class T>
@@ -86,6 +80,11 @@ private:
 	TwoKeysOneValSerializersMap::map_by<QStringTag>::type& serializersAsQStringMap();
 	TwoKeysOneValSerializersMap::map_by<QtTypeIndexTag>::type& serializersAsTypeindexMap();
 
+	// This could ve been public method too, but i feel like leaving only one way to do things -
+	// the other, and the only one, public 'registerSerialization()'
+    template<class T>
+	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer);
+
 private:
 	TwoKeysOneValSerializersMap serializerEntries;
 };
@@ -98,27 +97,6 @@ void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, J
 	SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
 
 	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer} } );
-}
-
-template<class T>
-void SerializationSystem::registerSerialization(std::function<QJsonValue(const T&)> serializer, std::function<std::optional<T>(QJsonValue)> deserializer)
-{
-	auto wrappedSerializer = [serializer](const QVariant& val)->QJsonValue
-	{
-		SV_ASSERT(qtTypeId<T>() == val.typeId());
-		return serializer(val.value<T>());
-	};
-
-	auto wrappedDeserializer = [deserializer](const QJsonValue& json)->QVariant
-	{
-		if (auto valueOpt = deserializer(json))
-		{
-			return QVariant::fromValue(*valueOpt);
-		}
-		else return QVariant();
-	};
-
-	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
 }
 
 template<class T>

@@ -3,12 +3,14 @@
 #include "SerializationSystem.h"
 #include <functional>
 
+
+
 template<typename T>
 void checkSerializeAndDeserialize(T val, std::function<QString(const T&)> valToString)
 {
     SV_LOG( format("****** Testing type <{}>", qtTypeName<T>().toStdString()) );
 
-    SV_LOG("Input: " + valToString(val).toStdString());
+    SV_LOG(std::format("Input: {}", val));
 
     auto jsonVal                = SerializationSystem::instance().qVariantToJson(QVariant::fromValue(val));
     auto reconstructedVariant   = SerializationSystem::instance().jsonToQVariant(jsonVal);
@@ -17,7 +19,7 @@ void checkSerializeAndDeserialize(T val, std::function<QString(const T&)> valToS
     {
         auto reconstructedVal       = reconstructedVariant.template value<T>();
 
-        SV_LOG("Output: " + valToString(reconstructedVal).toStdString());
+        SV_LOG(std::format("Output: {}", reconstructedVal));
     }
     else SV_LOG("Empty QVariant was returned by jsonToQVariant");
     

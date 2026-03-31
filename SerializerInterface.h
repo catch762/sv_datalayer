@@ -2,35 +2,31 @@
 #include <optional>
 #include <QJsonValue>
 
+//*************************************************************************************
+//
+//  Usage: in header file, after YourType definition, define Serializer<YourType> impl.
+//
+//*************************************************************************************
 template <typename T>
 class Serializer
 {
 public:
-    //You must implement these:
-
-    //static QJsonValue       toJson(const T& value);
-    //static std::optional<T> fromJson(const QJsonValue& json);
+    static QJsonValue toJson(const T& value)
+    {
+        static_assert(false, "you must implement Serializer::toJson for this type");
+        SV_UNREACHABLE();
+    }
+    static std::optional<T> fromJson(const QJsonValue& json)
+    {
+        static_assert(false, "you must implement Serializer::fromJson for this type");
+        SV_UNREACHABLE();
+    }
 };
 
 
-/***************************************************************************
-
-Usage: in header file, after YourType definition, make an impl like that:
-
-template <>
-class Serializer<YourType>
-{
-public:
-    static QJsonValue               toJson(const YourType& value) {...}
-    static std::optional<YourType>  fromJson(const QJsonValue& json) {...}
-}; 
-
-***************************************************************************/
-
-
-// Concept to check if Serializer is defined for T.
-// Currently doesnt ever trigger, because i have default impl already, that
-// triggers static_assert.
+// Concept to check if Serializer exists for T.
+// Currently doesnt always trigger, because i have default impl in Serializer already, which
+// triggers static_assert instead anyway, so its ok. But at least it conveys the message.
 template<typename T>
 concept Serializable = requires(const T& value)
 {

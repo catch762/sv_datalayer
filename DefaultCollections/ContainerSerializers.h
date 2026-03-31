@@ -1,6 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include "SerializationSystem.h"
+#include "SerializerInterface.h"
 
 //*****************************************************************************************
 //
@@ -14,15 +15,17 @@
 //     passing serializers from this ContainerSerializers class.
 //
 //*****************************************************************************************
-class ContainerSerializers
+
+template<Serializable T>
+class Serializer< std::vector<T> >
 {
 public:
-    template<typename T>
-	static QJsonValue 					 vector_toJson	(const std::vector<T>& vec)
+    using VectorT = std::vector<T>;
+
+	static QJsonValue toJson(const VectorT& vec)
     {
-        using VectorT = std::vector<T>;
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>());
+        SV_ASSERT(qtTypeIsRegisteredAndNamed<T>()); //not really needed
+        SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>()); //this IS needed, because im adding typeName in next line
 
         QJsonObject json;
         addTypeFieldToJson<VectorT>(json);
@@ -30,7 +33,7 @@ public:
         QJsonArray jsonValues;
         for (auto value : vec)
         {
-            jsonValues.append(SerializationSystem::instance().toJson(value));
+            jsonValues.append( Serializer<T>::toJson(value) );
         }
 
         json[ValuesKey] = jsonValues;
@@ -38,27 +41,25 @@ public:
         return json;
     }
 
-    template<typename T>
-	static std::optional<std::vector<T>> vector_fromJson(const QJsonValue& jsonValue)
+	static std::optional<VectorT> fromJson(const QJsonValue& jsonValue)
     {
-        using VectorT = std::vector<T>;
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>());
+        SV_ASSERT(qtTypeIsRegisteredAndNamed<T>()); //not really needed
+        SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>()); //not really needed
 
         const QString err = "Error deserializing " + qtTypeName<VectorT>();
 
         auto json = convertJsonAndLogError<QJsonObject>(jsonValue, err);
         if (!json) return {};
 
-        auto valuesArr = getFromJsonAndLogError<QJsonArray>(*json, ValuesKey, err);
-        if (!valuesArr) return {};
+        auto jsonValuesArr = getFromJsonAndLogError<QJsonArray>(*json, ValuesKey, err);
+        if (!jsonValuesArr) return {};
 
         VectorT vector;
-        vector.reserve(valuesArr->size());
+        vector.reserve(jsonValuesArr->size());
 
-        for (auto value : *valuesArr)
+        for (auto jsonValue : *jsonValuesArr)
         {
-            if (auto optT = SerializationSystem::instance().fromJson<T>(value))
+            if (auto optT = Serializer<T>::fromJson(jsonValue) )
             {
                 vector.push_back(*optT);
             }

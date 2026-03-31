@@ -87,7 +87,7 @@ const SerializationSystem::SerializerEntry *SerializationSystem::getSerializerBy
 
 SerializationSystem::SerializationSystem()
 {
-    DefaultSerializers::RegisterEverything(this);
+    DefaultSerializers::Register(this);
 }
 
 SerializationSystem::TwoKeysOneValSerializersMap::map_by<QStringTag>::type& SerializationSystem::serializersAsQStringMap()
