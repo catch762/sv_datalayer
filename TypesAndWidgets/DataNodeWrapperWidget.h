@@ -14,11 +14,14 @@
 //
 //*****************************************************************************************************
 
+//todo write abt it
+using QVariantWithWidgetPointer = QVariant;
+
 class DataNodeWrapperWidget : public QFrame
 {
     Q_OBJECT
 public:
-    DataNodeWrapperWidget(  const QList<QWidget*>& contentWidgets = {},
+    DataNodeWrapperWidget(  const std::vector<QVariantWithWidgetPointer>& contentWidgets = {},
                             const QString &name = {},
                             QWidget *parent = nullptr );
 
@@ -30,9 +33,9 @@ private:
     void setContentWidgetsVisibleStatus(bool visible);
 
 private:
-    QVBoxLayout*    layout                              = nullptr;
-    QWidget*            topStripe                       = nullptr;
-    QPushButton*            stripeShowHideContentButton = nullptr;
-    QLabel*                 stripeNameLabel             = nullptr;
-    //                  >And all the content widgets will be added here, one by one after 'topStripe'
+    QVBoxLayout*                            layout                              = nullptr;
+    QWidget*                                    topStripe                       = nullptr;
+    QPushButton*                                    stripeShowHideContentButton = nullptr;
+    QLabel*                                         stripeNameLabel             = nullptr;
+    std::vector<QVariantWithWidgetPointer>      contentWidgets;
 };

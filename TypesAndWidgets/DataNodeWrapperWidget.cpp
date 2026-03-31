@@ -7,7 +7,7 @@ namespace
     const int StripeContentHeight = StripeHeight - 2 * StripeMargin;
 }
 
-DataNodeWrapperWidget::DataNodeWrapperWidget(const QList<QWidget *> &contentWidgets, const QString &name, QWidget *parent)
+DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantWithWidgetPointer> &theContentWidgets, const QString &name, QWidget *parent)
  : QFrame(parent)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -19,9 +19,13 @@ DataNodeWrapperWidget::DataNodeWrapperWidget(const QList<QWidget *> &contentWidg
     
     createAndInitTopStripe(name);
 
+    contentWidgets = theContentWidgets;
     for (auto contentWidget : contentWidgets)
     {
-        layout->addWidget(contentWidget);
+        SV_ASSERT(contentWidget.canConvert<QWidget*>());
+        QWidget* contentAsQWidget = contentWidget.value<QWidget*>();
+        
+        layout->addWidget(contentAsQWidget);
     }
 }
 

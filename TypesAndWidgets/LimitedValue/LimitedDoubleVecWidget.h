@@ -38,3 +38,5 @@ private:
     LimitedDoublesWidget*       slidersView = nullptr;
     XYPadWithPresetsWidget*     xyPadView   = nullptr;
 };
+
+Q_DECLARE_METATYPE(LimitedDoubleVecWidget*);
