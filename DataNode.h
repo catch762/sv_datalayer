@@ -238,7 +238,7 @@ private:
     QString name;
 
     PayloadVariant payload;
-    WidgetViews views;
+    WidgetViews widgetViews;
 
     DataNodeWeak parent;
 

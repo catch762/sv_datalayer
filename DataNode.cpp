@@ -22,7 +22,11 @@ QJsonValue DataNode::toJSON() const
 
         obj[childrenKey] = childrenArray;
     }
-    //else unreachable
+    
+    for (auto widgetView : widgetViews)
+    {
+        //serialize them somehow
+    }
 
     return obj;
 }
@@ -47,8 +51,6 @@ DataNodeShared DataNode::fromJSON(QJsonValue jsonValue)
         result->initPayload(NodeType::Leaf);
 
         //todo.
-
-        return result;
     }
     else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
     {
@@ -67,8 +69,13 @@ DataNodeShared DataNode::fromJSON(QJsonValue jsonValue)
                 return {};
             }
         }
-        
-        return result;
     }
-    else return {};
+    else
+    {
+        return {};
+    }
+
+
+
+    return result;
 }
