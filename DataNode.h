@@ -167,78 +167,8 @@ public:
         else return 0;
     }
 
-    QJsonValue toJSON()
-    {
-        QJsonObject obj;
-        obj[nameKey] = name;
-
-        if (isLeaf())
-        {
-            obj[valueKey] = "todo";// Serialization::any to json(getLeafvalue); ALSO TEMPLATED version without any
-        }
-        else if(auto compData = tryGetCompositeData())
-        {
-            QJsonArray childrenArray;
-            for (auto &child : compData->children)
-            {
-                if (child)
-                {
-                    childrenArray.append( child->toJSON() );
-                }
-            }
-
-            obj[childrenKey] = childrenArray;
-        }
-        //else unreachable
-
-        return obj;
-    }
-
-    static DataNodeShared fromJSON(QJsonValue jsonValue)
-    {
-        const QString err("DataNode deserialize error");
-        DataNodeShared result = std::make_shared<DataNode>();
-
-        auto json = convertJsonAndLogError<QJsonObject>(jsonValue, err);
-        if (!json) return {};
-
-        if (auto name = getFromJsonAndLogError<QString>(*json, nameKey, err))
-        {
-            result->name = *name;
-        }
-        else return {};
-
-        auto leafValue = json->value(valueKey);
-        if (!leafValue.isUndefined()) //Then its Leaf node
-        {
-            result->initPayload(NodeType::Leaf);
-
-            //todo.
-
-            return result;
-        }
-        else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
-        {
-            result->initPayload(NodeType::Composite);
-            CompositeData* resCompData = result->tryGetCompositeData();
-
-            for (auto child : *childrenArray)
-            {
-                if (DataNodeShared loadedChild = fromJSON(child))
-                {
-                    resCompData->children.push_back(loadedChild);
-                }
-                else
-                {
-                    //error
-                    return {};
-                }
-            }
-            
-            return result;
-        }
-        else return {};
-    }
+    QJsonValue toJSON() const;
+    static DataNodeShared fromJSON(QJsonValue jsonValue);
 
     //These methods can not operate on wrong type, so will assert in case of mismatch:
     void addChild(DataNodeShared child)
@@ -313,9 +243,10 @@ private:
     DataNodeWeak parent;
 
 private:
-    static inline const QString nameKey = "name"; //mandatory
-    static inline const QString valueKey = "leafValue"; //mandatory for Leaf nodes
-    static inline const QString childrenKey = "children"; //mandatory for Composite nodes
+    static inline const QString nameKey     = "name";       //mandatory for all
+    static inline const QString valueKey    = "leafValue";  //mandatory for Leaf nodes
+    static inline const QString childrenKey = "children";   //mandatory for Composite nodes
+    static inline const QString widgetsKey  = "widgets";    //optional for all
 
     static inline const std::string logCategory = "DataNode";
 };
