@@ -1,6 +1,6 @@
 #pragma once
 #include "sv_qtcommon.h"
-
+#include "DataLayerUtils.h"
 //*****************************************************************************************************
 //
 // Widget that wraps content widget(s) for DataNode of any type.
@@ -15,7 +15,7 @@
 //*****************************************************************************************************
 
 //todo write abt it
-using QVariantWithWidgetPointer = QVariant;
+
 
 class DataNodeWrapperWidget : public QFrame
 {

@@ -23,7 +23,8 @@ QWidget* WidgetMakerSystem::makeWidgetForNode(DataNodeShared node, const WidgetO
         {
             if (auto createdInnerWidget = (*widgetmaker)(node, options))
             {
-                return new DataNodeWrapperWidget({createdInnerWidget}, node->getName());
+                //TODO228
+                return new DataNodeWrapperWidget({/*createdInnerWidget*/}, node->getName());
             }
             else
             {
@@ -52,7 +53,8 @@ QWidget* WidgetMakerSystem::makeWidgetForNode(DataNodeShared node, const WidgetO
             }
         }
 
-        return new DataNodeWrapperWidget(subwidgets, node->getName());
+        //TODO228
+        return new DataNodeWrapperWidget(/*subwidgets*/{}, node->getName());
     }
 
     SV_UNREACHABLE();

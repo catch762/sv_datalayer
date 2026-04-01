@@ -9,6 +9,10 @@
 #include <format>
 #include "sv_qtcommon.h"
 #include "tsl/ordered_map.h"
+#include "SerializerInterface.h"
+#include <QPointer>
+
+class DataNodeWrapperWidget;
 
 class DataNode;
 SV_DECL_ALIASES(DataNode);
@@ -52,6 +56,7 @@ public:
 
     using PayloadVariant = std::variant<LeafValue, CompositeData>;
 
+    using WidgetViews = std::vector<QPointer<DataNodeWrapperWidget>>;
     
     //DataNode() = default;
     DataNode(const QString &_name = QString(), NodeType _nodeType = NodeType::Leaf) : name(_name)
@@ -162,23 +167,23 @@ public:
         else return 0;
     }
 
-    static QJsonValue toJSON(const DataNode &node)
+    QJsonValue toJSON()
     {
         QJsonObject obj;
-        obj[nameKey] = node.name;
+        obj[nameKey] = name;
 
-        if (node.isLeaf())
+        if (isLeaf())
         {
             obj[valueKey] = "todo";// Serialization::any to json(getLeafvalue); ALSO TEMPLATED version without any
         }
-        else if(auto compData = node.tryGetCompositeData())
+        else if(auto compData = tryGetCompositeData())
         {
             QJsonArray childrenArray;
             for (auto &child : compData->children)
             {
                 if (child)
                 {
-                    childrenArray.append( toJSON(*child) );
+                    childrenArray.append( child->toJSON() );
                 }
             }
 
@@ -189,24 +194,24 @@ public:
         return obj;
     }
 
-    static DataNodeOpt fromJSON(QJsonValue jsonValue)
+    static DataNodeShared fromJSON(QJsonValue jsonValue)
     {
         const QString err("DataNode deserialize error");
-        DataNode result;
+        DataNodeShared result = std::make_shared<DataNode>();
 
         auto json = convertJsonAndLogError<QJsonObject>(jsonValue, err);
         if (!json) return {};
 
         if (auto name = getFromJsonAndLogError<QString>(*json, nameKey, err))
         {
-            result.name = *name;
+            result->name = *name;
         }
         else return {};
 
         auto leafValue = json->value(valueKey);
         if (!leafValue.isUndefined()) //Then its Leaf node
         {
-            result.initPayload(NodeType::Leaf);
+            result->initPayload(NodeType::Leaf);
 
             //todo.
 
@@ -214,17 +219,14 @@ public:
         }
         else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
         {
-            result.initPayload(NodeType::Composite);
-            CompositeData* resCompData = result.tryGetCompositeData();
+            result->initPayload(NodeType::Composite);
+            CompositeData* resCompData = result->tryGetCompositeData();
 
             for (auto child : *childrenArray)
             {
-                if (DataNodeOpt loadedChild = fromJSON(child))
+                if (DataNodeShared loadedChild = fromJSON(child))
                 {
-                    DataNodeShared childNode = std::make_shared<DataNode>();
-                    *childNode = std::move(*loadedChild);
-
-                    resCompData->children.push_back(childNode);
+                    resCompData->children.push_back(loadedChild);
                 }
                 else
                 {
@@ -306,6 +308,7 @@ private:
     QString name;
 
     PayloadVariant payload;
+    WidgetViews views;
 
     DataNodeWeak parent;
 
@@ -315,4 +318,27 @@ private:
     static inline const QString childrenKey = "children"; //mandatory for Composite nodes
 
     static inline const std::string logCategory = "DataNode";
+};
+
+template<>
+class Serializer< DataNodeShared >
+{
+public:
+    static QJsonValue toJson(const DataNodeShared& value)
+    {
+        if (!value)
+        {
+            SV_LOG("Error: trying to serialize null DataNodeShared value");
+            return QJsonValue();
+        }
+
+        return value->toJSON();
+    }
+    
+    static std::optional<DataNodeShared> fromJson(const QJsonValue& json)
+    {
+        auto result = DataNode::fromJSON(json);
+        if (result) return result;
+        else return {};
+    }
 };

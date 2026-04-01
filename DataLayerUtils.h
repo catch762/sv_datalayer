@@ -19,3 +19,5 @@ class AdhocTesting
 public:
     static void runTest();
 };
+
+using QVariantWithWidgetPointer = QVariant;
