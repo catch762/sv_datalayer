@@ -9,7 +9,7 @@
 #include <format>
 #include "sv_qtcommon.h"
 #include "tsl/ordered_map.h"
-#include "SerializerInterface.h"
+
 #include <QPointer>
 
 class DataNodeWrapperWidget;
@@ -41,11 +41,11 @@ public:
         {
             return hasChild(idx) ? children[idx] : DataNodeShared();
         }
-        int childrenCount()
+        int childrenCount() const
         {
             return children.size();
         }
-        bool hasChild(int idx)
+        bool hasChild(int idx) const
         {
             return idx >= 0 && idx < childrenCount();
         }
@@ -55,8 +55,6 @@ public:
     };
 
     using PayloadVariant = std::variant<LeafValue, CompositeData>;
-
-    using WidgetViews = std::vector<QPointer<DataNodeWrapperWidget>>;
     
     //DataNode() = default;
     DataNode(const QString &_name = QString(), NodeType _nodeType = NodeType::Leaf) : name(_name)
@@ -167,8 +165,15 @@ public:
         else return 0;
     }
 
-    QJsonValue toJSON() const;
-    static DataNodeShared fromJSON(QJsonValue jsonValue);
+
+    // When DataNode gets serialized or deserialized, you can use corresponding
+    // action to do something else (inject or read additional data, for example.)
+    // Return value in both: means 'success'. If false is returned, it means entire operation is failed.
+    using OnJsonCreatedFromNodeAction = std::function<bool(ConstDataNodeShared node,       QJsonObject &jsonOfNode)>;
+    using OnNodeCreatedFromJsonAction = std::function<bool(     DataNodeShared node, const QJsonObject &jsonOfNode)>;
+
+    QJsonObjectOpt toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction = nullptr) const;
+    static DataNodeShared fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAction onNodeCreatedAction = nullptr);
 
     //These methods can not operate on wrong type, so will assert in case of mismatch:
     void addChild(DataNodeShared child)
@@ -200,14 +205,14 @@ public:
         return compData->getChild(idx);
     }
 
-    QString basicInfo()
+    QString basicInfo() const
     {
         return QString("DataNode{name=%1, type=%2, holds=%3}")
             .arg(name)
             .arg(isLeaf() ? "leaf":"comp")
             .arg(isLeaf() ? *tryGetLeafTypeName() : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
     }
-    std::string stdBasicInfo()
+    std::string stdBasicInfo() const
     {
         return basicInfo().toStdString();
     }
@@ -229,7 +234,7 @@ private:
         else payload = CompositeData();
     }
 
-    std::string formatMsg(const std::string &msg)
+    std::string formatMsg(const std::string &msg) const
     {
         return basicInfo().toStdString() + ": " + msg;
     }
@@ -238,7 +243,6 @@ private:
     QString name;
 
     PayloadVariant payload;
-    WidgetViews widgetViews;
 
     DataNodeWeak parent;
 
@@ -246,30 +250,7 @@ private:
     static inline const QString nameKey     = "name";       //mandatory for all
     static inline const QString valueKey    = "leafValue";  //mandatory for Leaf nodes
     static inline const QString childrenKey = "children";   //mandatory for Composite nodes
-    static inline const QString widgetsKey  = "widgets";    //optional for all
 
     static inline const std::string logCategory = "DataNode";
 };
 
-template<>
-class Serializer< DataNodeShared >
-{
-public:
-    static QJsonValue toJson(const DataNodeShared& value)
-    {
-        if (!value)
-        {
-            SV_LOG("Error: trying to serialize null DataNodeShared value");
-            return QJsonValue();
-        }
-
-        return value->toJSON();
-    }
-    
-    static std::optional<DataNodeShared> fromJson(const QJsonValue& json)
-    {
-        auto result = DataNode::fromJSON(json);
-        if (result) return result;
-        else return {};
-    }
-};

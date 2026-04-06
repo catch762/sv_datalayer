@@ -17,11 +17,11 @@ template <>
 class Serializer<double>
 {
 public:
-    static QJsonValue toJson(const double& value)
+    QJsonValue toJson(const double& value)
     {
         return QJsonValue(value);
     }
-    static std::optional<double> fromJson(const QJsonValue& json)
+    std::optional<double> fromJson(const QJsonValue& json)
     {
         return json.isDouble() ? json.toDouble() : doubleOpt();
     }
@@ -31,11 +31,11 @@ template <>
 class Serializer<bool>
 {
 public:
-    static QJsonValue toJson(const bool& value)
+    QJsonValue toJson(const bool& value)
     {
         return QJsonValue(value);
     }
-    static std::optional<bool> fromJson(const QJsonValue& json)
+    std::optional<bool> fromJson(const QJsonValue& json)
     {
         return json.isBool() ? json.toBool() : boolOpt();
     }
@@ -45,11 +45,11 @@ template <>
 class Serializer<QString>
 {
 public:
-    static QJsonValue toJson(const QString& value)
+    QJsonValue toJson(const QString& value)
     {
         return QJsonValue(value);
     }
-    static std::optional<QString> fromJson(const QJsonValue& json)
+    std::optional<QString> fromJson(const QJsonValue& json)
     {
         return json.isString() ? json.toString() : QStringOpt();
     }

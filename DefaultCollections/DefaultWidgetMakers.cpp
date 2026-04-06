@@ -10,11 +10,11 @@ void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
     system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec, QString("std"));
 }
 
-QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const WidgetOptionsJsonOpt &options)
+QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<QString>(leafWithQString))
     {
-        return nullptr;
+        return {};
     }
 
     auto *widget = new QLineEdit(leafWithQString->tryGetLeafvalue()->toString());
@@ -33,14 +33,14 @@ QWidget *DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQStri
         }
     });
 
-    return widget;
+    return QVariantHoldingWidget::fromValue( QPointer<QLineEdit>(widget) );
 }
 
-QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const WidgetOptionsJsonOpt &options)
+QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDouble>(leafWithLimitedDouble))
     {
-        return nullptr;
+        return {};
     }
 
     auto *widget = new LimitedDoubleWidget(leafWithLimitedDouble->tryGetLeafvalue()->value<LimitedDouble>());
@@ -58,15 +58,15 @@ QWidget *DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWit
         }
     });
 
-    return widget;
+    return QVariantHoldingWidget::fromValue( QPointer<LimitedDoubleWidget>(widget) );
 }
 
 
-QWidget *DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const WidgetOptionsJsonOpt &options)
+QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDoubleVec>(leafWithLimitedDoubleVec))
     {
-        return nullptr;
+        return {};
     }
 
     auto *widget = new LimitedDoubleVecWidget(leafWithLimitedDoubleVec->tryGetLeafvalue()->value<LimitedDoubleVec>());
@@ -85,5 +85,5 @@ QWidget *DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leaf
         }
     });
 
-    return widget;
+    return QVariantHoldingWidget::fromValue( QPointer<LimitedDoubleVecWidget>(widget) );
 }

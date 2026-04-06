@@ -127,12 +127,12 @@ void SerializationSystem::registerSerialization()
 	auto wrappedSerializer = [](const QVariant& val)->QJsonValue
 	{
 		SV_ASSERT(qtTypeId<T>() == val.typeId());
-		return Serializer<T>::toJson(val.value<T>());
+		return Serializer<T>().toJson(val.value<T>());
 	};
 
 	auto wrappedDeserializer = [](const QJsonValue& json)->QVariant
 	{
-		if (auto valueOpt = Serializer<T>::fromJson(json))
+		if (auto valueOpt = Serializer<T>().fromJson(json))
 		{
 			return QVariant::fromValue(*valueOpt);
 		}

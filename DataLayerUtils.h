@@ -1,5 +1,6 @@
 #pragma once
 #include "sv_qtcommon.h"
+#include <QPointer>
 
 static constexpr auto TypeFieldKey = "_type";
 
@@ -20,4 +21,32 @@ public:
     static void runTest();
 };
 
-using QVariantWithWidgetPointer = QVariant;
+// todo: emphasis on serializing just options.
+// Must contain QPointer<ConcreteWidgetType>
+//
+// Thats how serializable widgets are stored.
+// This way, for your ConcreteWidget type, in the same header, you implement
+//      Serializer< QPointer<ConcreteWidgetType> > 
+//          (Note: you only implement toJson() method, because unlike simple data,
+//          creating widgets is more complicated - you also need DataNode, not just json.
+//          This is out of scope for Serializer interface, and its done in WidgetMakerSystem. Just FYI.)
+//
+// ...and then all the other code can serialize widgets like all other items, i.e. simply
+// giving 'QVariantHoldingWidget' to 'SerializerSystem'.
+//
+// The alternative to that would be forcing all widgets inherit from some serializing
+// interface. I dont want that, i want any existing widget ready to be used. If you want,
+// say, QLineEdit, you dont make more widget classes, you just supply Serializer< QPointer<QLineEdit> >
+// and everything should just work.
+using QVariantHoldingWidget = QVariant;
+
+//Yes, this casts from QPointer<ConcreteWidget> to QPointer<QWidget>
+inline QPointer<QWidget> getWidgetFromQVariant(const QVariantHoldingWidget& qvariant)
+{
+    return getValueOr< QPointer<QWidget> >(qvariant);
+}
+
+inline bool qVariantHasWidget(const QVariantHoldingWidget& qvariant)
+{
+    return !getWidgetFromQVariant(qvariant).isNull();
+}  

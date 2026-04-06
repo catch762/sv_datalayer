@@ -171,12 +171,12 @@ template <typename T>
 class Serializer<LimitedValue<T>>
 {
 public:
-    static QJsonValue toJson(const LimitedValue<T>& value)
+    QJsonValue toJson(const LimitedValue<T>& value)
     {
         return LimitedValue<T>::toJSON(value);
     }
     
-    static std::optional<LimitedValue<T>> fromJson(const QJsonValue& json)
+    std::optional<LimitedValue<T>> fromJson(const QJsonValue& json)
     {
         return LimitedValue<T>::fromJSON(json);
     }

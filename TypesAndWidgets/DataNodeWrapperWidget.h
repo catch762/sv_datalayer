@@ -21,7 +21,7 @@ class DataNodeWrapperWidget : public QFrame
 {
     Q_OBJECT
 public:
-    DataNodeWrapperWidget(  const std::vector<QVariantWithWidgetPointer>& contentWidgets = {},
+    DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets = {},
                             const QString &name = {},
                             QWidget *parent = nullptr );
 
@@ -37,5 +37,5 @@ private:
     QWidget*                                    topStripe                       = nullptr;
     QPushButton*                                    stripeShowHideContentButton = nullptr;
     QLabel*                                         stripeNameLabel             = nullptr;
-    std::vector<QVariantWithWidgetPointer>      contentWidgets;
+    std::vector<QVariantHoldingWidget>      contentWidgets;
 };

@@ -7,7 +7,7 @@ namespace
     const int StripeContentHeight = StripeHeight - 2 * StripeMargin;
 }
 
-DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantWithWidgetPointer> &theContentWidgets, const QString &name, QWidget *parent)
+DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets, const QString &name, QWidget *parent)
  : QFrame(parent)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);

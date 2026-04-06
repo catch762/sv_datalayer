@@ -1,9 +1,9 @@
 #pragma once
-#include "DataNode.h"
+#include "DataNode/DataNodeHeader.h"
 #include <typeindex>
 #include <map>
 #include "WidgetOptions.h"
-
+#include "DataLayerUtils.h"
 
 
 //************************************************************************************************
@@ -26,7 +26,7 @@
 //
 //    See 'WidgetMakerForTypeT' definition and details below, in the class.
 //
-//  - Then you call 'WidgetMakerSystem::instance().makeWidgetForNode(rootDataNode)'
+//  - Then you call 'WidgetMakerSystem::instance().makeWidgetForLeafNode(rootDataNode)'
 //    And it will build widgets for your entire tree, walking through every node.
 //
 // WidgetMakerSystem comes with some types already registered: thats because
@@ -56,18 +56,18 @@ public:
     //    You may see examples in
     //  
     //************************************************************************************************
-    using WidgetMakerForTypeT = std::function<QWidget*(DataNodeShared leafNodeContainingValueOfTypeT,
-                                                       const WidgetOptionsJsonOpt &options)>;
+    using WidgetMakerForTypeT = std::function<QVariantHoldingWidget(DataNodeShared leafNodeContainingValueOfTypeT,
+                                                                    const QJsonObjectWithWidgetOptionsOpt &options)>;
 
     struct WidgetMakerCollection
     {
-        std::map<QString, WidgetMakerForTypeT> widgetMakers;
+        std::map<QString /*name*/, WidgetMakerForTypeT> widgetMakers;
         QString defaultWidgetMakerName;
     };
 
     static WidgetMakerSystem& instance();
 
-    QWidget* makeWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});      
+    QVariantHoldingWidget makeWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});      
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName);

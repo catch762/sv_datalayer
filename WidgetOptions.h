@@ -1,12 +1,12 @@
 #pragma once
 #include "sv_qtcommon.h"
 
-using WidgetOptionsJson = QJsonObject;
-SV_DECL_OPT(WidgetOptionsJson);
+using QJsonObjectWithWidgetOptions = QJsonObject;
+SV_DECL_OPT(QJsonObjectWithWidgetOptions);
 
 constexpr auto WidgetMakerNameKey = "_maker";
 
-inline QStringOpt getWidgetMakerNameOpt(const WidgetOptionsJson &obj)
+inline QStringOpt getWidgetMakerNameOpt(const QJsonObjectWithWidgetOptions &obj)
 {
     //return getFromJsonAndLogError<QString>(obj, WidgetMakerNameKey);
 
@@ -16,12 +16,12 @@ inline QStringOpt getWidgetMakerNameOpt(const WidgetOptionsJson &obj)
     return {};
 }
 
-inline QStringOpt getWidgetMakerNameOpt(const WidgetOptionsJsonOpt &objOpt)
+inline QStringOpt getWidgetMakerNameOpt(const QJsonObjectWithWidgetOptionsOpt &objOpt)
 {
     return objOpt ? getWidgetMakerNameOpt(*objOpt) : QStringOpt();
 }
 
-inline void setWidgetMakerName(const WidgetOptionsJson &obj, QString widgetMakerName)
+inline void setWidgetMakerName(const QJsonObjectWithWidgetOptions &obj, QString widgetMakerName)
 {
     obj[WidgetMakerNameKey] = widgetMakerName;
 }

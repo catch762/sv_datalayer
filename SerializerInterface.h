@@ -12,12 +12,12 @@ class Serializer
 {
 public:
     //todo requires false ?
-    static QJsonValue toJson(const T& value)
+    QJsonValue toJson(const T& value)
     {
         static_assert(false, "you must implement Serializer::toJson for this type");
         SV_UNREACHABLE();
     }
-    static std::optional<T> fromJson(const QJsonValue& json)
+    std::optional<T> fromJson(const QJsonValue& json)
     {
         static_assert(false, "you must implement Serializer::fromJson for this type");
         SV_UNREACHABLE();
@@ -31,13 +31,6 @@ public:
 template<typename T>
 concept Serializable = requires(const T& value)
 {
-    { Serializer<T>::toJson(value) } -> std::same_as<QJsonValue>;
-    { Serializer<T>::fromJson(QJsonValue()) } -> std::same_as<std::optional<T>>;
-};
-
-template <typename WidgetT>
-class WidgetSerializer : public Serializer<WidgetT>
-{
-public:
-    //static 
+    { Serializer<T>().toJson(value) } -> std::same_as<QJsonValue>;
+    { Serializer<T>().fromJson(QJsonValue()) } -> std::same_as<std::optional<T>>;
 };

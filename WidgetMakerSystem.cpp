@@ -8,11 +8,11 @@ WidgetMakerSystem& WidgetMakerSystem::instance()
     return system;
 }
 
-QWidget* WidgetMakerSystem::makeWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
+QVariantHoldingWidget WidgetMakerSystem::makeWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!node)
     {
-        return nullptr;
+        return {};
     }
 
     auto widgetMakerNameOpt = getWidgetMakerNameOpt(options);
@@ -21,43 +21,31 @@ QWidget* WidgetMakerSystem::makeWidgetForNode(DataNodeShared node, const WidgetO
     {
         if (auto widgetmaker = getWidgetMakerForContentType(*leafValue))
         {
-            if (auto createdInnerWidget = (*widgetmaker)(node, options))
+            auto createdInnerWidget = (*widgetmaker)(node, options);
+            if (qVariantHasWidget(createdInnerWidget))
             {
-                //TODO228
-                return new DataNodeWrapperWidget({/*createdInnerWidget*/}, node->getName());
+                auto *wrapperWidget = new DataNodeWrapperWidget({createdInnerWidget}, node->getName());
+
+                return QVariant::fromValue( QPointer<DataNodeWrapperWidget>(wrapperWidget) );
             }
             else
             {
-                SV_ERROR("WidgetMakerSystem", "widget maker returned nullptr for: " + node->stdBasicInfo());
-                return nullptr;
+                SV_ERROR("WidgetMakerSystem", "widget maker returned null for: " + node->stdBasicInfo());
+                return {};
             }
         }
         else
         {
             //todo bad inspection
             SV_ERROR("WidgetMakerSystem", "No widget maker exist for: " + node->stdBasicInfo());
-            return nullptr;
+            return {};
         }
     }
-    else if (auto compData = node->tryGetCompositeData())
+    else
     {
-        //This node doesnt contain QVariant value, it does contain list of other DataNode's -
-        //this is a special case handled here.
-        
-        QList<QWidget*> subwidgets;
-        for (auto subNode : compData->children)
-        {
-            if(auto subwidget = makeWidgetForNode(subNode))
-            {
-                subwidgets.append(subwidget);
-            }
-        }
-
-        //TODO228
-        return new DataNodeWrapperWidget(/*subwidgets*/{}, node->getName());
+        SV_ERROR("WidgetMakerSystem", "makeWidgetForLeafNode() called on non-leaf node");
+        return {};
     }
-
-    SV_UNREACHABLE();
 }
 
 WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection(QtTypeIndex typeIndex)

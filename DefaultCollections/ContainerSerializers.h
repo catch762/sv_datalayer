@@ -22,7 +22,7 @@ class Serializer< std::vector<T> >
 public:
     using VectorT = std::vector<T>;
 
-	static QJsonValue toJson(const VectorT& vec)
+	QJsonValue toJson(const VectorT& vec)
     {
         SV_ASSERT(qtTypeIsRegisteredAndNamed<T>()); //not really needed
         SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>()); //this IS needed, because im adding typeName in next line
@@ -33,7 +33,7 @@ public:
         QJsonArray jsonValues;
         for (auto value : vec)
         {
-            jsonValues.append( Serializer<T>::toJson(value) );
+            jsonValues.append( Serializer<T>().toJson(value) );
         }
 
         json[ValuesKey] = jsonValues;
@@ -41,7 +41,7 @@ public:
         return json;
     }
 
-	static std::optional<VectorT> fromJson(const QJsonValue& jsonValue)
+	std::optional<VectorT> fromJson(const QJsonValue& jsonValue)
     {
         SV_ASSERT(qtTypeIsRegisteredAndNamed<T>()); //not really needed
         SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>()); //not really needed
@@ -59,7 +59,7 @@ public:
 
         for (auto jsonValue : *jsonValuesArr)
         {
-            if (auto optT = Serializer<T>::fromJson(jsonValue) )
+            if (auto optT = Serializer<T>().fromJson(jsonValue) )
             {
                 vector.push_back(*optT);
             }
