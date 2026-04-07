@@ -1,6 +1,8 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include "DataLayerUtils.h"
+#include "SerializerInterface.h"
+
 //*****************************************************************************************************
 //
 // Widget that wraps content widget(s) for DataNode of any type.
@@ -38,4 +40,23 @@ private:
     QPushButton*                                    stripeShowHideContentButton = nullptr;
     QLabel*                                         stripeNameLabel             = nullptr;
     std::vector<QVariantHoldingWidget>      contentWidgets;
+};
+
+template<>
+class Serializer< QPointer<DataNodeWrapperWidget> >
+{
+public:
+    using WidgetPtr = QPointer<DataNodeWrapperWidget>;
+
+    QJsonValue toJson(const WidgetPtr& value)
+    {
+        QJsonObject obj;
+        obj["hi"] = "hello";
+        return obj;
+    }
+
+    std::optional<WidgetPtr> fromJson(const QJsonValue& json)
+    {
+        SV_UNREACHABLE();
+    }
 };

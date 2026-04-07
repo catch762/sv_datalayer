@@ -254,3 +254,4 @@ private:
     static inline const std::string logCategory = "DataNode";
 };
 
+SV_DECL_STD_FORMATTER(DataNodeShared, obj ? obj->stdBasicInfo() : "DataNode{nullptr}");

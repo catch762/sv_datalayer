@@ -1,7 +1,7 @@
 #pragma once
 #include "DataNode/DataNodeHeader.h"
 #include "SerializerInterface.h"
-
+#include "DataLayerUtils.h"
 
 /*template<>
 class BasicSerializer< DataNodeShared >
@@ -37,6 +37,15 @@ public:
     QJsonValue toJson(const DataNodeShared& value);
     
     std::optional<DataNodeShared> fromJson(const QJsonValue& json);
+
+    QVariantHoldingWidget getRootWidget();
+
+private:
+    //This assumes that widgets for node's children are already created
+    static QVariantHoldingWidget createAndRegisterWidgetForCompositeNode(DataNodeShared node);
+
+private:
+    QVariantHoldingWidget rootWidget;
 
 private:
     static inline const QString widgetsKey  = "widgets";

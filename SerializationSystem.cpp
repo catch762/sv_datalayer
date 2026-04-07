@@ -15,8 +15,9 @@ QJsonValue SerializationSystem::qVariantToJson(const QVariant &val)
         return entry->serializer(val);
     }
 
-    SV_ERROR("Serialization", QString("Couldnt find serializers for QVariant with type [%1][%2]")
-                                .arg(val.typeId()).arg(val.typeName()).toStdString());
+    //SV_ERROR("Serialization", QString("Couldnt find serializers for QVariant with type [%1][%2]")
+    //                            .arg(val.typeId()).arg(val.typeName()).toStdString());
+    
     return QJsonValue();
 }
 
