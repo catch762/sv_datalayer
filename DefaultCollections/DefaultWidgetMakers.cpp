@@ -33,7 +33,7 @@ QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForQString(DataNodeShared 
         }
     });
 
-    return QVariantHoldingWidget::fromValue( QPointer<QLineEdit>(widget) );
+    return QVariantHoldingWidget::fromValue( widget );
 }
 
 QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
@@ -58,7 +58,7 @@ QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeS
         }
     });
 
-    return QVariantHoldingWidget::fromValue( QPointer<LimitedDoubleWidget>(widget) );
+    return QVariantHoldingWidget::fromValue( widget );
 }
 
 
@@ -85,5 +85,5 @@ QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNo
         }
     });
 
-    return QVariantHoldingWidget::fromValue( QPointer<LimitedDoubleVecWidget>(widget) );
+    return QVariantHoldingWidget::fromValue( widget );
 }

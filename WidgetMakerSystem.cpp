@@ -2,50 +2,29 @@
 #include "DefaultCollections/DefaultWidgetMakers.h"
 #include "TypesAndWidgets/DataNodeWrapperWidget.h"
 
+#include "WidgetsForNodeManager.h"
+
 WidgetMakerSystem& WidgetMakerSystem::instance()
 {
     static WidgetMakerSystem system;
     return system;
 }
 
-QVariantHoldingWidget WidgetMakerSystem::makeWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+QVariantHoldingWidget WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!node)
     {
         return {};
     }
 
-    auto widgetMakerNameOpt = getWidgetMakerNameOpt(options);
+    QVariantHoldingWidget resultWidget = createWidgetForNode (node, options);
 
-    if (auto leafValue = node->tryGetLeafvalue())
+    if (qVariantHasWidget(resultWidget))
     {
-        if (auto widgetmaker = getWidgetMakerForContentType(*leafValue))
-        {
-            auto createdInnerWidget = (*widgetmaker)(node, options);
-            if (qVariantHasWidget(createdInnerWidget))
-            {
-                auto *wrapperWidget = new DataNodeWrapperWidget({createdInnerWidget}, node->getName());
+        WidgetsForNodeManager::registerWidgetForNode(node, resultWidget);
+    }
 
-                return QVariant::fromValue( QPointer<DataNodeWrapperWidget>(wrapperWidget) );
-            }
-            else
-            {
-                SV_ERROR("WidgetMakerSystem", "widget maker returned null for: " + node->stdBasicInfo());
-                return {};
-            }
-        }
-        else
-        {
-            //todo bad inspection
-            SV_ERROR("WidgetMakerSystem", "No widget maker exist for: " + node->stdBasicInfo());
-            return {};
-        }
-    }
-    else
-    {
-        SV_ERROR("WidgetMakerSystem", "makeWidgetForLeafNode() called on non-leaf node");
-        return {};
-    }
+    return resultWidget;
 }
 
 WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection(QtTypeIndex typeIndex)
@@ -99,6 +78,92 @@ const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerF
     }
 
     return nullptr;
+}
+
+QVariantHoldingWidget WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    SV_ASSERT(node);
+
+    if (options)
+    {
+        SV_LOG(std::format("createWidgetForNode {} with options {}", node, jsonValueToString(*options)));
+    }
+
+    return node->isLeaf() ? createWidgetForLeafNode     (node, options) :
+                            createWidgetForCompositeNode(node, options);
+}
+
+QVariantHoldingWidget WidgetMakerSystem::createWidgetForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    SV_ASSERT(node);
+    SV_ASSERT(node->isComposite())
+
+    std::vector<QVariantHoldingWidget> widgetsOfChildren;
+
+    for (auto childNode : node->tryGetCompositeData()->children)
+    {
+        auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(childNode);
+
+        if (qVariantHasWidget(widgetVariant))
+        {
+            widgetsOfChildren.push_back(widgetVariant);
+        }
+        else
+        {
+            //Apparently, we didnt go depth-first. So we are creating widgets now, and at the moment we dont have options for them
+            auto createdChildWidget = createAndRegisterWidgetForNode(childNode, QJsonObjectWithWidgetOptionsOpt{});
+            if (qVariantHasWidget(createdChildWidget))
+            {
+                widgetsOfChildren.push_back(createdChildWidget);
+            }
+            //is it fine? maybe it is
+            //SV_WARN(std::format("Could not obtain widget for node {} which is child of {}", childNode, node));
+        }
+    }
+
+    if (widgetsOfChildren.empty())
+    {
+        SV_ERROR(std::format("Could not createAndRegisterWidgetForCompositeNode for {} "
+                             "because didnt find a single child widget. Not doing anything then.", node));
+        return {};
+    }
+
+    //todo use the options
+
+    auto *wrapper = new DataNodeWrapperWidget(widgetsOfChildren, node->getName());
+    return QVariant::fromValue( wrapper );
+}
+
+QVariantHoldingWidget WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    SV_ASSERT(node);
+    SV_ASSERT(node->isLeaf())
+
+    auto widgetMakerNameOpt = getWidgetMakerNameOpt(options);
+
+    auto *leafValue = node->tryGetLeafvalue();
+
+    if (auto widgetmaker = getWidgetMakerForContentType(*leafValue, widgetMakerNameOpt))
+    {
+        auto createdInnerWidget = (*widgetmaker)(node, options);
+        if (qVariantHasWidget(createdInnerWidget))
+        {
+            auto *wrapperWidget = new DataNodeWrapperWidget({createdInnerWidget}, node->getName());
+
+            return QVariant::fromValue( wrapperWidget );
+        }
+        else
+        {
+            SV_ERROR(std::format("widget maker returned null for {}", node));
+            return {};
+        }
+    }
+    else
+    {
+        //todo bad inspection
+        SV_ERROR(std::format("No widget maker exist for {}", node)); 
+        return {};
+    }
 }
 
 WidgetMakerSystem::WidgetMakerSystem()

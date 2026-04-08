@@ -41,12 +41,12 @@ public:
 using QVariantHoldingWidget = QVariant;
 
 //Yes, this casts from QPointer<ConcreteWidget> to QPointer<QWidget>
-inline QPointer<QWidget> getWidgetFromQVariant(const QVariantHoldingWidget& qvariant)
+inline QWidget* getWidgetFromQVariant(const QVariantHoldingWidget& qvariant)
 {
-    return getValueOr< QPointer<QWidget> >(qvariant);
+    return getValueOr< QWidget* >(qvariant, nullptr);
 }
 
 inline bool qVariantHasWidget(const QVariantHoldingWidget& qvariant)
 {
-    return !getWidgetFromQVariant(qvariant).isNull();
+    return getWidgetFromQVariant(qvariant) != nullptr;
 }  

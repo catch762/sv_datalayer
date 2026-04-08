@@ -67,7 +67,20 @@ public:
 
     static WidgetMakerSystem& instance();
 
-    QVariantHoldingWidget makeWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});      
+    // Typically, there are 2 use cases which both work fine:
+    //
+    //  - You start from scratch, you dont have any QJsonObjectWithWidgetOptions to recover.
+    //    So you build entire DataNode tree, and you pass root node to this function, and you pass {} for 'options'.
+    //    It will build entire widget tree and return root widget.
+    //    (Note: if you pass actual value for 'options' it will only be used to create widget for this node,
+    //    all potential children will use nullopt because it cant know what options are needed for children)
+    //
+    //  - You are recovering both DataNode tree and widgets tree from JSON.
+    //    So as you build a DataNode tree, you call this function on each node. You go depth-first, from bottom to the top.
+    //    So this function never needs to create widgets for children, because children widgets are always already created:
+    //    this way, this function only creates one widget for node you pass in.  
+    //    And this way, you can pass aproppriate QJsonObjectWithWidgetOptions for each node.
+    QVariantHoldingWidget createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});      
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName);
@@ -87,6 +100,16 @@ private:
 
     //if 'widgetMakerNameOpt' is {}, returns default widget maker for this WidgetMakerCollection
     const WidgetMakerForTypeT* getWidgetMakerForContentType(const QVariant &var, QStringOpt widgetMakerNameOpt = {});
+
+    QVariantHoldingWidget createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+
+    // If widgets for children arent already created, it creates and registers them
+    // (but for all created children QJsonObjectWithWidgetOptionsOpt will be a nullopt, ofcourse - the 'options' passed
+    // to the functions only concerns that single 'node' and we dont have any options for children).
+    QVariantHoldingWidget createWidgetForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+
+    QVariantHoldingWidget createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+
     WidgetMakerSystem();
 
 private:

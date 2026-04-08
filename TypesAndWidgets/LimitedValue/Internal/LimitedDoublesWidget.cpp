@@ -59,7 +59,7 @@ void LimitedDoublesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
     {
         int widgetsToDelete = existingbasicWidgets - requiredBasicWidgetsCount;
 
-        SV_LOG(std::format("setbasicWidgetsCount will delete [{}] widgets", widgetsToDelete));
+        //SV_LOG(std::format("setbasicWidgetsCount will delete [{}] widgets", widgetsToDelete));
 
         for (int i = 0; i < widgetsToDelete; ++i)
         {
@@ -71,7 +71,7 @@ void LimitedDoublesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
     {
         int widgetsToAdd = requiredBasicWidgetsCount - existingbasicWidgets;
 
-        SV_LOG(std::format("setbasicWidgetsCount will add [{}] widgets", widgetsToAdd));
+        //SV_LOG(std::format("setbasicWidgetsCount will add [{}] widgets", widgetsToAdd));
 
         for (int i = 0; i < widgetsToAdd; ++i)
         {

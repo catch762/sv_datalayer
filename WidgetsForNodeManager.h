@@ -16,6 +16,7 @@
 //
 //******************************************************************************************
 
+// WARNING AS OF NOW DOESNT TRACK DELETED WIDGETS, SO IF U DELETE SMTH, INVALID PTR WILL REMAIN HERE.
 class WidgetsForNodeManager
 {
 public:
@@ -31,6 +32,8 @@ public:
         SV_ASSERT(container);
 
         container->push_back(widget);
+
+        SV_LOG(std::format("Registered widget (now {}) for node {}", container->size(), node));
     }
     
     static WidgetsContainer* getWidgetsForNode(ConstDataNodeWeak node)
@@ -44,8 +47,9 @@ public:
     {
         if (auto *container = getWidgetsForNode(node))
         {
-            auto firstNotNull = std::ranges::find_if(*container, [](const auto& qVariantHoldingWidget) {
-                return !qVariantHoldingWidget.isNull();
+            auto firstNotNull = std::ranges::find_if(*container, [](const auto& qVariantHoldingWidget)
+            {
+                return qVariantHasWidget(qVariantHoldingWidget);
             });
 
             return firstNotNull != container->end() ? *firstNotNull : QVariantHoldingWidget{};
@@ -54,8 +58,13 @@ public:
         return {};
     }
 
+    static void clear()
+    {
+        instance().entries.clear();
+    }
+
 private:
-    static WidgetsForNodeManager instance()
+    static WidgetsForNodeManager& instance()
     {
         static WidgetsForNodeManager inst;
         return inst;
@@ -64,7 +73,15 @@ private:
     WidgetsContainer* getContainerForNode(ConstDataNodeWeak node)
     {
         auto found = entries.find(node);
-        return found != entries.end() ? &found->second : nullptr;
+
+        if (found != entries.end())
+        {
+            return &found->second;
+        }
+        else
+        {
+            return nullptr;
+        }
     }
     WidgetsContainer* getOrCreateContainerForNode(ConstDataNodeWeak node)
     {
@@ -75,7 +92,8 @@ private:
         else
         {
             entries[node] = WidgetsContainer();
-            return getContainerForNode(node);
+            auto *createdContainer = getContainerForNode(node);
+            return createdContainer;
         }
     }
 

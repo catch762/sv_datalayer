@@ -23,3 +23,5 @@ private:
     QSpinBox* spinboxRightLimit   = nullptr;
     QSlider*  slider              = nullptr;
 };
+
+Q_DECLARE_METATYPE(LimitedIntWidget*);

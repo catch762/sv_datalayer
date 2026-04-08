@@ -14,6 +14,6 @@ void DefaultSerializers::Register(SerializationSystem *systemInstance)
     systemInstance->registerSerialization<LimitedDouble>();
     systemInstance->registerSerialization<LimitedDoubleVec>();
 
-    systemInstance->registerSerialization<QPointer<DataNodeWrapperWidget>>();
+    systemInstance->registerSerialization<DataNodeWrapperWidget*>();
     
 }

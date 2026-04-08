@@ -43,10 +43,10 @@ private:
 };
 
 template<>
-class Serializer< QPointer<DataNodeWrapperWidget> >
+class Serializer< DataNodeWrapperWidget* >
 {
 public:
-    using WidgetPtr = QPointer<DataNodeWrapperWidget>;
+    using WidgetPtr = DataNodeWrapperWidget*;
 
     QJsonValue toJson(const WidgetPtr& value)
     {

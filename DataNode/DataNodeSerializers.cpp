@@ -29,67 +29,17 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget
 {
     QJsonObjectWithWidgetOptionsOpt widgetOptionsOpt = getFromJson<QJsonObject>(jsonOfNode, widgetsKey);
 
-    if (node->isLeaf())
+    lastCreatedWidget = WidgetMakerSystem::instance().createAndRegisterWidgetForNode(node, widgetOptionsOpt);
+
+    if (!qVariantHasWidget(lastCreatedWidget))
     {
-        //todo: who registers ?
-        QVariantHoldingWidget widgetVariant = WidgetMakerSystem::instance().makeWidgetForLeafNode(node, widgetOptionsOpt);
-        if (qVariantHasWidget(widgetVariant))
-        {
-            WidgetsForNodeManager::registerWidgetForNode(node, widgetVariant);
-            return true;
-        }
-        else
-        {
-            SV_ERROR(std::format("restoring widget failed: Received null QVariantHoldingWidget for leaf node {}", node));
-            return false;
-        }
+        SV_ERROR(std::format("restoring widget failed: Received null QVariantHoldingWidget for leaf node {}", node));
+        return false;
     }
-    else
-    {
-        auto widgetForCompNode = createAndRegisterWidgetForCompositeNode(node);
-        if (!qVariantHasWidget(widgetForCompNode))
-        {
-            return false;
-        }
-        else return true;
-    }
+
+    return true;
 }
 
-QVariantHoldingWidget SerializerForDataNodeTreeAndItsWidgets::createAndRegisterWidgetForCompositeNode(DataNodeShared node)
-{
-    SV_ASSERT(node);
-    SV_ASSERT(node->isComposite())
-
-    std::vector<QVariantHoldingWidget> widgetsOfChildren;
-
-    for (auto childNode : node->tryGetCompositeData()->children)
-    {
-        auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node);
-        auto hasWidget = qVariantHasWidget(widgetVariant);
-
-        if (hasWidget)
-        {
-            widgetsOfChildren.push_back(widgetVariant);
-        }
-        else
-        {
-            //is it fine? maybe it is
-            SV_ERROR(std::format("Could not obtain widget for node {} which is child of {}", childNode, node));
-        }
-    }
-
-    if (widgetsOfChildren.empty())
-    {
-        SV_ERROR("Could not createWidgetForCompositeNode because didnt find a single child widget. Not doing anything then.");
-        return {};
-    }
-
-    auto *wrapper = new DataNodeWrapperWidget(widgetsOfChildren, node->getName());
-    QVariantHoldingWidget finalWidgetVariant = QVariant::fromValue( QPointer<DataNodeWrapperWidget>(wrapper) );
-    WidgetsForNodeManager::registerWidgetForNode(node, finalWidgetVariant);
-
-    return finalWidgetVariant;
-}
 
 QJsonValue SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& value)
 {
@@ -106,14 +56,9 @@ QJsonValue SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& 
     else return QJsonValue();
 }
 
-std::optional<DataNodeShared> SerializerForDataNodeTreeAndItsWidgets::fromJson(const QJsonValue& json)
+std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndItsWidgets::fromJson(const QJsonValue& json)
 {
-    auto result = DataNode::fromJSON(json, onNodeCreatedFromJson_restoreWidget);
-    if (result) return result;
-    else return {};
+    auto resultNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget, this, std::placeholders::_1, std::placeholders::_2));
+    return {resultNode, lastCreatedWidget};
 }
 
-QVariantHoldingWidget SerializerForDataNodeTreeAndItsWidgets::getRootWidget()
-{
-    return rootWidget;
-}

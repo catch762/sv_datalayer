@@ -290,7 +290,7 @@ void XYPadWithPresetsWidget::updatePresetButtonIfNeeded(QPushButton *btn, int in
         return;
     }
 
-    SV_LOG("Updating prop");
+    //SV_LOG("Updating prop");
 
     btn->setProperty(ButtonPresetIsValidProperty, isValidNow);
 

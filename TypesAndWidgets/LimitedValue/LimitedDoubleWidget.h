@@ -35,3 +35,5 @@ private:
     QDoubleSpinBox* spinboxLeftLimit        = nullptr;
     QDoubleSpinBox* spinboxRightLimit       = nullptr;
 };
+
+Q_DECLARE_METATYPE(LimitedDoubleWidget*);
