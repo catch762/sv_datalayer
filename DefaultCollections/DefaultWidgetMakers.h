@@ -5,15 +5,16 @@
 #include "DataLayerUtils.h"
 
 class WidgetMakerSystem;
+class DataNodeWrapperWidget;
 
 class DefaultWidgetMakers
 {
 public:
     static void RegisterEverything(WidgetMakerSystem *system);
 
-    static QVariantHoldingWidget widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options);
+    static DataNodeWrapperWidget* widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options);
 
-    static QVariantHoldingWidget widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options);
+    static DataNodeWrapperWidget* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options);
 
-    static QVariantHoldingWidget widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options);
+    static DataNodeWrapperWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options);
 };

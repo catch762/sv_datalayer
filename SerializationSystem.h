@@ -55,12 +55,12 @@ public:
 	void registerSerialization();
 
 	
-
+	//todo its bad cause qvariant also fits
 	//convenience function, wraps in QVariant and calls 'qVariantToJson'
 	template<class T>
 	QJsonValue toJson(const T& value);
 
-	QJsonValue qVariantToJson(const QVariant& val);
+	QJsonValue qVariantToJson(const QVariant& val, bool logOnError = false);
 
 	//todo write about type and how its not needed for double bool qstring
 	QVariant jsonToQVariant(const QJsonValue& json);

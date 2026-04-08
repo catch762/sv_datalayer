@@ -1,6 +1,6 @@
 #include "DefaultWidgetMakers.h"
 #include "WidgetMakerSystem.h"
-
+#include "TypesAndWidgets/DataNodeWrapperWidget.h"
 #include "TypesAndWidgets/TypesAndWidgets.h"
 
 void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
@@ -10,7 +10,7 @@ void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
     system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec, QString("std"));
 }
 
-QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
+DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<QString>(leafWithQString))
     {
@@ -33,10 +33,10 @@ QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForQString(DataNodeShared 
         }
     });
 
-    return QVariantHoldingWidget::fromValue( widget );
+    return new DataNodeWrapperWidget( widget, leafWithQString->getName(), options);
 }
 
-QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
+DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDouble>(leafWithLimitedDouble))
     {
@@ -58,11 +58,11 @@ QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeS
         }
     });
 
-    return QVariantHoldingWidget::fromValue( widget );
+    return new DataNodeWrapperWidget( widget, leafWithLimitedDouble->getName(), options);
 }
 
 
-QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options)
+DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDoubleVec>(leafWithLimitedDoubleVec))
     {
@@ -85,5 +85,5 @@ QVariantHoldingWidget DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNo
         }
     });
 
-    return QVariantHoldingWidget::fromValue( widget );
+    return new DataNodeWrapperWidget( widget, leafWithLimitedDoubleVec->getName(), options);
 }

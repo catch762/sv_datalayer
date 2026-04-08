@@ -145,12 +145,9 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared 
 
     if (auto widgetmaker = getWidgetMakerForContentType(*leafValue, widgetMakerNameOpt))
     {
-        auto createdInnerWidget = (*widgetmaker)(node, options);
-        if (qVariantHasWidget(createdInnerWidget))
+        if (auto *widget = (*widgetmaker)(node, options))
         {
-            auto *wrapperWidget = new DataNodeWrapperWidget({createdInnerWidget}, node->getName());
-
-            return QVariant::fromValue( wrapperWidget );
+            return QVariantHoldingWidget::fromValue( widget );
         }
         else
         {

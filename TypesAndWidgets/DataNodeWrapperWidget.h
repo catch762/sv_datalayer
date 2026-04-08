@@ -2,6 +2,7 @@
 #include "sv_qtcommon.h"
 #include "DataLayerUtils.h"
 #include "SerializerInterface.h"
+#include "WidgetOptions.h"
 
 //*****************************************************************************************************
 //
@@ -23,16 +24,33 @@ class DataNodeWrapperWidget : public QFrame
 {
     Q_OBJECT
 public:
-    DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets = {},
-                            const QString &name = {},
-                            QWidget *parent = nullptr );
+    DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets,
+                            const QString&                            name           = {},
+                            QJsonObjectWithWidgetOptionsOpt           options        = {},
+                            QWidget*                                  parent         = nullptr );
 
-    void setExpanded(bool expanded);                        
+    template<class WidgetType>                        
+    DataNodeWrapperWidget(  WidgetType*                     widget,
+                            const QString&                  name    = {},
+                            QJsonObjectWithWidgetOptionsOpt options = {},
+                            QWidget*                        parent  = nullptr )
+        : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, name, options, parent)
+    {
+    }
+
+    void setExpanded(bool expanded);
+    
+    
+    QJsonObjectWithWidgetOptions makeOptions() const;
 private:
     void createAndInitTopStripe(const QString &name);
     void iterateContentWidgets(std::function<void(QWidget*)> visitor);
     
     void setContentWidgetsVisibleStatus(bool visible);
+
+private:
+    static const inline QString isExpandedKey = "isExpanded";
+    static const inline QString contentOptionsKey = "contentOptions";
 
 private:
     QVBoxLayout*                            layout                              = nullptr;
@@ -50,9 +68,7 @@ public:
 
     QJsonValue toJson(const WidgetPtr& value)
     {
-        QJsonObject obj;
-        obj["hi"] = "hello";
-        return obj;
+        return value->makeOptions();
     }
 
     std::optional<WidgetPtr> fromJson(const QJsonValue& json)

@@ -1,5 +1,5 @@
 #include "DataNodeWrapperWidget.h"
-
+#include "SerializationSystem.h"
 namespace
 {
     const int StripeHeight = 24;
@@ -7,7 +7,10 @@ namespace
     const int StripeContentHeight = StripeHeight - 2 * StripeMargin;
 }
 
-DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets, const QString &name, QWidget *parent)
+DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets,
+                                             const QString &name,
+                                             QJsonObjectWithWidgetOptionsOpt options,
+                                             QWidget *parent)
  : QFrame(parent)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -26,6 +29,15 @@ DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWi
         QWidget* contentAsQWidget = contentWidget.value<QWidget*>();
         
         layout->addWidget(contentAsQWidget);
+    }
+
+    if (options)
+    {
+        if (auto isExpandedOpt = getFromJson<bool>(*options, isExpandedKey))
+        {
+            SV_LOG("applied expansion");
+            setExpanded(*isExpandedOpt);
+        }
     }
 }
 
@@ -96,4 +108,25 @@ void DataNodeWrapperWidget::setContentWidgetsVisibleStatus(bool visible)
     {
         widget->setVisible(visible);
     });
+}
+
+QJsonObjectWithWidgetOptions DataNodeWrapperWidget::makeOptions() const
+{
+    QJsonObjectWithWidgetOptions obj;
+    obj[isExpandedKey] = stripeShowHideContentButton->isChecked();
+
+    //todo add widget name...
+
+    //then this widget is for leaf node; and if its for comp node, we dont save anything else
+    if (contentWidgets.size() == 1) 
+    {
+        //its perfectly ok to receive null value here - simply means content widget doesnt save anything
+        auto contentOptions = SerializationSystem::instance().qVariantToJson(contentWidgets.front());
+        if (contentOptions.isObject())
+        {
+            obj[contentOptionsKey] = contentOptions;
+        }
+    }
+
+    return obj;
 }

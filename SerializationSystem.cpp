@@ -8,15 +8,18 @@ SerializationSystem &SerializationSystem::instance()
     return s;
 }
 
-QJsonValue SerializationSystem::qVariantToJson(const QVariant &val)
+QJsonValue SerializationSystem::qVariantToJson(const QVariant &val, bool logOnError)
 {
     if (auto * entry = getSerializerByIndex(val.typeId()))
     {
         return entry->serializer(val);
     }
 
-    //SV_ERROR("Serialization", QString("Couldnt find serializers for QVariant with type [%1][%2]")
-    //                            .arg(val.typeId()).arg(val.typeName()).toStdString());
+    if (logOnError)
+    {
+        SV_ERROR("Serialization", QString("Couldnt find serializers for QVariant with type [%1][%2]")
+                                .arg(val.typeId()).arg(val.typeName()).toStdString());
+    }
     
     return QJsonValue();
 }
