@@ -52,6 +52,22 @@ public:
     };
     static ColorData colorsForPreset(int presetIdx, bool isValid);
 
+
+
+
+
+
+
+
+    //TODO add curpreset to options and also change spacing
+
+
+
+
+
+
+
+
     //saves only valid presets, if there are none, return nullopt
     QJsonObjectOpt getPresetsJson();
     void restorePresetsFromJson(const QJsonObject& presetsJson);
@@ -92,7 +108,7 @@ private:
     QWidget*                    presetsWidget           = nullptr;
     QVBoxLayout*                    presetsLayout       = nullptr;
     std::vector<QPushButton*>       presetsButtons;
-    
+
     QSpinBox*                           currentXIndex   = nullptr;
     QSpinBox*                           currentYIndex   = nullptr;
 

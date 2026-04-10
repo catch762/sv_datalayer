@@ -6,7 +6,7 @@
 
 namespace
 {
-    const int PresetsWidth = 30;
+    const int PresetsWidth = 24;
     const int CurrentPresetTabHeight = 24;
     const char* ButtonPresetIsValidProperty = "PresetIsValid";
 }
@@ -163,13 +163,13 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
     }
     {
         QSpacerItem* spacer = new QSpacerItem(4, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
-        layout->addItem(spacer, 0, 1, 2, 1);
+        layout->addItem(spacer, 0, 1, 3, 1);
     }
 
 
     xyPad = new XYPadForPresets(this);
     {
-        layout->addWidget(xyPad, 3, 1, 1, 2);
+        layout->addWidget(xyPad, 3, 2, 1, 1);
 
         auto onPadRepresentationChange = [this](QPointF coord11)
         {

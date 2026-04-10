@@ -8,7 +8,7 @@ LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWid
     
     sliderValueLeftToRight = new QSlider(Qt::Horizontal, this);
     {
-        sliderValueLeftToRight->setMinimumWidth(20);
+        sliderValueLeftToRight->setMinimumWidth(30);
 
         sliderValueLeftToRight->setMinimum(0);
         sliderValueLeftToRight->setMaximum(10'000);
