@@ -75,8 +75,55 @@ void XYPadForPresets::paintEvent(QPaintEvent *event)
 //  [/class XYPadForPresets]  //
 //****************************//
 
+//***********************//
+//  [class PresetData]   //
+//***********************//
 
+QJsonArray XYPadWithPresetsWidget::PresetData::toJson() const
+{
+    QJsonArray arr;
+    arr.append(xIndex.value_or(-1));
+    arr.append(yIndex.value_or(-1));
+    return arr;
+}
+std::optional<XYPadWithPresetsWidget::PresetData> XYPadWithPresetsWidget::PresetData::fromJson(const QJsonValue& json)
+{
+    PresetData res;
 
+    const QString err("Deserializing XY PresetData error");
+    auto arr = convertJsonAndLogError<QJsonArray>(json, err);
+    if (!arr) return {};
+
+    if (arr->size() != 2)
+    {
+        SV_ERROR(std::format("{}: array size {} instead of 2", err, arr->size()));
+        return {};
+    }
+
+    //returns success;
+    auto putValueTo = [&](const QJsonValue& val, intOpt& intOptDestination)
+    {
+        doubleOpt index = convertJsonAndLogError<double>(val, err + " in array value");
+        if (!index) return false;
+
+        intOptDestination = int(*index);
+        return true;
+    };
+
+    if (!putValueTo((*arr)[0], res.xIndex)) return {};
+    if (!putValueTo((*arr)[1], res.yIndex)) return {};
+
+    return res;
+}
+
+bool XYPadWithPresetsWidget::PresetData::hasValues() const
+{
+    return xIndex && yIndex;
+}
+
+//***********************//
+//  [/class PresetData]  //
+//***********************//
 
 XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent) : QWidget(theParent), parent(theParent)
 {
@@ -106,8 +153,6 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
 
         layout->addWidget(paramX, 0, 0, 1, 2);
         layout->addWidget(paramY, 1, 0, 1, 2);
-
-
     }
 
     xyPad = new XYPadForPresets(this);
@@ -200,10 +245,11 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
         layout->addWidget(currentPresetWidget, 3, 0, 1, 2);
     }
 
-    
-    // After adding all widgets to layout:
-    //layout->setColumnStretch(0, 1);  // Let xyPad column expand, fixed column 1 stays narrow
-    //layout->setRowStretch(0, 0);     // Row 0 minimum, row 1 expands if needed
+    //now that everything else is created, we update paramX and paramY
+    {
+        setupSliderWidgetForIndex(paramX, getIndexOptAndHandleInvalid(currentXIndex));
+        setupSliderWidgetForIndex(paramY, getIndexOptAndHandleInvalid(currentYIndex));
+    }
 }
 
 void XYPadWithPresetsWidget::onPresetSelected(int presetIdx)
@@ -297,6 +343,38 @@ void XYPadWithPresetsWidget::updatePresetButtonIfNeeded(QPushButton *btn, int in
     setPresetButtonStylesheetAndColors(btn, colorsForPreset(index, isValidNow));
 }
 
+intOpt XYPadWithPresetsWidget::getIndexOptAndHandleInvalid(QSpinBox *indexSpinbox)
+{
+    int index = indexSpinbox->value();
+    if (componentIndexIsValid(index))
+    {
+        return index;
+    }
+    else
+    {
+        // Currently this is not really needed for anything. I just feel like it:
+        const int DefaultInvalidValue = -1;
+        if (index != DefaultInvalidValue)
+        {
+            QSignalBlocker blocker(indexSpinbox);
+            indexSpinbox->setValue(DefaultInvalidValue);
+        }
+
+        return {};
+    }
+}
+
+void XYPadWithPresetsWidget::updateCurrentIndexesUIToMatchPresetData()
+{
+    const auto &curPreset = currentPresetSaveData();
+    int xIndex = curPreset.xIndex.value_or(-1);
+    int yIndex = curPreset.yIndex.value_or(-1);
+    currentXIndex->setValue(xIndex);
+    currentYIndex->setValue(yIndex);
+
+    SV_LOG(std::format("Set indexes {} {}", xIndex, yIndex));
+}
+
 XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int presetIdx, bool isValid)
 {
     auto makeColorData = [](QColor selectedColor)
@@ -327,6 +405,52 @@ XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int pr
     else return unavailableColor;
 }
 
+QJsonObjectOpt XYPadWithPresetsWidget::getPresetsJson()
+{
+    QJsonObject obj;
+
+    for (int presetIdx = 0; presetIdx < PresetsCount; ++presetIdx)
+    {
+        const auto &preset = presets[presetIdx];
+
+        if (preset.hasValues() && *preset.xIndex >= 0 && *preset.yIndex >= 0)
+        {
+            obj[QString::number(presetIdx)] = preset.toJson();
+        }
+    }
+
+    return !obj.empty() ? obj : QJsonObjectOpt{};
+}
+
+void XYPadWithPresetsWidget::restorePresetsFromJson(const QJsonObject &presetsJson)
+{
+    for (auto [keyPresetIndexString, presetDataJson] : presetsJson.asKeyValueRange())
+    {
+        bool keyIsInteger       = false;
+        int  presetIndex        = keyPresetIndexString.toString().toInt(&keyIsInteger);
+        bool presetIndexIsValid = keyIsInteger && presetIndex >= 0 && presetIndex < PresetsCount;
+
+        if (!presetIndexIsValid)
+        {
+            continue;
+        }
+
+        if (auto presetData = PresetData::fromJson(presetDataJson))
+        {
+            presets[presetIndex] = *presetData;
+        }
+    }
+
+    updateCurrentIndexesUIToMatchPresetData();
+
+    for (int i = 0; i < presetsButtons.size(); ++i)
+    {
+        updatePresetButtonIfNeeded(presetsButtons[i], i);
+    }
+
+    update(); //to repaint preset buttons mainly
+}
+
 void XYPadWithPresetsWidget::iterateValidPresetPoints(std::function<void(const LimitedDoublePair &xy,
                                                                          int presetIndex,
                                                                          bool presetIsSelected)> visitor)
@@ -342,46 +466,24 @@ void XYPadWithPresetsWidget::iterateValidPresetPoints(std::function<void(const L
     }
 }
 
+void XYPadWithPresetsWidget::setupSliderWidgetForIndex(LimitedDoubleWidget* sliderParam, intOpt indexOpt)
+{
+    auto isValidIdx = indexOpt && componentIndexIsValid(*indexOpt);
+
+    sliderParam->setEnabled(isValidIdx);
+
+    QSignalBlocker block(sliderParam);
+    sliderParam->setValue(isValidIdx ? parent->getValue()[*indexOpt] : LimitedDouble{});
+}
 
 void XYPadWithPresetsWidget::updateEverythingToMatchParentValue()
 {
     const auto &vectorValue = parent->getValue();
 
-    auto getIndexOptAndHandleInvalid = [this](QSpinBox* indexSpinbox) -> intOpt
-    {
-        int index = indexSpinbox->value();
-        if (componentIndexIsValid(index))
-        {
-            return index;
-        }
-        else
-        {
-            // Currently this is not really needed for anything. I just feel like it:
-            const int DefaultInvalidValue = -1;
-            if (index != DefaultInvalidValue)
-            {
-                QSignalBlocker blocker(indexSpinbox);
-                indexSpinbox->setValue(DefaultInvalidValue);
-            }
-
-            return {};
-        }
-    };
-
     intOpt xIndexOpt = getIndexOptAndHandleInvalid(currentXIndex);
     intOpt yIndexOpt = getIndexOptAndHandleInvalid(currentYIndex);
 
     currentPresetSaveData() = {xIndexOpt, yIndexOpt};
-
-    auto setupSliderWidgetForIndex = [&](LimitedDoubleWidget* sliderParam, intOpt indexOpt)
-    {
-        auto isValidIdx = indexOpt && componentIndexIsValid(*indexOpt);
-
-        sliderParam->setEnabled(isValidIdx);
-
-        QSignalBlocker block(sliderParam);
-        sliderParam->setValue(isValidIdx ? vectorValue[*indexOpt] : LimitedDouble{});
-    };
 
     setupSliderWidgetForIndex(paramX, xIndexOpt);
     setupSliderWidgetForIndex(paramY, yIndexOpt);

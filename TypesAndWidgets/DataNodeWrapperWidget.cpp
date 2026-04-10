@@ -9,7 +9,7 @@ namespace
 
 DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets,
                                              const QString &name,
-                                             QJsonObjectWithWidgetOptionsOpt options,
+                                             const QJsonObjectWithWidgetOptionsOpt& options,
                                              QWidget *parent)
  : QFrame(parent)
 {
@@ -46,13 +46,18 @@ void DataNodeWrapperWidget::setExpanded(bool expanded)
     stripeShowHideContentButton->setChecked(expanded);
 }
 
+QHBoxLayout *DataNodeWrapperWidget::getStripeLayout()
+{
+    return stripeLayout;
+}
+
 void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
 {
     topStripe = new QWidget(this);
     topStripe->setFixedHeight(StripeHeight);
     topStripe->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    auto stripeLayout = new QHBoxLayout(topStripe);
+    stripeLayout = new QHBoxLayout(topStripe);
     stripeLayout->setContentsMargins(StripeMargin, StripeMargin, StripeMargin, StripeMargin);
     stripeLayout->setSpacing(5);
 
@@ -113,20 +118,20 @@ void DataNodeWrapperWidget::setContentWidgetsVisibleStatus(bool visible)
 QJsonObjectWithWidgetOptions DataNodeWrapperWidget::makeOptions() const
 {
     QJsonObjectWithWidgetOptions obj;
-    obj[isExpandedKey] = stripeShowHideContentButton->isChecked();
-
+    
     //todo add widget name...
 
     //then this widget is for leaf node; and if its for comp node, we dont save anything else
     if (contentWidgets.size() == 1) 
     {
-        //its perfectly ok to receive null value here - simply means content widget doesnt save anything
-        auto contentOptions = SerializationSystem::instance().qVariantToJson(contentWidgets.front());
-        if (contentOptions.isObject())
+        //its perfectly ok to receive no value here - simply means content widget doesnt save anything
+        if (auto contentOptions = convertJson<QJsonObject>( SerializationSystem::instance().qVariantToJson(contentWidgets.front()) ))
         {
-            obj[contentOptionsKey] = contentOptions;
+            obj = *contentOptions;
         }
     }
+
+    obj[isExpandedKey] = stripeShowHideContentButton->isChecked();
 
     return obj;
 }

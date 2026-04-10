@@ -128,9 +128,7 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForCompositeNode(DataNodeSh
         return {};
     }
 
-    //todo use the options
-
-    auto *wrapper = new DataNodeWrapperWidget(widgetsOfChildren, node->getName());
+    auto *wrapper = new DataNodeWrapperWidget(widgetsOfChildren, node->getName(), options);
     return QVariant::fromValue( wrapper );
 }
 

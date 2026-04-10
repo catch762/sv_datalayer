@@ -20,11 +20,24 @@
 class WidgetsForNodeManager
 {
 public:
+    
+    // Unfortunately, cant use one variable.
     // Note: QPointer is not owning, but it will become invalid if widget gets deleted.
     // This means, we might need to cleanup empty QPointer's (not done yet), or this
     // class will hold them forever.
-    //I assume, if there will be multiple widgets, then most will be short-lived
-    using WidgetsContainer = std::list<QVariantHoldingWidget>;
+    // I assume, if there will be multiple widgets, then most will be short-lived
+    struct WidgetEntry
+    {
+        WidgetEntry(const QVariantHoldingWidget &widget) :
+            qVariant(widget), qPointer(getWidgetFromQVariant(widget)) {}
+
+        bool stillAlive() const {return qPointer;}
+
+        QVariantHoldingWidget qVariant; //e.g. QVariant holding QLineEdit* raw pointer
+        QPointer<QWidget>     qPointer; //exact same pointer wrapped in QPointer so we can check if widget is already deleted.
+    };
+
+    using WidgetsContainer = std::list<WidgetEntry>;
 
     static void registerWidgetForNode(ConstDataNodeWeak node, QVariantHoldingWidget widget)
     {
@@ -49,10 +62,10 @@ public:
         {
             auto firstNotNull = std::ranges::find_if(*container, [](const auto& qVariantHoldingWidget)
             {
-                return qVariantHasWidget(qVariantHoldingWidget);
+                return qVariantHoldingWidget.stillAlive();
             });
 
-            return firstNotNull != container->end() ? *firstNotNull : QVariantHoldingWidget{};
+            return firstNotNull != container->end() ? firstNotNull->qVariant : QVariantHoldingWidget{};
         }
 
         return {};
@@ -61,6 +74,19 @@ public:
     static void clear()
     {
         instance().entries.clear();
+    }
+
+    static void clearAllDeletedWidgets()
+    {
+        auto &entries = instance().entries;
+
+        for (auto& [node, container] : entries)
+        {
+            std::erase_if(container, [](const auto &widget){ return !widget.stillAlive(); });
+        }
+
+        //delete empty containers
+        std::erase_if(entries, [](const auto &keyAndValue){ return keyAndValue.second.empty(); });
     }
 
 private:

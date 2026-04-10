@@ -26,20 +26,21 @@ class DataNodeWrapperWidget : public QFrame
 public:
     DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets,
                             const QString&                            name           = {},
-                            QJsonObjectWithWidgetOptionsOpt           options        = {},
+                            const QJsonObjectWithWidgetOptionsOpt&    options        = {},
                             QWidget*                                  parent         = nullptr );
 
     template<class WidgetType>                        
-    DataNodeWrapperWidget(  WidgetType*                     widget,
-                            const QString&                  name    = {},
-                            QJsonObjectWithWidgetOptionsOpt options = {},
-                            QWidget*                        parent  = nullptr )
+    DataNodeWrapperWidget(  WidgetType*                             widget,
+                            const QString&                          name    = {},
+                            const QJsonObjectWithWidgetOptionsOpt&  options = {},
+                            QWidget*                                parent  = nullptr )
         : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, name, options, parent)
     {
     }
 
     void setExpanded(bool expanded);
     
+    QHBoxLayout* getStripeLayout();
     
     QJsonObjectWithWidgetOptions makeOptions() const;
 private:
@@ -49,12 +50,12 @@ private:
     void setContentWidgetsVisibleStatus(bool visible);
 
 private:
-    static const inline QString isExpandedKey = "isExpanded";
-    static const inline QString contentOptionsKey = "contentOptions";
+    static const inline QString isExpandedKey = "_DNWW_isExpanded";
 
 private:
     QVBoxLayout*                            layout                              = nullptr;
     QWidget*                                    topStripe                       = nullptr;
+    QHBoxLayout*                                stripeLayout                    = nullptr;
     QPushButton*                                    stripeShowHideContentButton = nullptr;
     QLabel*                                         stripeNameLabel             = nullptr;
     std::vector<QVariantHoldingWidget>      contentWidgets;

@@ -69,7 +69,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
         return {};
     }
 
-    auto *widget = new LimitedDoubleVecWidget(leafWithLimitedDoubleVec->tryGetLeafvalue()->value<LimitedDoubleVec>());
+    auto *widget = new LimitedDoubleVecWidget(leafWithLimitedDoubleVec->tryGetLeafvalue()->value<LimitedDoubleVec>(), options);
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedDoubleVec);
 
@@ -85,5 +85,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
         }
     });
 
-    return new DataNodeWrapperWidget( widget, leafWithLimitedDoubleVec->getName(), options);
+    auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedDoubleVec->getName(), options);
+    widget->setupButtonsOnWrapperParent(wrapper, options);
+    return wrapper;
 }

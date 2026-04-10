@@ -32,10 +32,12 @@ public:
 
     struct PresetData
     {
+        QJsonArray toJson() const;
+        static std::optional<PresetData> fromJson(const QJsonValue& json);
+        bool hasValues() const;
+
         intOpt xIndex;
         intOpt yIndex;
-
-        bool hasValues() const {return xIndex && yIndex;}
     };
 
     void iterateValidPresetPoints(std::function<void(const LimitedDoublePair& xy,
@@ -49,6 +51,10 @@ public:
         bool isValid() { return selectedColor.isValid() && notSelectedColor.isValid(); }
     };
     static ColorData colorsForPreset(int presetIdx, bool isValid);
+
+    //saves only valid presets, if there are none, return nullopt
+    QJsonObjectOpt getPresetsJson();
+    void restorePresetsFromJson(const QJsonObject& presetsJson);
 
 public slots:
     void updateEverythingToMatchParentValue(); //will not emit any signals
@@ -69,6 +75,12 @@ private:
 
     void setPresetButtonStylesheetAndColors(QPushButton* btn, ColorData colors);
     void updatePresetButtonIfNeeded(QPushButton* btn, int index);
+
+    //pass paramX or paramY
+    void setupSliderWidgetForIndex(LimitedDoubleWidget* sliderParam, intOpt indexOpt);
+    //pass currentXIndex or currentYIndex. Any invalid value on spinbox will change to -1
+    intOpt getIndexOptAndHandleInvalid(QSpinBox* indexSpinbox); 
+    void updateCurrentIndexesUIToMatchPresetData();
 
 private:
     QGridLayout*            layout                      = nullptr;

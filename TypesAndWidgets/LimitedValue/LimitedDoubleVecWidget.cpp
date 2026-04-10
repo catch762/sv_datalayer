@@ -1,36 +1,16 @@
 #include "LimitedDoubleVecWidget.h"
 #include "Internal/LimitedDoublesWidget.h"
 #include "Internal/XYPadWithPresetsWidget.h"
+#include "TypesAndWidgets/DataNodeWrapperWidget.h"
 
 
-
-LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialValue, QWidget *parent)
+LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialValue,
+    const QJsonObjectWithWidgetOptionsOpt& options, QWidget *parent)
     : QFrame(parent)
 {
     value = initialValue;
 
-    auto tempWrapperLayout = new QVBoxLayout(this);
-
-    layout = new QVBoxLayout();
-    tempWrapperLayout->addLayout(layout);
-
-    {
-        auto *tempSwapModesButton = new QPushButton("swap", this);
-        connect(tempSwapModesButton, &QPushButton::clicked, [this]()
-        {
-            if (slidersView->isVisible())
-            {
-                slidersView->setVisible(false);
-                xyPadView->setVisible(true);
-            }
-            else
-            {
-                xyPadView->setVisible(false);
-                slidersView->setVisible(true);
-            }
-        });
-        tempWrapperLayout->addWidget(tempSwapModesButton);
-    }
+    layout = new QVBoxLayout(this);
 
     slidersView = new LimitedDoublesWidget(value, this);
     {
@@ -45,6 +25,10 @@ LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialVa
     xyPadView = new XYPadWithPresetsWidget(this);
     {
         xyPadView->setVisible(false);
+        if (options)
+        {
+            xyPadView->restorePresetsFromJson(*options);
+        }
         layout->addWidget(xyPadView);
     }    
 }
@@ -66,7 +50,39 @@ void LimitedDoubleVecWidget::setValue(const LimitedDoubleVec& newValue)
     emit valueChanged(value);
 }
 
+QJsonObjectWithWidgetOptionsOpt LimitedDoubleVecWidget::makeOptions() const
+{
+    QJsonObjectWithWidgetOptions options = xyPadView->getPresetsJson().value_or(QJsonObjectWithWidgetOptions());
 
+    if (viewSelectorWrapperButton)
+    {
+        options[modeIsXYKey] = viewSelectorWrapperButton->isChecked();
+    }
+
+    return options;
+}
+
+void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
+{
+    viewSelectorWrapperButton = new QPushButton("s");
+    viewSelectorWrapperButton->setCheckable(true);
+    viewSelectorWrapperButton->setChecked(false);
+
+    connect(viewSelectorWrapperButton, &QPushButton::toggled, this, [this](bool checked)
+    {
+        setMode(checked ? Mode::ShowXYPad : Mode::ShowJustLimitedDoubleWidgets);
+    });
+
+    wrapper->getStripeLayout()->addWidget(viewSelectorWrapperButton);
+
+    if (options)
+    {
+        if (auto modeIsXY = getFromJson<bool>(*options, modeIsXYKey))
+        {
+            viewSelectorWrapperButton->setChecked(*modeIsXY);
+        }
+    }
+}
 
 void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& value)
 {
@@ -74,4 +90,18 @@ void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& valu
     slidersView->setValue(value);
 
     xyPadView->updateEverythingToMatchParentValue();
+}
+
+void LimitedDoubleVecWidget::setMode(Mode mode)
+{
+    if (mode == Mode::ShowJustLimitedDoubleWidgets)
+    {
+        slidersView->setVisible(true);
+        xyPadView->setVisible(false);
+    }
+    else
+    {
+        slidersView->setVisible(false);
+        xyPadView->setVisible(true);
+    }
 }
