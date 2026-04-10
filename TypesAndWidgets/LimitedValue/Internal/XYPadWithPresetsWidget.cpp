@@ -6,7 +6,7 @@
 
 namespace
 {
-    const int PresetsWidth = 24;
+    const int PresetsWidth = 30;
     const int CurrentPresetTabHeight = 24;
     const char* ButtonPresetIsValidProperty = "PresetIsValid";
 }
@@ -127,6 +127,8 @@ bool XYPadWithPresetsWidget::PresetData::hasValues() const
 
 XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent) : QWidget(theParent), parent(theParent)
 {
+    setFocusPolicy(Qt::ClickFocus);
+
     layout = new QGridLayout(this);
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(0);
@@ -151,13 +153,23 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
         connect(paramX, &LimitedDoubleWidget::valueChanged, this, onSliderRepresentationChange);
         connect(paramY, &LimitedDoubleWidget::valueChanged, this, onSliderRepresentationChange);
 
-        layout->addWidget(paramX, 0, 0, 1, 2);
-        layout->addWidget(paramY, 1, 0, 1, 2);
+        layout->addWidget(paramX, 0, 2);
+        layout->addWidget(paramY, 1, 2);
     }
+
+    {
+        QSpacerItem* spacer = new QSpacerItem(0, 4, QSizePolicy::Minimum, QSizePolicy::Fixed);
+        layout->addItem(spacer, 2, 0, 1, 2);
+    }
+    {
+        QSpacerItem* spacer = new QSpacerItem(4, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
+        layout->addItem(spacer, 0, 1, 2, 1);
+    }
+
 
     xyPad = new XYPadForPresets(this);
     {
-        layout->addWidget(xyPad, 2, 0);
+        layout->addWidget(xyPad, 3, 1, 1, 2);
 
         auto onPadRepresentationChange = [this](QPointF coord11)
         {
@@ -179,7 +191,7 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
     presetsWidget = new QWidget(this);
     {
         presetsLayout = new QVBoxLayout(presetsWidget);
-        presetsLayout->setContentsMargins(0,0,0,0);
+        presetsLayout->setContentsMargins(0,3,0,3);
         presetsLayout->setSpacing(0);
 
         presetsWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
@@ -216,33 +228,30 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
             presetsButtons.push_back(presetBtn);
         }
 
-        layout->addWidget(presetsWidget, 2, 1);
+        layout->addWidget(presetsWidget, 3, 0);
     }
 
-    currentPresetWidget = new QWidget(this);
     {
-        currentPresetLayout = new QHBoxLayout(currentPresetWidget);
-
-        currentPresetWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-        currentXIndex = new QSpinBox(this);
-        currentYIndex = new QSpinBox(this);
+        auto makeIndexSpinbox = [this]()
         {
-            auto init = [this](auto *spinbox)
-            {
-                spinbox->setMinimum(-1);
-                spinbox->setValue(-1);
+            QSpinBox *spinbox = new QSpinBox(this);
 
-                connect(spinbox, &QSpinBox::valueChanged, this, &XYPadWithPresetsWidget::updateEverythingToMatchParentValue);
+            spinbox->setFixedWidth(PresetsWidth);
+            spinbox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
 
-                currentPresetLayout->addWidget(spinbox);
-            };
-            init(currentXIndex);
-            init(currentYIndex);
-        }
+            spinbox->setMinimum(-1);
+            spinbox->setValue(-1);
 
+            connect(spinbox, &QSpinBox::valueChanged, this, &XYPadWithPresetsWidget::updateEverythingToMatchParentValue);
 
-        layout->addWidget(currentPresetWidget, 3, 0, 1, 2);
+            return spinbox;
+        };
+
+        currentXIndex = makeIndexSpinbox();
+        currentYIndex = makeIndexSpinbox();
+
+        layout->addWidget(currentXIndex, 0, 0);
+        layout->addWidget(currentYIndex, 1, 0);
     }
 
     //now that everything else is created, we update paramX and paramY

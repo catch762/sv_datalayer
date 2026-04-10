@@ -92,8 +92,7 @@ private:
     QWidget*                    presetsWidget           = nullptr;
     QVBoxLayout*                    presetsLayout       = nullptr;
     std::vector<QPushButton*>       presetsButtons;
-    QWidget*                    currentPresetWidget     = nullptr;
-    QHBoxLayout*                    currentPresetLayout = nullptr;
+    
     QSpinBox*                           currentXIndex   = nullptr;
     QSpinBox*                           currentYIndex   = nullptr;
 

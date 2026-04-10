@@ -49,6 +49,6 @@ protected:
 
 private:
     //actual coordinateArea() is between [offset.x, width - 2*offset.x], same for height
-    QPoint offset = QPoint(10,10);
+    QPoint offset = QPoint(3,3);
     bool constrainAreaToSquared = false;
 };

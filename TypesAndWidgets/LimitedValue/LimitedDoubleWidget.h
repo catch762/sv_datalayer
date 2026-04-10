@@ -2,7 +2,7 @@
 #include "sv_qtcommon.h"
 #include "LimitedValue.h"
 
-class LimitedDoubleWidget : public QFrame
+class LimitedDoubleWidget : public QWidget
 {
     Q_OBJECT
 public:

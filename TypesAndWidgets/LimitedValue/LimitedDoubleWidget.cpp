@@ -1,13 +1,15 @@
 #include "LimitedDoubleWidget.h"
 
-LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWidget *parent) : QFrame(parent)
+LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWidget *parent) : QWidget(parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setSpacing(2);
-    layout->setContentsMargins(2,2,2,2);
+    layout->setContentsMargins(1,1,1,1);
     
     sliderValueLeftToRight = new QSlider(Qt::Horizontal, this);
     {
+        sliderValueLeftToRight->setMinimumWidth(20);
+
         sliderValueLeftToRight->setMinimum(0);
         sliderValueLeftToRight->setMaximum(10'000);
         sliderValueLeftToRight->setTickInterval(1);
