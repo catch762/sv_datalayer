@@ -2,6 +2,7 @@
 #include "Internal/LimitedDoublesWidget.h"
 #include "Internal/XYPadWithPresetsWidget.h"
 #include "TypesAndWidgets/DataNodeWrapperWidget.h"
+#include <QToolButton>
 
 
 LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialValue,
@@ -27,7 +28,7 @@ LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialVa
         xyPadView->setVisible(false);
         if (options)
         {
-            xyPadView->restorePresetsFromJson(*options);
+            xyPadView->restoreFromOptions(*options);
         }
         layout->addWidget(xyPadView);
     }    
@@ -52,7 +53,7 @@ void LimitedDoubleVecWidget::setValue(const LimitedDoubleVec& newValue)
 
 QJsonObjectWithWidgetOptionsOpt LimitedDoubleVecWidget::makeOptions() const
 {
-    QJsonObjectWithWidgetOptions options = xyPadView->getPresetsJson().value_or(QJsonObjectWithWidgetOptions());
+    QJsonObjectWithWidgetOptions options = xyPadView->makeOptions().value_or(QJsonObjectWithWidgetOptions());
 
     if (viewSelectorWrapperButton)
     {
@@ -82,6 +83,15 @@ void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *
             viewSelectorWrapperButton->setChecked(*modeIsXY);
         }
     }
+
+    auto tb = new QToolButton();
+    tb->setCheckable(true);
+
+    QIcon icon = QIcon::fromTheme(QIcon::ThemeIcon::EditUndo);
+    tb->setIcon(icon);
+    tb->setIconSize(QSize(16, 16));
+
+    wrapper->getStripeLayout()->addWidget(tb);
 }
 
 void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& value)

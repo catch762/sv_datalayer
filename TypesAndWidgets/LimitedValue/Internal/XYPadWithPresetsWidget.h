@@ -3,6 +3,7 @@
 #include "../LimitedValue.h"
 #include <QGridLayout>
 #include "BaseXYPadWidget.h"
+#include "WidgetOptions.h"
 
 class LimitedDoubleWidget;
 class LimitedDoubleVecWidget;
@@ -52,25 +53,8 @@ public:
     };
     static ColorData colorsForPreset(int presetIdx, bool isValid);
 
-
-
-
-
-
-
-
-    //TODO add curpreset to options and also change spacing
-
-
-
-
-
-
-
-
-    //saves only valid presets, if there are none, return nullopt
-    QJsonObjectOpt getPresetsJson();
-    void restorePresetsFromJson(const QJsonObject& presetsJson);
+    QJsonObjectWithWidgetOptionsOpt makeOptions();
+    void restoreFromOptions(const QJsonObjectWithWidgetOptions& options);
 
 public slots:
     void updateEverythingToMatchParentValue(); //will not emit any signals

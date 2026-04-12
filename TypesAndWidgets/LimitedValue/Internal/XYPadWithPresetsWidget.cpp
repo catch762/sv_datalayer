@@ -9,6 +9,9 @@ namespace
     const int PresetsWidth = 24;
     const int CurrentPresetTabHeight = 24;
     const char* ButtonPresetIsValidProperty = "PresetIsValid";
+
+    const QString presetsKey = "presets";
+    const QString currentPresetKey = "curPreset";
 }
 
 void setBackgroundColor(QPushButton *btn, QColor color)
@@ -414,50 +417,85 @@ XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int pr
     else return unavailableColor;
 }
 
-QJsonObjectOpt XYPadWithPresetsWidget::getPresetsJson()
+
+QJsonObjectWithWidgetOptionsOpt XYPadWithPresetsWidget::makeOptions()
 {
-    QJsonObject obj;
+    QJsonObjectWithWidgetOptions res;
 
-    for (int presetIdx = 0; presetIdx < PresetsCount; ++presetIdx)
+    auto getPresetsJson = [&]() -> QJsonObjectOpt
     {
-        const auto &preset = presets[presetIdx];
+        QJsonObject obj;
 
-        if (preset.hasValues() && *preset.xIndex >= 0 && *preset.yIndex >= 0)
+        for (int presetIdx = 0; presetIdx < PresetsCount; ++presetIdx)
         {
-            obj[QString::number(presetIdx)] = preset.toJson();
+            const auto &preset = presets[presetIdx];
+
+            if (preset.hasValues() && *preset.xIndex >= 0 && *preset.yIndex >= 0)
+            {
+                obj[QString::number(presetIdx)] = preset.toJson();
+            }
         }
+
+        return !obj.empty() ? obj : QJsonObjectOpt{};
+    };
+
+    if (auto presetsObj = getPresetsJson())
+    {
+        res[presetsKey] = *presetsObj;
     }
 
-    return !obj.empty() ? obj : QJsonObjectOpt{};
+    if (currentPresetIdx != 0)
+    {
+        res[currentPresetKey] = currentPresetIdx;
+    }
+
+    return !res.empty() ? res : QJsonObjectWithWidgetOptionsOpt{};
 }
 
-void XYPadWithPresetsWidget::restorePresetsFromJson(const QJsonObject &presetsJson)
+void XYPadWithPresetsWidget::restoreFromOptions(const QJsonObjectWithWidgetOptions &options)
 {
-    for (auto [keyPresetIndexString, presetDataJson] : presetsJson.asKeyValueRange())
+    auto restorePresets = [&](const QJsonObject& presetsJson)
     {
-        bool keyIsInteger       = false;
-        int  presetIndex        = keyPresetIndexString.toString().toInt(&keyIsInteger);
-        bool presetIndexIsValid = keyIsInteger && presetIndex >= 0 && presetIndex < PresetsCount;
-
-        if (!presetIndexIsValid)
+        for (auto [keyPresetIndexString, presetDataJson] : presetsJson.asKeyValueRange())
         {
-            continue;
+            bool keyIsInteger       = false;
+            int  presetIndex        = keyPresetIndexString.toString().toInt(&keyIsInteger);
+            bool presetIndexIsValid = keyIsInteger && presetIndex >= 0 && presetIndex < PresetsCount;
+
+            if (!presetIndexIsValid)
+            {
+                continue;
+            }
+
+            if (auto presetData = PresetData::fromJson(presetDataJson))
+            {
+                presets[presetIndex] = *presetData;
+            }
         }
 
-        if (auto presetData = PresetData::fromJson(presetDataJson))
+        updateCurrentIndexesUIToMatchPresetData();
+
+        for (int i = 0; i < presetsButtons.size(); ++i)
         {
-            presets[presetIndex] = *presetData;
+            updatePresetButtonIfNeeded(presetsButtons[i], i);
+        }
+
+        update(); //to repaint preset buttons mainly
+    };
+
+    if (doubleOpt currentIdx = getFromJson<double>(options, currentPresetKey))
+    {
+        auto idx = int(*currentIdx);
+        if (idx >= 0 && idx < presetsButtons.size())
+        {
+            presetsButtons[idx]->setChecked(true);
         }
     }
 
-    updateCurrentIndexesUIToMatchPresetData();
-
-    for (int i = 0; i < presetsButtons.size(); ++i)
+    if (auto presetsObj = getFromJson<QJsonObject>(options, presetsKey))
     {
-        updatePresetButtonIfNeeded(presetsButtons[i], i);
+        restorePresets(*presetsObj);
     }
-
-    update(); //to repaint preset buttons mainly
 }
 
 void XYPadWithPresetsWidget::iterateValidPresetPoints(std::function<void(const LimitedDoublePair &xy,

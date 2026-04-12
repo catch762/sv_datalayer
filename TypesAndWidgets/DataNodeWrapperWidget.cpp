@@ -13,7 +13,7 @@ DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWi
                                              QWidget *parent)
  : QFrame(parent)
 {
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
+    setFrameStyle(QFrame::NoFrame);
 
     layout = new QVBoxLayout(this);
     layout->setContentsMargins(2,2,2,2);
@@ -54,6 +54,16 @@ QHBoxLayout *DataNodeWrapperWidget::getStripeLayout()
 void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
 {
     topStripe = new QWidget(this);
+    topStripe->setObjectName("topStripe");
+
+    topStripe->setStyleSheet(
+            "#topStripe {"
+            "  border: 1px solid palette(mid);"
+            "  border-radius: 0px;"
+            "}"
+        );
+
+    //topStripe->setFrameStyle(QFrame::Box | QFrame::Plain);
     topStripe->setFixedHeight(StripeHeight);
     topStripe->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
@@ -66,17 +76,51 @@ void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
         static const QString expandedStateText = "-";
         static const QString collapsedStateText = "+";
 
-        stripeShowHideContentButton = new QPushButton(expandedStateText, this);
+        stripeShowHideContentButton = new QPushButton("", this);
         stripeShowHideContentButton->setFixedSize(StripeContentHeight, StripeContentHeight);
         
         stripeShowHideContentButton->setCheckable(true);
         stripeShowHideContentButton->setChecked(true);
 
+        {
+            QIcon icon;
+
+            int theIconSize = StripeContentHeight - 8;
+            QSize iconSize(theIconSize, theIconSize);
+
+            // Expand state (plus) → On
+            icon.addPixmap(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd)
+                            .pixmap(iconSize),
+                        QIcon::Normal, QIcon::Off);
+
+            // Collapse state (minus) → Off
+            icon.addPixmap(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove)
+                            .pixmap(iconSize),
+                        QIcon::Normal, QIcon::On);
+
+            stripeShowHideContentButton->setIcon(icon);
+
+            // - move to the right 2px, because otherwise icon is not fucking centered
+            // - make it so when its checked its same color as when its not
+
+            stripeShowHideContentButton->setFlat(true);
+
+            /*stripeShowHideContentButton->setStyleSheet(R"(
+                QPushButton {
+                    padding: 0px 0px 0px 2px;
+                    border: none;
+                }
+                QPushButton:checked {
+                    background-color: palette(button);
+                }
+            )");*/
+        }
+
         connect(stripeShowHideContentButton, &QPushButton::toggled, this, [this](bool checked)
         {
             bool wasExpanded = checked;
 
-            stripeShowHideContentButton->setText(wasExpanded ? expandedStateText : collapsedStateText);
+            //stripeShowHideContentButton->setText(wasExpanded ? expandedStateText : collapsedStateText);
             
             setContentWidgetsVisibleStatus(wasExpanded);
         });

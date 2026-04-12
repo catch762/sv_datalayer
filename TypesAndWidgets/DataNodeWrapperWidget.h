@@ -54,6 +54,7 @@ private:
 
 private:
     QVBoxLayout*                            layout                              = nullptr;
+    QHBoxLayout*                            frameAndContentLayout               = nullptr;
     QWidget*                                    topStripe                       = nullptr;
     QHBoxLayout*                                stripeLayout                    = nullptr;
     QPushButton*                                    stripeShowHideContentButton = nullptr;
