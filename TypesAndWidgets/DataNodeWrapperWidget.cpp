@@ -95,9 +95,9 @@ void DataNodeWrapperWidget::setExpanded(bool expanded)
     stripeShowHideContentButton->setChecked(expanded);
 }
 
-QHBoxLayout *DataNodeWrapperWidget::getStripeLayout()
+QHBoxLayout *DataNodeWrapperWidget::getStripeButtonsLayout()
 {
-    return stripeLayout;
+    return stripeButtonsLayout;
 }
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon)
@@ -130,6 +130,9 @@ QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIco
     button->setStyleSheet(R"(
         QPushButton {
             padding: 0px 0px 0px 2px;
+            margin: 0px;
+            border: 1px solid rgb(180,180,180);
+            border-radius: 1px;
         }
         QPushButton:checked {
             background-color: palette(button);
@@ -187,6 +190,13 @@ void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
         stripeNameLabel = new QLabel(name, this);
         stripeLayout->addWidget(stripeNameLabel);
     }
+
+    {
+        stripeButtonsLayout = new QHBoxLayout(this);
+        initLayoutSpacing(stripeButtonsLayout);
+        stripeButtonsLayout->setAlignment(Qt::AlignRight);
+        stripeLayout->addLayout(stripeButtonsLayout);
+    }
 }
 
 void DataNodeWrapperWidget::iterateContentWidgets(std::function<void(QWidget *)> visitor)
@@ -214,6 +224,17 @@ void DataNodeWrapperWidget::setContentWidgetsVisibleStatus(bool visible)
     {
         widget->setVisible(visible);
     });
+
+    for (int i = 0; i < stripeButtonsLayout->count(); ++i)
+    {
+        if(auto *item = stripeButtonsLayout->itemAt(i))
+        {
+            if (auto *widget = item->widget())
+            {
+                widget->setVisible(visible);
+            }
+        }
+    }
 }
 
 QJsonObjectWithWidgetOptions DataNodeWrapperWidget::makeOptions() const

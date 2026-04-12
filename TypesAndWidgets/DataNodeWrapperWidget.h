@@ -41,7 +41,7 @@ public:
 
     void setExpanded(bool expanded);
     
-    QHBoxLayout* getStripeLayout();
+    QHBoxLayout* getStripeButtonsLayout();
     
     QJsonObjectWithWidgetOptions makeOptions() const;
 private:
@@ -59,6 +59,9 @@ private:
     QHBoxLayout*                                stripeLayout                    = nullptr;
     QPushButton*                                    stripeShowHideContentButton = nullptr;
     QLabel*                                         stripeNameLabel             = nullptr;
+    //content widget may set up additional buttons that go in the stripe, in this layout
+    //and they all are only visible when expanded.
+    QHBoxLayout*                                    stripeButtonsLayout         = nullptr;
     QHBoxLayout*                            frameAndContentLayout               = nullptr;
     QFrame*                                     frameVerticalLine               = nullptr;
     QVBoxLayout*                                contentLayout                   = nullptr;

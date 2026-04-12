@@ -66,8 +66,8 @@ QJsonObjectWithWidgetOptionsOpt LimitedDoubleVecWidget::makeOptions() const
 
 void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
 {
-    viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::FormatJustifyLeft,
-                                                                     QIcon::ThemeIcon::MediaPlaybackStop);
+    viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::MediaPlaybackStop,
+                                                                     QIcon::ThemeIcon::FormatJustifyLeft);
     viewSelectorWrapperButton->setChecked(false);
 
     connect(viewSelectorWrapperButton, &QPushButton::toggled, this, [this](bool checked)
@@ -75,7 +75,7 @@ void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *
         setMode(checked ? Mode::ShowXYPad : Mode::ShowJustLimitedDoubleWidgets);
     });
 
-    wrapper->getStripeLayout()->addWidget(viewSelectorWrapperButton);
+    wrapper->getStripeButtonsLayout()->addWidget(viewSelectorWrapperButton);
 
     if (options)
     {

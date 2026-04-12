@@ -138,8 +138,17 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
     paramX = new LimitedDoubleWidget({}, this);
     paramY = new LimitedDoubleWidget({}, this);
     {
-        auto onSliderRepresentationChange = [this]()
+        auto onSliderRepresentationChange = [this](LimitedDoubleWidget *changedInWidget)
         {
+            //special case we need to handle, or we ll have two different values for same index:
+            if (currentXIndex->value() == currentYIndex->value())
+            {
+                auto *otherWidget = changedInWidget == paramX ? paramY : paramX;
+                QSignalBlocker block(otherWidget);
+                otherWidget->setValue(changedInWidget->currentValue());
+            }
+
+
             auto point = tryGetPointFromPreset(currentPresetSaveData());
             if (!point)
             {
@@ -152,8 +161,8 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
             onXYRepresentationChanged(*point);
         };
 
-        connect(paramX, &LimitedDoubleWidget::valueChanged, this, onSliderRepresentationChange);
-        connect(paramY, &LimitedDoubleWidget::valueChanged, this, onSliderRepresentationChange);
+        connect(paramX, &LimitedDoubleWidget::valueChanged, this, std::bind(onSliderRepresentationChange, paramX));
+        connect(paramY, &LimitedDoubleWidget::valueChanged, this, std::bind(onSliderRepresentationChange, paramY));
 
         layout->addWidget(paramX, 0, 2);
         layout->addWidget(paramY, 1, 2);
