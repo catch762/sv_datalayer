@@ -108,7 +108,7 @@ private:
     // If widgets for children arent already created, it creates and registers them
     // (but for all created children QJsonObjectWithWidgetOptionsOpt will be a nullopt, ofcourse - the 'options' passed
     // to the functions only concerns that single 'node' and we dont have any options for children).
-    QVariantHoldingWidget createWidgetForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    QVariantHoldingWidget createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
     QVariantHoldingWidget createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 

@@ -6,6 +6,7 @@ LimitedDoublesWidget::LimitedDoublesWidget(const LimitedDoubleVec& initialValue,
     : QFrame(parent)
 {
     basicWidgetsLayout = new QVBoxLayout(this);
+    initLayoutSpacing(basicWidgetsLayout);
 
     //this will (unless 'initialValue' is empty) create 'basicWidgets' and put them in 'basicWidgetsLayout'
     setValue(initialValue);

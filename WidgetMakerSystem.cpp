@@ -90,10 +90,10 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForNode(DataNodeShared node
     }
 
     return node->isLeaf() ? createWidgetForLeafNode     (node, options) :
-                            createWidgetForCompositeNode(node, options);
+                            createWidgetisForCompositeNode(node, options);
 }
 
-QVariantHoldingWidget WidgetMakerSystem::createWidgetForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+QVariantHoldingWidget WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     SV_ASSERT(node);
     SV_ASSERT(node->isComposite())
@@ -123,12 +123,12 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForCompositeNode(DataNodeSh
 
     if (widgetsOfChildren.empty())
     {
-        SV_ERROR(std::format("Could not createAndRegisterWidgetForCompositeNode for {} "
+        SV_ERROR(std::format("Could not createAndRegisterWidgetisForCompositeNode for {} "
                              "because didnt find a single child widget. Not doing anything then.", node));
         return {};
     }
 
-    auto *wrapper = new DataNodeWrapperWidget(widgetsOfChildren, node->getName(), options);
+    auto *wrapper = new DataNodeWrapperWidget(widgetsOfChildren, true, node->getName(), options);
     return QVariant::fromValue( wrapper );
 }
 

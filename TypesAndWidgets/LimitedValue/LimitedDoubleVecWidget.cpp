@@ -12,6 +12,7 @@ LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialVa
     value = initialValue;
 
     layout = new QVBoxLayout(this);
+    initLayoutSpacing(layout, 2, 0);
 
     slidersView = new LimitedDoublesWidget(value, this);
     {
@@ -65,8 +66,8 @@ QJsonObjectWithWidgetOptionsOpt LimitedDoubleVecWidget::makeOptions() const
 
 void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
 {
-    viewSelectorWrapperButton = new QPushButton("s");
-    viewSelectorWrapperButton->setCheckable(true);
+    viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::FormatJustifyLeft,
+                                                                     QIcon::ThemeIcon::MediaPlaybackStop);
     viewSelectorWrapperButton->setChecked(false);
 
     connect(viewSelectorWrapperButton, &QPushButton::toggled, this, [this](bool checked)
@@ -83,15 +84,6 @@ void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *
             viewSelectorWrapperButton->setChecked(*modeIsXY);
         }
     }
-
-    auto tb = new QToolButton();
-    tb->setCheckable(true);
-
-    QIcon icon = QIcon::fromTheme(QIcon::ThemeIcon::EditUndo);
-    tb->setIcon(icon);
-    tb->setIconSize(QSize(16, 16));
-
-    wrapper->getStripeLayout()->addWidget(tb);
 }
 
 void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& value)

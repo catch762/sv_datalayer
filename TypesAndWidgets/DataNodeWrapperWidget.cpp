@@ -5,31 +5,80 @@ namespace
     const int StripeHeight = 24;
     const int StripeMargin = 2;
     const int StripeContentHeight = StripeHeight - 2 * StripeMargin;
+    const int VerticalLineWidth = 16;
 }
 
 DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets,
+                                             bool _isForCompositeNode,
                                              const QString &name,
                                              const QJsonObjectWithWidgetOptionsOpt& options,
                                              QWidget *parent)
  : QFrame(parent)
 {
+    isForCompositeNode = _isForCompositeNode;
     setFrameStyle(QFrame::NoFrame);
 
     layout = new QVBoxLayout(this);
-    layout->setContentsMargins(2,2,2,2);
-    layout->setSpacing(5);
+    initLayoutSpacing(layout);
     layout->setAlignment(Qt::AlignTop);
-    
-    createAndInitTopStripe(name);
 
-    contentWidgets = theContentWidgets;
-    for (auto contentWidget : contentWidgets)
+    //Item 1 in layout: topStripe
     {
-        SV_ASSERT(contentWidget.canConvert<QWidget*>());
-        QWidget* contentAsQWidget = contentWidget.value<QWidget*>();
-        
-        layout->addWidget(contentAsQWidget);
+        createAndInitTopStripe(name);
+        layout->addWidget(topStripe);
     }
+    //Item 2 in layout: everything else
+    {
+        frameAndContentLayout = new QHBoxLayout();
+        initLayoutSpacing(frameAndContentLayout);
+        frameAndContentLayout->setAlignment(Qt::AlignLeft);
+        layout->addLayout(frameAndContentLayout);
+
+        //Item 1 in frameAndContentLayout: frameVerticalLine
+        if(isForCompositeNode)
+        {
+            frameVerticalLine = new QFrame(this);
+            frameVerticalLine->setFixedWidth(VerticalLineWidth);
+            frameVerticalLine->setFrameStyle(QFrame::VLine | QFrame::Plain);
+            frameVerticalLine->setLineWidth(1);
+            frameVerticalLine->setMidLineWidth(0);
+            frameVerticalLine->setFrameStyle(QFrame::NoFrame);
+            frameVerticalLine->setFrameStyle(QFrame::NoFrame);
+            frameVerticalLine->setStyleSheet(R"(
+                QFrame {
+                    border: none;
+                    background: transparent;
+                    border-left: 1px solid palette(mid);
+                    margin-left: 10px;  /* Centers: shift line from left edge */
+                    padding: 0;
+                }
+            )");
+            frameVerticalLine->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+            frameAndContentLayout->addWidget(frameVerticalLine);
+        }
+
+        //Item 2 in frameAndContentLayout: contentLayout
+        {
+            contentLayout = new QVBoxLayout();
+            contentLayout->setSpacing(0);
+            contentLayout->setContentsMargins(0,0,0,0);
+            contentLayout->setAlignment(Qt::AlignTop);
+            frameAndContentLayout->addLayout(contentLayout);
+
+            //Items [0 - N] in contentLayout
+            {
+                contentWidgets = theContentWidgets;
+                for (auto contentWidget : contentWidgets)
+                {
+                    SV_ASSERT(contentWidget.canConvert<QWidget*>());
+                    QWidget* contentAsQWidget = contentWidget.value<QWidget*>();
+                    
+                    contentLayout->addWidget(contentAsQWidget);
+                }
+            }
+        }
+    }
+
 
     if (options)
     {
@@ -51,21 +100,62 @@ QHBoxLayout *DataNodeWrapperWidget::getStripeLayout()
     return stripeLayout;
 }
 
+QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon)
+{
+    auto *button = new QPushButton();
+    button->setFixedSize(StripeContentHeight, StripeContentHeight);
+    button->setCheckable(true);
+
+    QIcon icon;
+    {
+        int theIconSize = StripeContentHeight - 8;
+        QSize iconSize(theIconSize, theIconSize);
+
+        // Expand state (plus) → On
+        icon.addPixmap(QIcon::fromTheme(offIcon)
+                        .pixmap(iconSize),
+                    QIcon::Normal, QIcon::Off);
+
+        // Collapse state (minus) → Off
+        icon.addPixmap(QIcon::fromTheme(onIcon)
+                        .pixmap(iconSize),
+                    QIcon::Normal, QIcon::On);
+    }
+
+    button->setIcon(icon);
+    //stripeShowHideContentButton->setFlat(true);
+
+    // - move to the right 2px, because otherwise icon is not fucking centered
+    // - make it so when its checked its same color as when its not
+    button->setStyleSheet(R"(
+        QPushButton {
+            padding: 0px 0px 0px 2px;
+        }
+        QPushButton:checked {
+            background-color: palette(button);
+        }
+    )");
+
+    return button;
+}
+
 void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
 {
     topStripe = new QWidget(this);
     topStripe->setObjectName("topStripe");
 
+    /*
     topStripe->setStyleSheet(
             "#topStripe {"
             "  border: 1px solid palette(mid);"
             "  border-radius: 0px;"
             "}"
         );
+    */
 
     //topStripe->setFrameStyle(QFrame::Box | QFrame::Plain);
     topStripe->setFixedHeight(StripeHeight);
-    topStripe->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    topStripe->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
     stripeLayout = new QHBoxLayout(topStripe);
     stripeLayout->setContentsMargins(StripeMargin, StripeMargin, StripeMargin, StripeMargin);
@@ -76,45 +166,9 @@ void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
         static const QString expandedStateText = "-";
         static const QString collapsedStateText = "+";
 
-        stripeShowHideContentButton = new QPushButton("", this);
-        stripeShowHideContentButton->setFixedSize(StripeContentHeight, StripeContentHeight);
-        
-        stripeShowHideContentButton->setCheckable(true);
+        stripeShowHideContentButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::ListAdd,
+                                                                           QIcon::ThemeIcon::ListRemove);
         stripeShowHideContentButton->setChecked(true);
-
-        {
-            QIcon icon;
-
-            int theIconSize = StripeContentHeight - 8;
-            QSize iconSize(theIconSize, theIconSize);
-
-            // Expand state (plus) → On
-            icon.addPixmap(QIcon::fromTheme(QIcon::ThemeIcon::ListAdd)
-                            .pixmap(iconSize),
-                        QIcon::Normal, QIcon::Off);
-
-            // Collapse state (minus) → Off
-            icon.addPixmap(QIcon::fromTheme(QIcon::ThemeIcon::ListRemove)
-                            .pixmap(iconSize),
-                        QIcon::Normal, QIcon::On);
-
-            stripeShowHideContentButton->setIcon(icon);
-
-            // - move to the right 2px, because otherwise icon is not fucking centered
-            // - make it so when its checked its same color as when its not
-
-            stripeShowHideContentButton->setFlat(true);
-
-            /*stripeShowHideContentButton->setStyleSheet(R"(
-                QPushButton {
-                    padding: 0px 0px 0px 2px;
-                    border: none;
-                }
-                QPushButton:checked {
-                    background-color: palette(button);
-                }
-            )");*/
-        }
 
         connect(stripeShowHideContentButton, &QPushButton::toggled, this, [this](bool checked)
         {
@@ -133,15 +187,13 @@ void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
         stripeNameLabel = new QLabel(name, this);
         stripeLayout->addWidget(stripeNameLabel);
     }
-
-    layout->addWidget(topStripe, 0);
 }
 
 void DataNodeWrapperWidget::iterateContentWidgets(std::function<void(QWidget *)> visitor)
 {
-    for (int i = 1; i < layout->count(); ++i)
+    for (int i = 0; i < contentLayout->count(); ++i)
     {
-        if(auto *item = layout->itemAt(i))
+        if(auto *item = contentLayout->itemAt(i))
         {
             if (auto *widget = item->widget())
             {
@@ -153,6 +205,11 @@ void DataNodeWrapperWidget::iterateContentWidgets(std::function<void(QWidget *)>
 
 void DataNodeWrapperWidget::setContentWidgetsVisibleStatus(bool visible)
 {
+    if(frameVerticalLine)
+    {
+        frameVerticalLine->setVisible(visible);
+    }
+    
     iterateContentWidgets([=](auto *widget)
     {
         widget->setVisible(visible);

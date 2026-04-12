@@ -25,6 +25,7 @@ class DataNodeWrapperWidget : public QFrame
     Q_OBJECT
 public:
     DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets,
+                            bool                                      isForCompositeNode,
                             const QString&                            name           = {},
                             const QJsonObjectWithWidgetOptionsOpt&    options        = {},
                             QWidget*                                  parent         = nullptr );
@@ -34,7 +35,7 @@ public:
                             const QString&                          name    = {},
                             const QJsonObjectWithWidgetOptionsOpt&  options = {},
                             QWidget*                                parent  = nullptr )
-        : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, name, options, parent)
+        : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
     {
     }
 
@@ -54,13 +55,19 @@ private:
 
 private:
     QVBoxLayout*                            layout                              = nullptr;
-    QHBoxLayout*                            frameAndContentLayout               = nullptr;
     QWidget*                                    topStripe                       = nullptr;
     QHBoxLayout*                                stripeLayout                    = nullptr;
     QPushButton*                                    stripeShowHideContentButton = nullptr;
     QLabel*                                         stripeNameLabel             = nullptr;
-    std::vector<QVariantHoldingWidget>      contentWidgets;
+    QHBoxLayout*                            frameAndContentLayout               = nullptr;
+    QFrame*                                     frameVerticalLine               = nullptr;
+    QVBoxLayout*                                contentLayout                   = nullptr;
+    std::vector<QVariantHoldingWidget>              contentWidgets;
+
+    bool isForCompositeNode = false;
 };
+
+QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
 
 template<>
 class Serializer< DataNodeWrapperWidget* >

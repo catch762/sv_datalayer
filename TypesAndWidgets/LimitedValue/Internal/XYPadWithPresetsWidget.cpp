@@ -133,8 +133,7 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
     setFocusPolicy(Qt::ClickFocus);
 
     layout = new QGridLayout(this);
-    layout->setContentsMargins(0,0,0,0);
-    layout->setSpacing(0);
+    initLayoutSpacing(layout);
 
     paramX = new LimitedDoubleWidget({}, this);
     paramY = new LimitedDoubleWidget({}, this);
