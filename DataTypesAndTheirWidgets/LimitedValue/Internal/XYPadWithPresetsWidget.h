@@ -61,10 +61,11 @@ public slots:
                                                      
 private slots:
     void onPresetSelected(int presetIdx);
-    
-
     void onXYRepresentationChanged(const LimitedDoublePair& point);
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+    
 private:
     PresetData& currentPresetSaveData();
     bool componentIndexIsValid(int componentIndex);

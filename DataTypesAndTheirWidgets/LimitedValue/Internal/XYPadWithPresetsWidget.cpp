@@ -130,7 +130,7 @@ bool XYPadWithPresetsWidget::PresetData::hasValues() const
 
 XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent) : QWidget(theParent), parent(theParent)
 {
-    setFocusPolicy(Qt::ClickFocus);
+    setFocusPolicy(Qt::StrongFocus);
 
     layout = new QGridLayout(this);
     initLayoutSpacing(layout);
@@ -579,4 +579,15 @@ void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedDoublePair &
     //note that we are not changing 'other representation' of this widget:
     //we just set it on parent, and parent will synchronize everything
     parent->setValue(*newValue);
+}
+
+void XYPadWithPresetsWidget::keyPressEvent(QKeyEvent *event)
+{
+    int presetIndex = event->key() - Qt::Key_1;
+    if (presetIndex >= 0 && presetIndex < PresetsCount)
+    {
+        presetsButtons[presetIndex]->click();
+    }
+
+    QWidget::keyPressEvent(event);
 }
