@@ -3,7 +3,7 @@
 #include "../LimitedValue.h"
 #include <QGridLayout>
 #include "BaseXYPadWidget.h"
-#include "WidgetOptions.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 class LimitedDoubleWidget;
 class LimitedDoubleVecWidget;

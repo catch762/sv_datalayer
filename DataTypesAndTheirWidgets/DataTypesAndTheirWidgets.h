@@ -15,4 +15,4 @@ SV_DECL_ALIASES(LimitedDoubleVec)
 
 #include "LimitedValue/LimitedDoubleVecWidget.h"
 
-#include "WidgetOptions.h"
+#include "WidgetLogic/WidgetDefs.h"

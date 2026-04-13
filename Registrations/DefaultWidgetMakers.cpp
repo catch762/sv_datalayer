@@ -1,7 +1,7 @@
 #include "DefaultWidgetMakers.h"
-#include "WidgetMakerSystem.h"
-#include "TypesAndWidgets/DataNodeWrapperWidget.h"
-#include "TypesAndWidgets/TypesAndWidgets.h"
+#include "WidgetLogic/WidgetMakerSystem.h"
+#include "WidgetLogic/DataNodeWrapperWidget.h"
+#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 
 void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
 {

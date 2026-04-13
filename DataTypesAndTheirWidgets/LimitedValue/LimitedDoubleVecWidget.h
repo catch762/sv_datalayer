@@ -1,8 +1,8 @@
 #pragma once
 #include "LimitedDoubleWidget.h"
-#include "TypesAndWidgets/TypesAndWidgets.h"
+#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include <QStackedLayout>
-#include "WidgetOptions.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 class LimitedDoublesWidget;
 class XYPadWithPresetsWidget;

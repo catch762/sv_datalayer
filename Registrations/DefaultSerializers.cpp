@@ -1,8 +1,8 @@
 #include "DefaultSerializers.h"
-#include "SerializationSystem.h"
-#include "TypesAndWidgets/TypesAndWidgets.h"
+#include "SerializationLogic/SerializationSystem.h"
+#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include "ContainerSerializers.h"
-#include "TypesAndWidgets/DataNodeWrapperWidget.h"
+#include "WidgetLogic/DataNodeWrapperWidget.h"
 
 
 void DefaultSerializers::Register(SerializationSystem *systemInstance)

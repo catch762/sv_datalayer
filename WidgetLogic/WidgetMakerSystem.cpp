@@ -1,8 +1,8 @@
-#include "WidgetMakerSystem.h"
-#include "DefaultCollections/DefaultWidgetMakers.h"
-#include "TypesAndWidgets/DataNodeWrapperWidget.h"
+#include "WidgetLogic/WidgetMakerSystem.h"
+#include "Registrations/DefaultWidgetMakers.h"
+#include "WidgetLogic/DataNodeWrapperWidget.h"
 
-#include "WidgetsForNodeManager.h"
+#include "WidgetLogic/WidgetsForNodeManager.h"
 
 WidgetMakerSystem& WidgetMakerSystem::instance()
 {

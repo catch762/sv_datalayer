@@ -1,8 +1,8 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include <boost/bimap.hpp>
-#include "DataLayerUtils.h"
-#include "SerializerInterface.h"
+#include "WidgetLogic/WidgetDefs.h"
+#include "SerializationLogic/SerializerInterface.h"
 
 //**************************************************************************************************************
 //

@@ -1,8 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
-#include "DataLayerUtils.h"
-#include "SerializerInterface.h"
-#include "WidgetOptions.h"
+#include "SerializationLogic/SerializerInterface.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 //*****************************************************************************************************
 //

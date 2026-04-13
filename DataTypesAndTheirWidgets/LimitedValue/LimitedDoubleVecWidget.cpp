@@ -1,7 +1,7 @@
 #include "LimitedDoubleVecWidget.h"
 #include "Internal/LimitedDoublesWidget.h"
 #include "Internal/XYPadWithPresetsWidget.h"
-#include "TypesAndWidgets/DataNodeWrapperWidget.h"
+#include "WidgetLogic/DataNodeWrapperWidget.h"
 #include <QToolButton>
 
 

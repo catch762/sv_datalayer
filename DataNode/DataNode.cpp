@@ -1,5 +1,5 @@
 #include "DataNode.h"
-#include "SerializationSystem.h"
+#include "SerializationLogic/SerializationSystem.h"
 
 QJsonObjectOpt DataNode::toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction) const
 {

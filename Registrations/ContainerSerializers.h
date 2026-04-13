@@ -1,7 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
-#include "SerializationSystem.h"
-#include "SerializerInterface.h"
+#include "SerializationLogic/SerializationSystem.h"
+#include "SerializationLogic/SerializerInterface.h"
 
 //*****************************************************************************************
 //

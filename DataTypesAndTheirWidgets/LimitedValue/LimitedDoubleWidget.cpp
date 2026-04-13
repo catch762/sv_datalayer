@@ -1,4 +1,5 @@
 #include "LimitedDoubleWidget.h"
+#include "DataLayerUtils.h"
 
 LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWidget *parent) : QWidget(parent)
 {

@@ -1,6 +1,6 @@
 #include "DataLayerUtils.h"
-#include "TypesAndWidgets/TypesAndWidgets.h"
-#include "SerializationSystem.h"
+#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
+#include "SerializationLogic/SerializationSystem.h"
 #include <functional>
 
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <QJsonValue>
 #include "sv_qtcommon.h"
-#include "SerializerInterface.h"
+#include "SerializationLogic/SerializerInterface.h"
 
 class SerializationSystem;
 class DefaultSerializers

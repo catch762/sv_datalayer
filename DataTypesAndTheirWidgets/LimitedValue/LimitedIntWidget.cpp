@@ -1,4 +1,5 @@
 #include "LimitedIntWidget.h"
+#include "DataLayerUtils.h"
 
 LimitedIntWidget::LimitedIntWidget(const LimitedInt &initialValue, QWidget *parent)
 {

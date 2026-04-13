@@ -1,6 +1,6 @@
 #include "LimitedDoublesWidget.h"
-#include "TypesAndWidgets/LimitedValue/Internal/BaseXYPadWidget.h"
-#include "TypesAndWidgets/LimitedValue/Internal/XYPadWithPresetsWidget.h"
+#include "DataTypesAndTheirWidgets/LimitedValue/Internal/BaseXYPadWidget.h"
+#include "DataTypesAndTheirWidgets/LimitedValue/Internal/XYPadWithPresetsWidget.h"
 
 LimitedDoublesWidget::LimitedDoublesWidget(const LimitedDoubleVec& initialValue, QWidget *parent)
     : QFrame(parent)

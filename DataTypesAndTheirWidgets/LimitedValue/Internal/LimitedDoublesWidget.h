@@ -1,6 +1,6 @@
 #pragma once
 #include "../LimitedDoubleWidget.h"
-#include "TypesAndWidgets/TypesAndWidgets.h"
+#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 
 class BaseXYPadWidget;
 class XYPadWithPresetsWidget;

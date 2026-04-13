@@ -1,6 +1,6 @@
 #include "SerializationSystem.h"
 
-#include "DefaultCollections/DefaultSerializers.h"
+#include "Registrations/DefaultSerializers.h"
 
 SerializationSystem &SerializationSystem::instance()
 {

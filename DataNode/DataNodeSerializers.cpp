@@ -1,10 +1,10 @@
 #include "DataNodeSerializers.h"
 
-#include "DataLayerUtils.h"
-#include "WidgetsForNodeManager.h"
-#include "SerializationSystem.h"
-#include "WidgetMakerSystem.h"
-#include "TypesAndWidgets/DataNodeWrapperWidget.h"
+#include "WidgetLogic/WidgetDefs.h"
+#include "WidgetLogic/WidgetsForNodeManager.h"
+#include "SerializationLogic/SerializationSystem.h"
+#include "WidgetLogic/WidgetMakerSystem.h"
+#include "WidgetLogic/DataNodeWrapperWidget.h"
 
 bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode)
 {

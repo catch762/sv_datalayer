@@ -1,5 +1,5 @@
 #include "DataNodeWrapperWidget.h"
-#include "SerializationSystem.h"
+#include "SerializationLogic/SerializationSystem.h"
 namespace
 {
     const int StripeHeight = 24;

@@ -2,8 +2,7 @@
 #include "DataNode/DataNodeHeader.h"
 #include <typeindex>
 #include <map>
-#include "WidgetOptions.h"
-#include "DataLayerUtils.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 
 //************************************************************************************************

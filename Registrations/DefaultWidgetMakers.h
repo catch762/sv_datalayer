@@ -1,8 +1,8 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include "DataNode/DataNodeHeader.h"
-#include "TypesAndWidgets/TypesAndWidgets.h"
-#include "DataLayerUtils.h"
+#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 class WidgetMakerSystem;
 class DataNodeWrapperWidget;

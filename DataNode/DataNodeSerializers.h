@@ -1,7 +1,7 @@
 #pragma once
 #include "DataNode/DataNodeHeader.h"
-#include "SerializerInterface.h"
-#include "DataLayerUtils.h"
+#include "SerializationLogic/SerializerInterface.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 /*template<>
 class BasicSerializer< DataNodeShared >
