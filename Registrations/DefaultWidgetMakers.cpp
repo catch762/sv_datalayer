@@ -47,7 +47,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNode
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedDouble);
 
-    QObject::connect(widget, &LimitedDoubleWidget::valueChanged, widget, [nodeWeak](const LimitedDouble &v)
+    QObject::connect(widget, &LimitedDoubleWidget::doubleValueChanged, widget, [nodeWeak](const LimitedDouble &v)
     {
         if (auto nodeShared = nodeWeak.lock())
         {
@@ -79,7 +79,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
         {
             if (auto leaf = nodeShared->tryGetLeafvalue())
             {
-                SV_LOG("Saving LimitedDoubleVec to node...");
+                //SV_LOG("Saving LimitedDoubleVec to node...");
                 *leaf = QVariant::fromValue(v);
             }
         }

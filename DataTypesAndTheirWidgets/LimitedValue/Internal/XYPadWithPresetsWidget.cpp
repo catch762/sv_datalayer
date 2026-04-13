@@ -135,8 +135,8 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
     layout = new QGridLayout(this);
     initLayoutSpacing(layout);
 
-    paramX = new LimitedDoubleWidget({}, this);
-    paramY = new LimitedDoubleWidget({}, this);
+    paramX = new LimitedDoubleWidget(LimitedDouble{}, this);
+    paramY = new LimitedDoubleWidget(LimitedDouble{}, this);
     {
         auto onSliderRepresentationChange = [this](LimitedDoubleWidget *changedInWidget)
         {
@@ -145,7 +145,7 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
             {
                 auto *otherWidget = changedInWidget == paramX ? paramY : paramX;
                 QSignalBlocker block(otherWidget);
-                otherWidget->setValue(changedInWidget->currentValue());
+                otherWidget->setValue(changedInWidget->currentDoubleValue());
             }
 
 
@@ -155,14 +155,14 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
                 return;
             }
 
-            point->first.setValue11 ( paramX->currentValue().getValue11() );
-            point->second.setValue11( paramY->currentValue().getValue11() );
+            point->first.setValue11 ( paramX->currentDoubleValue().getValue11() );
+            point->second.setValue11( paramY->currentDoubleValue().getValue11() );
 
             onXYRepresentationChanged(*point);
         };
 
-        connect(paramX, &LimitedDoubleWidget::valueChanged, this, std::bind(onSliderRepresentationChange, paramX));
-        connect(paramY, &LimitedDoubleWidget::valueChanged, this, std::bind(onSliderRepresentationChange, paramY));
+        connect(paramX, &LimitedDoubleWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramX));
+        connect(paramY, &LimitedDoubleWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramY));
 
         layout->addWidget(paramX, 0, 2);
         layout->addWidget(paramY, 1, 2);

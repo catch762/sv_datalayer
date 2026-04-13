@@ -1,7 +1,9 @@
 #include "LimitedDoubleWidget.h"
 #include "DataLayerUtils.h"
 
-LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWidget *parent) : QWidget(parent)
+LimitedDoubleWidget::LimitedDoubleWidget(const LimitedIntOrDouble &initialValue, QWidget *parent)
+    //todo: figure out why doesnt compile without 'spinboxes{Spinboxes<double>()}' 
+ : QWidget(parent), isDouble(std::holds_alternative<LimitedDouble>(initialValue)), spinboxes{Spinboxes<double>()}
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setSpacing(2);
@@ -21,24 +23,23 @@ LimitedDoubleWidget::LimitedDoubleWidget(const LimitedDouble &initialValue, QWid
         });
     }
 
-    spinboxValue        = createSpinbox();
-    spinboxLeftLimit    = createSpinbox();
-    spinboxRightLimit   = createSpinbox();
+    spinboxes = createSpinboxes();
 
-    layout->addWidget(spinboxValue);
+    layout->addWidget(isDouble ? (QWidget*)getDoubleSpinboxes().spinboxValue : (QWidget*)getIntSpinboxes().spinboxValue);
     layout->addWidget(sliderValueLeftToRight);
-    layout->addWidget(spinboxLeftLimit);
-    layout->addWidget(spinboxRightLimit);
+    layout->addWidget(isDouble ? (QWidget*)getDoubleSpinboxes().spinboxLeftLimit : (QWidget*)getIntSpinboxes().spinboxLeftLimit);
+    layout->addWidget(isDouble ? (QWidget*)getDoubleSpinboxes().spinboxRightLimit : (QWidget*)getIntSpinboxes().spinboxRightLimit);
 
     setValue(initialValue);
 }
 
-QDoubleSpinBox *LimitedDoubleWidget::createSpinbox()
+QDoubleSpinBox *LimitedDoubleWidget::createDoubleSpinbox()
 {
     auto* spinbox = new QDoubleSpinBox(this);
     spinbox->setKeyboardTracking(false);
     spinbox->setMaximumWidth(60);
     spinbox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+
     spinbox->setDecimals(3);
     spinbox->setSingleStep(0.1);
     spinbox->setRange(MinFloatInUI, MaxFloatInUI);
@@ -51,67 +52,173 @@ QDoubleSpinBox *LimitedDoubleWidget::createSpinbox()
     return spinbox;
 }
 
+QSpinBox *LimitedDoubleWidget::createIntSpinbox()
+{
+    auto* spinbox = new QSpinBox(this);
+    spinbox->setKeyboardTracking(false);
+    spinbox->setMaximumWidth(60);
+    spinbox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+
+    spinbox->setSingleStep(1);
+    spinbox->setRange(MinIntInUI, MaxIntInUI);
+
+    connect(spinbox, &QSpinBox::valueChanged, this, [this, spinbox]()
+    {
+        onSomethingChanged(spinbox); 
+    });
+
+    return spinbox;
+}
+
+LimitedDoubleWidget::DoubleOrIntSpinboxes LimitedDoubleWidget::createSpinboxes()
+{
+    if (isDouble)
+    {
+        DoubleSpinboxes spinboxes{
+            createDoubleSpinbox(),
+            createDoubleSpinbox(),
+            createDoubleSpinbox()
+        };
+
+        return spinboxes;
+    }
+    else
+    {
+        IntSpinboxes spinboxes{
+            createIntSpinbox(),
+            createIntSpinbox(),
+            createIntSpinbox()
+        };
+
+        return spinboxes;
+    }
+}
+
+const LimitedDoubleWidget::DoubleSpinboxes& LimitedDoubleWidget::getDoubleSpinboxes() const
+{
+    return std::get<DoubleSpinboxes>(spinboxes);
+}
+
+const LimitedDoubleWidget::IntSpinboxes& LimitedDoubleWidget::getIntSpinboxes() const
+{
+    return std::get<IntSpinboxes>(spinboxes);
+}
+
+LimitedDoubleWidget::DoubleSpinboxes& LimitedDoubleWidget::getDoubleSpinboxes() 
+{
+    return const_cast<DoubleSpinboxes&>(
+        static_cast<const LimitedDoubleWidget*>(this)->getDoubleSpinboxes()
+    );
+}
+
+LimitedDoubleWidget::IntSpinboxes& LimitedDoubleWidget::getIntSpinboxes() 
+{
+    return const_cast<IntSpinboxes&>(
+        static_cast<const LimitedDoubleWidget*>(this)->getIntSpinboxes()
+    );
+}
+
+void LimitedDoubleWidget::setSpinboxValue(doubleOrInt val)
+{
+    if (isDouble) getDoubleSpinboxes().setValue( std::get<double>( val ) );
+    else          getIntSpinboxes   ().setValue( std::get<int>   ( val ) );
+}
+
 void LimitedDoubleWidget::onSomethingChanged(QWidget *changedWidget)
 {
     if (changedWidget == sliderValueLeftToRight)
     {
-        const QSignalBlocker blocker(spinboxValue);
-        spinboxValue->setValue( getValueBasedOnSlider() );
+        std::visit([this](auto &&sliderBasedValue)
+        {
+            using SpinboxesT = Spinboxes<std::decay_t<decltype(sliderBasedValue)>>;
+
+            std::get<SpinboxesT>(spinboxes).setValue(sliderBasedValue);
+        },
+        getValueBasedOnSlider());
     }
     else
     {
+        std::visit([this](auto&& limitedIntOrDouble)
         {
-            //something changed and we need to constrain spinboxValue to limits
-            const QSignalBlocker blocker(spinboxValue);
-            spinboxValue->setValue( currentValue().value() );
-        }
+            using SpinboxesT = Spinboxes<typename std::decay_t<decltype(limitedIntOrDouble)>::UnderlyingType>;
+
+            std::get<SpinboxesT>(spinboxes).setValue(limitedIntOrDouble.value());
+        },
+        currentValueVariant());
 
         const QSignalBlocker blocker(sliderValueLeftToRight);
         setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
     }
 
-
-    //SV_LOG(("Changed: " + currentValue().toString()).toStdString());
-    emit valueChanged(currentValue());
+    if (isDouble) emit doubleValueChanged(currentDoubleValue());
+    else          emit intValueChanged   (currentIntValue   ());
 }
 
-LimitedDouble LimitedDoubleWidget::currentValue() const
+LimitedIntOrDouble LimitedDoubleWidget::currentValueVariant() const
 {
-    double left     = spinboxLeftLimit->value();
-    double right    = spinboxRightLimit->value();
-    double value    = spinboxValue->value();
-
-    return LimitedDouble(value, left, right);
+    if (isDouble) return currentDoubleValue();
+    else          return currentIntValue();
 }
 
-void LimitedDoubleWidget::setValue(const LimitedDouble &value)
+LimitedDouble LimitedDoubleWidget::currentDoubleValue() const
 {
+    if(!isDouble)
     {
-        QSignalBlocker  a(spinboxLeftLimit),
-                        b(spinboxRightLimit),
-                        c(spinboxValue),
-                        d(sliderValueLeftToRight);
+        SV_ERROR("Calling LimitedDoubleWidget::currentDoubleValue() while its holding LimitedInt");
+        return {};
+    }
 
-        spinboxLeftLimit->setValue(value.left());
-        spinboxRightLimit->setValue(value.right());
-        spinboxValue->setValue(value.value());
+    return getDoubleSpinboxes().getLimitedValue();
+}
+
+LimitedInt LimitedDoubleWidget::currentIntValue() const
+{
+    if(isDouble)
+    {
+        SV_ERROR("Calling LimitedDoubleWidget::currentIntValue() while its holding LimitedDouble");
+        return {};
+    }
+
+    return getIntSpinboxes().getLimitedValue();
+}
+
+void LimitedDoubleWidget::setValue(const LimitedIntOrDouble &value)
+{
+    if (std::holds_alternative<LimitedDouble>(value) != isDouble)
+    {
+        SV_ERROR("LimitedDoubleWidget::setValue mismatch");
+        return;
+    }
+
+    {
+        //this also blocks signals, nothing emitted from spinboxes
+        if(isDouble) getDoubleSpinboxes ().setValue(std::get<LimitedDouble> (value));
+        else         getIntSpinboxes    ().setValue(std::get<LimitedInt>    (value));
+
+        QSignalBlocker block(sliderValueLeftToRight);
         setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
     }
 
-    //SV_LOG(("Set: " + currentValue().toString()).toStdString());
-    emit valueChanged(currentValue());
+    if (isDouble) emit doubleValueChanged(currentDoubleValue());
+    else          emit intValueChanged   (currentIntValue   ());
 }
 
 double LimitedDoubleWidget::getValue01BasedOnSpinboxes() const
 {
-    return getValue01Clamped(spinboxValue->value(),
-                             spinboxLeftLimit->value(),
-                             spinboxRightLimit->value());
+    return std::visit([](auto &&spinboxes)
+    {
+        return spinboxes.getValue01();
+    },
+    spinboxes);
 }
 
-double LimitedDoubleWidget::getValueBasedOnSlider() const
+
+doubleOrInt LimitedDoubleWidget::getValueBasedOnSlider() const
 {
-    return mix( spinboxLeftLimit->value(),
-                spinboxRightLimit->value(),
-                getSliderValue01(sliderValueLeftToRight) );
+    return std::visit([this](auto &&spinboxes)
+    {
+        double value01 = getSliderValue01(sliderValueLeftToRight);
+        return doubleOrInt(spinboxes.getValueFromValue01(value01));
+    },
+    spinboxes);
 }

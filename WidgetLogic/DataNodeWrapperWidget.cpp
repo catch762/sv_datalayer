@@ -192,7 +192,7 @@ void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
     }
 
     {
-        stripeButtonsLayout = new QHBoxLayout(this);
+        stripeButtonsLayout = new QHBoxLayout();
         initLayoutSpacing(stripeButtonsLayout);
         stripeButtonsLayout->setAlignment(Qt::AlignRight);
         stripeLayout->addLayout(stripeButtonsLayout);
