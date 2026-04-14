@@ -198,8 +198,28 @@ Q_DECLARE_METATYPE(LimitedDouble)
 SV_DECL_ALIASES(LimitedInt)
 SV_DECL_ALIASES(LimitedDouble)
 
-using LimitedDoublePair = std::pair<LimitedDouble, LimitedDouble>;
-using LimitedIntPair = std::pair<LimitedDouble, LimitedDouble>;
 
+
+
+
+using LimitedIntVec     = std::vector<LimitedInt>;
+using LimitedDoubleVec  = std::vector<LimitedDouble>;
+
+Q_DECLARE_METATYPE(LimitedIntVec)
+Q_DECLARE_METATYPE(LimitedDoubleVec)
+
+SV_DECL_ALIASES(LimitedIntVec)
+SV_DECL_ALIASES(LimitedDoubleVec)
+
+
+using LimitedIntOrDouble    = std::variant<LimitedInt, LimitedDouble>;
+using LimitedIntOrDoubleVec = std::variant<LimitedIntVec, LimitedDoubleVec>;
+
+using doubleOrInt = std::variant<double, int>;
+
+using LimitedDoublePair         = std::pair<LimitedDouble,      LimitedDouble>;
+using LimitedIntPair            = std::pair<LimitedInt,         LimitedInt>;
+using LimitedIntOrDoublePair    = std::variant<LimitedIntPair,  LimitedDoublePair>;
 SV_DECL_ALIASES(LimitedDoublePair)
 SV_DECL_ALIASES(LimitedIntPair)
+SV_DECL_ALIASES(LimitedIntOrDoublePair)

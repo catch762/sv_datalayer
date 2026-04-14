@@ -72,7 +72,7 @@ private:
     //Returns whether both indexes in PresetData are valid indexes for 'parent->getValue()' vector
     bool presetIsValid(const PresetData& data);
     //if !presetIsValid(), returns {}
-    LimitedDoublePairOpt tryGetPointFromPreset(const PresetData& data);
+    LimitedIntOrDoublePairOpt tryGetPointFromPreset(const PresetData& data);
 
     void setPresetButtonStylesheetAndColors(QPushButton* btn, ColorData colors);
     void updatePresetButtonIfNeeded(QPushButton* btn, int index);
@@ -82,6 +82,9 @@ private:
     //pass currentXIndex or currentYIndex. Any invalid value on spinbox will change to -1
     intOpt getIndexOptAndHandleInvalid(QSpinBox* indexSpinbox); 
     void updateCurrentIndexesUIToMatchPresetData();
+
+private:
+    std::pair<double, double> getValue11PairFromSliderRepresentation();
 
 private:
     QGridLayout*            layout                      = nullptr;

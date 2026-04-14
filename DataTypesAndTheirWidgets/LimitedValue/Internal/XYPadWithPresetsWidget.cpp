@@ -155,6 +155,25 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
                 return;
             }
 
+
+
+
+
+
+            
+
+            /*std::visit([this](auto&& point)
+            {   
+                
+                point.first.setValue11 ( paramX->currentDoubleValue().getValue11() );
+            }, *point);*/
+
+
+
+
+
+
+
             point->first.setValue11 ( paramX->currentDoubleValue().getValue11() );
             point->second.setValue11( paramY->currentDoubleValue().getValue11() );
 
@@ -295,7 +314,11 @@ XYPadWithPresetsWidget::PresetData& XYPadWithPresetsWidget::currentPresetSaveDat
 
 bool XYPadWithPresetsWidget::componentIndexIsValid(int componentIndex)
 {
-    return componentIndex >= 0 && componentIndex < parent->getValue().size();
+    return std::visit([&](auto&& parentValue)
+    {
+        return componentIndex >= 0 && componentIndex < parentValue.size();
+    },
+    parent->getValue());
 }
 
 bool XYPadWithPresetsWidget::presetIsValid(const PresetData &preset)
@@ -303,12 +326,24 @@ bool XYPadWithPresetsWidget::presetIsValid(const PresetData &preset)
     return preset.hasValues() && componentIndexIsValid(*preset.xIndex) && componentIndexIsValid(*preset.yIndex);
 }
 
-LimitedDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromPreset(const PresetData &preset)
+
+
+LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromPreset(const PresetData &preset)
 {
     if (presetIsValid(preset))
     {
-        const auto &valueVector = parent->getValue();
-        return LimitedDoublePair{valueVector[*preset.xIndex], valueVector[*preset.yIndex]};
+        return std::visit([&](auto &&parentValueVec)
+        {
+            using VecT          = typename std::decay_t<decltype(parentValueVec)>::value_type;
+
+            return std::pair<VecT, VecT>{
+                parentValueVec[*preset.xIndex],
+                parentValueVec[*preset.yIndex]
+            };
+
+            //return LimitedIntOrDoublePairOpt{parentValue[*preset.xIndex], parentValue[*preset.yIndex]};
+        }, 
+        parent->getValue());
     }
 
     return {};
@@ -393,6 +428,24 @@ void XYPadWithPresetsWidget::updateCurrentIndexesUIToMatchPresetData()
     currentYIndex->setValue(yIndex);
 
     SV_LOG(std::format("Set indexes {} {}", xIndex, yIndex));
+}
+
+std::pair<double, double> XYPadWithPresetsWidget::getValue11PairFromSliderRepresentation()
+{
+    return std::pair<double, double>();
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int presetIdx, bool isValid)
