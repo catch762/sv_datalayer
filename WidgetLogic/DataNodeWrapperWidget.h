@@ -19,7 +19,7 @@
 //todo write abt it
 
 
-class DataNodeWrapperWidget : public QFrame
+class DataNodeWrapperWidget : public QWidget
 {
     Q_OBJECT
 public:

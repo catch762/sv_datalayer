@@ -101,6 +101,7 @@ private:
     IntSpinboxes&          getIntSpinboxes();
 
     void setSpinboxValue(doubleOrInt val);
+    void updateLeftToRightSliderBasedOnSpinboxes();
 
 private:
     const bool isDouble;

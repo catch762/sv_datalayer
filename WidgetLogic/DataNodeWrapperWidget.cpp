@@ -13,11 +13,9 @@ DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWi
                                              const QString &name,
                                              const QJsonObjectWithWidgetOptionsOpt& options,
                                              QWidget *parent)
- : QFrame(parent)
+ : QWidget(parent)
 {
     isForCompositeNode = _isForCompositeNode;
-    setFrameStyle(QFrame::NoFrame);
-
     layout = new QVBoxLayout(this);
     initLayoutSpacing(layout);
     layout->setAlignment(Qt::AlignTop);

@@ -22,7 +22,6 @@ using doubleOrInt = std::variant<double, int>;
 #include "LimitedValue/LimitedDoubleWidget.h"
 #include "LimitedValue/LimitedIntWidget.h"
 
-
 #include "LimitedValue/LimitedDoubleVecWidget.h"
 
 #include "WidgetLogic/WidgetDefs.h"

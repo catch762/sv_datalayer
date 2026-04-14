@@ -12,10 +12,11 @@ LimitedDoubleWidget::LimitedDoubleWidget(const LimitedIntOrDouble &initialValue,
     sliderValueLeftToRight = new QSlider(Qt::Horizontal, this);
     {
         sliderValueLeftToRight->setMinimumWidth(30);
+        sliderValueLeftToRight->setTickInterval(1);
 
+        //this is only for double:
         sliderValueLeftToRight->setMinimum(0);
         sliderValueLeftToRight->setMaximum(10'000);
-        sliderValueLeftToRight->setTickInterval(1);
 
         connect(sliderValueLeftToRight, &QSlider::valueChanged, this, [this]()
         {
@@ -25,10 +26,14 @@ LimitedDoubleWidget::LimitedDoubleWidget(const LimitedIntOrDouble &initialValue,
 
     spinboxes = createSpinboxes();
 
-    layout->addWidget(isDouble ? (QWidget*)getDoubleSpinboxes().spinboxValue : (QWidget*)getIntSpinboxes().spinboxValue);
-    layout->addWidget(sliderValueLeftToRight);
-    layout->addWidget(isDouble ? (QWidget*)getDoubleSpinboxes().spinboxLeftLimit : (QWidget*)getIntSpinboxes().spinboxLeftLimit);
-    layout->addWidget(isDouble ? (QWidget*)getDoubleSpinboxes().spinboxRightLimit : (QWidget*)getIntSpinboxes().spinboxRightLimit);
+    std::visit([&](auto&& spinboxes)
+    {
+        layout->addWidget(spinboxes.spinboxValue);
+        layout->addWidget(sliderValueLeftToRight);
+        layout->addWidget(spinboxes.spinboxLeftLimit);
+        layout->addWidget(spinboxes.spinboxRightLimit);
+    },
+    spinboxes);
 
     setValue(initialValue);
 }
@@ -124,30 +129,49 @@ void LimitedDoubleWidget::setSpinboxValue(doubleOrInt val)
     else          getIntSpinboxes   ().setValue( std::get<int>   ( val ) );
 }
 
+void LimitedDoubleWidget::updateLeftToRightSliderBasedOnSpinboxes()
+{
+
+    const QSignalBlocker blocker(sliderValueLeftToRight);
+
+    if(!isDouble)
+    {
+        LimitedInt limInt = currentIntValue();
+
+        //this should work?
+        sliderValueLeftToRight->setMinimum(limInt.min());
+        sliderValueLeftToRight->setMaximum(limInt.max());
+    }
+
+    setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
+}
+
 void LimitedDoubleWidget::onSomethingChanged(QWidget *changedWidget)
 {
     if (changedWidget == sliderValueLeftToRight)
     {
-        std::visit([this](auto &&sliderBasedValue)
+        std::visit([&](auto &&sliderBasedValue)
         {
             using SpinboxesT = Spinboxes<std::decay_t<decltype(sliderBasedValue)>>;
 
-            std::get<SpinboxesT>(spinboxes).setValue(sliderBasedValue);
+            std::get<SpinboxesT>(spinboxes).setValueSpinbox(sliderBasedValue);
         },
         getValueBasedOnSlider());
     }
     else
     {
+        // - read sliders values
+        // - construct LimitedValue from them, which keeps LimitedValue.value constrained - thats the whole point
+        // - write sliders value from that (potentially fixed) LimitedValue
         std::visit([this](auto&& limitedIntOrDouble)
         {
             using SpinboxesT = Spinboxes<typename std::decay_t<decltype(limitedIntOrDouble)>::UnderlyingType>;
 
-            std::get<SpinboxesT>(spinboxes).setValue(limitedIntOrDouble.value());
+            std::get<SpinboxesT>(spinboxes).setValue(limitedIntOrDouble);
         },
         currentValueVariant());
 
-        const QSignalBlocker blocker(sliderValueLeftToRight);
-        setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
+        updateLeftToRightSliderBasedOnSpinboxes();
     }
 
     if (isDouble) emit doubleValueChanged(currentDoubleValue());
@@ -195,8 +219,7 @@ void LimitedDoubleWidget::setValue(const LimitedIntOrDouble &value)
         if(isDouble) getDoubleSpinboxes ().setValue(std::get<LimitedDouble> (value));
         else         getIntSpinboxes    ().setValue(std::get<LimitedInt>    (value));
 
-        QSignalBlocker block(sliderValueLeftToRight);
-        setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
+        updateLeftToRightSliderBasedOnSpinboxes();
     }
 
     if (isDouble) emit doubleValueChanged(currentDoubleValue());
