@@ -1,8 +1,8 @@
-#include "LimitedDoublesWidget.h"
+#include "LimitedValuesWidget.h"
 #include "DataTypesAndTheirWidgets/LimitedValue/Internal/BaseXYPadWidget.h"
 #include "DataTypesAndTheirWidgets/LimitedValue/Internal/XYPadWithPresetsWidget.h"
 
-LimitedDoublesWidget::LimitedDoublesWidget(const LimitedDoubleVec& initialValue, QWidget *parent)
+LimitedValuesWidget::LimitedValuesWidget(const LimitedDoubleVec& initialValue, QWidget *parent)
     : QFrame(parent)
 {
     basicWidgetsLayout = new QVBoxLayout(this);
@@ -12,12 +12,12 @@ LimitedDoublesWidget::LimitedDoublesWidget(const LimitedDoubleVec& initialValue,
     setValue(initialValue);
 }
 
-const LimitedDoubleVec& LimitedDoublesWidget::getValue() const
+const LimitedDoubleVec& LimitedValuesWidget::getValue() const
 {
     return value;
 }
 
-void LimitedDoublesWidget::setValue(const LimitedDoubleVec& newValue)
+void LimitedValuesWidget::setValue(const LimitedDoubleVec& newValue)
 {
     value = newValue;
 
@@ -26,21 +26,21 @@ void LimitedDoublesWidget::setValue(const LimitedDoubleVec& newValue)
     emit valueChanged(value);
 }
 
-void LimitedDoublesWidget::onSomethingChanged()
+void LimitedValuesWidget::onSomethingChanged()
 {
     setCurrentValueFromWidgetsState();
 
     emit valueChanged(value);
 }
 
-void LimitedDoublesWidget::setCurrentValueFromWidgetsState()
+void LimitedValuesWidget::setCurrentValueFromWidgetsState()
 {
     auto valueSize = value.size();
     auto widgetsSize = basicWidgets.size();
 
     if (valueSize != widgetsSize)
     {
-        SV_LOG(std::format("LimitedDoublesWidget, set val from widgets: valueSize[{}] but widgetsSize[{}], will resize",
+        SV_LOG(std::format("LimitedValuesWidget, set val from widgets: valueSize[{}] but widgetsSize[{}], will resize",
                 valueSize, widgetsSize));
         value.resize(widgetsSize);
     }
@@ -52,7 +52,7 @@ void LimitedDoublesWidget::setCurrentValueFromWidgetsState()
     }
 }
 
-void LimitedDoublesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
+void LimitedValuesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
 {
     auto existingbasicWidgets = basicWidgets.size();
 
@@ -79,7 +79,7 @@ void LimitedDoublesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
             //not even setting value, well do it later
             auto widget = new LimitedValueWidget(LimitedDouble{}, this);
 
-            connect(widget, &LimitedValueWidget::doubleValueChanged, this, &LimitedDoublesWidget::onSomethingChanged);
+            connect(widget, &LimitedValueWidget::doubleValueChanged, this, &LimitedValuesWidget::onSomethingChanged);
 
             basicWidgets.push_back(widget);
             basicWidgetsLayout->addWidget(widget);
@@ -93,7 +93,7 @@ void LimitedDoublesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
     }
 }
 
-void LimitedDoublesWidget::setWidgetsStateFromValue(const LimitedDoubleVec& value)
+void LimitedValuesWidget::setWidgetsStateFromValue(const LimitedDoubleVec& value)
 {
     setBasicWidgetsCount(value.size());
 

@@ -6,11 +6,11 @@ class BaseXYPadWidget;
 class XYPadWithPresetsWidget;
 
 // Simplest widget for LimitedDoubleVec: just creates N LimitedValueWidget's in a layout 
-class LimitedDoublesWidget : public QFrame
+class LimitedValuesWidget : public QFrame
 {
     Q_OBJECT
 public:
-    LimitedDoublesWidget(const LimitedDoubleVec& vec, QWidget *parent = nullptr);
+    LimitedValuesWidget(const LimitedDoubleVec& vec, QWidget *parent = nullptr);
 
     const LimitedDoubleVec& getValue() const;
 

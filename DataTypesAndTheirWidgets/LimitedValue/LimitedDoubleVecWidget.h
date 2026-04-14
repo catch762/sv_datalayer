@@ -4,7 +4,7 @@
 #include <QStackedLayout>
 #include "WidgetLogic/WidgetDefs.h"
 
-class LimitedDoublesWidget;
+class LimitedValuesWidget;
 class XYPadWithPresetsWidget;
 class DataNodeWrapperWidget;
 
@@ -43,7 +43,7 @@ private:
 private:
     LimitedDoubleVec value;
     QVBoxLayout*            layout          = nullptr;
-    LimitedDoublesWidget*       slidersView = nullptr;
+    LimitedValuesWidget*       slidersView = nullptr;
     XYPadWithPresetsWidget*     xyPadView   = nullptr;
 
     // Button to select views, it will be created on a DataNodeWrapperWidget, but stored here.

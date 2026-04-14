@@ -1,5 +1,5 @@
 #include "LimitedDoubleVecWidget.h"
-#include "Internal/LimitedDoublesWidget.h"
+#include "Internal/LimitedValuesWidget.h"
 #include "Internal/XYPadWithPresetsWidget.h"
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 #include <QToolButton>
@@ -14,9 +14,9 @@ LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialVa
     layout = new QVBoxLayout(this);
     initLayoutSpacing(layout, 2, 0);
 
-    slidersView = new LimitedDoublesWidget(value, this);
+    slidersView = new LimitedValuesWidget(value, this);
     {
-        connect(slidersView, &LimitedDoublesWidget::valueChanged, this, [this](auto &val)
+        connect(slidersView, &LimitedValuesWidget::valueChanged, this, [this](auto &val)
         {
             setValue(val);
         });
