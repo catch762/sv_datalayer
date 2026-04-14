@@ -29,7 +29,7 @@ class LimitedValue
 public:
     using UnderlyingType = T;
 
-    LimitedValue(T theValue = 0, T theLeft = 0, T theRight = 1)
+    explicit LimitedValue(T theValue = 0, T theLeft = 0, T theRight = 1)
     : _value(theValue), _left(theLeft), _right(theRight)
     {
         setValue(theValue);

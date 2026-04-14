@@ -123,15 +123,8 @@ LimitedDoubleWidget::IntSpinboxes& LimitedDoubleWidget::getIntSpinboxes()
     );
 }
 
-void LimitedDoubleWidget::setSpinboxValue(doubleOrInt val)
-{
-    if (isDouble) getDoubleSpinboxes().setValue( std::get<double>( val ) );
-    else          getIntSpinboxes   ().setValue( std::get<int>   ( val ) );
-}
-
 void LimitedDoubleWidget::updateLeftToRightSliderBasedOnSpinboxes()
 {
-
     const QSignalBlocker blocker(sliderValueLeftToRight);
 
     if(!isDouble)
@@ -189,7 +182,7 @@ LimitedDouble LimitedDoubleWidget::currentDoubleValue() const
     if(!isDouble)
     {
         SV_ERROR("Calling LimitedDoubleWidget::currentDoubleValue() while its holding LimitedInt");
-        return {};
+        return LimitedDouble{};
     }
 
     return getDoubleSpinboxes().getLimitedValue();
@@ -200,7 +193,7 @@ LimitedInt LimitedDoubleWidget::currentIntValue() const
     if(isDouble)
     {
         SV_ERROR("Calling LimitedDoubleWidget::currentIntValue() while its holding LimitedDouble");
-        return {};
+        return LimitedInt{};
     }
 
     return getIntSpinboxes().getLimitedValue();

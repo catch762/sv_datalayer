@@ -6,7 +6,7 @@ class LimitedIntWidget : public QFrame
 {
     Q_OBJECT
 public:
-    LimitedIntWidget(const LimitedInt &initialValue = {}, QWidget *parent = nullptr);
+    LimitedIntWidget(const LimitedInt &initialValue = LimitedInt{}, QWidget *parent = nullptr);
 
 signals:
     void valueChanged(const LimitedInt& value);

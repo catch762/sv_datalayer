@@ -100,7 +100,6 @@ private:
     DoubleSpinboxes&       getDoubleSpinboxes();
     IntSpinboxes&          getIntSpinboxes();
 
-    void setSpinboxValue(doubleOrInt val);
     void updateLeftToRightSliderBasedOnSpinboxes();
 
 private:
