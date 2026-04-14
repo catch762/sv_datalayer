@@ -6,19 +6,21 @@ class BaseXYPadWidget;
 class XYPadWithPresetsWidget;
 
 // Simplest widget for LimitedDoubleVec: just creates N LimitedValueWidget's in a layout 
-class LimitedValuesWidget : public QFrame
+class LimitedValueVecSlidersWidget : public QFrame
 {
     Q_OBJECT
 public:
-    LimitedValuesWidget(const LimitedDoubleVec& vec, QWidget *parent = nullptr);
+    LimitedValueVecSlidersWidget(const LimitedIntOrDoubleVec& vec, QWidget *parent = nullptr);
 
-    const LimitedDoubleVec& getValue() const;
+    const LimitedIntOrDoubleVec& getValue() const;
 
     //may add or remove widgets based on difference between current value and new value
-    void setValue(const LimitedDoubleVec& newValue);
+    void setValue(const LimitedIntOrDoubleVec& newValue);
 
 signals:
-    void valueChanged(const LimitedDoubleVec &val);
+    //void doubleValueChanged(const LimitedDoubleVec &val);
+    //void intValueChanged(const LimitedIntVec &val);
+    void valueChanged(const LimitedIntOrDoubleVec& val);
 
 private slots:
     void onSomethingChanged();
@@ -35,10 +37,12 @@ private:
     //After this call, widgets state will exactly match the argument.
     //Therefore widgets count may change.
     //All signals from widgets are blocked during this operation.
-    void setWidgetsStateFromValue(const LimitedDoubleVec& value);
+    void setWidgetsStateFromValue(const LimitedIntOrDoubleVec& value);
+
+    void emitValueChanged();
 
 private:
-    LimitedDoubleVec value;
+    LimitedIntOrDoubleVec value;
 
     QVBoxLayout*                        basicWidgetsLayout = nullptr;
     std::vector<LimitedValueWidget*>   basicWidgets;

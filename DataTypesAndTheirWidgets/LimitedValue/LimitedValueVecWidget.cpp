@@ -1,11 +1,11 @@
-#include "LimitedDoubleVecWidget.h"
-#include "Internal/LimitedValuesWidget.h"
+#include "LimitedValueVecWidget.h"
+#include "Internal/LimitedValueVecSlidersWidget.h"
 #include "Internal/XYPadWithPresetsWidget.h"
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 #include <QToolButton>
 
 
-LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialValue,
+LimitedValueVecWidget::LimitedValueVecWidget(const LimitedDoubleVec& initialValue,
     const QJsonObjectWithWidgetOptionsOpt& options, QWidget *parent)
     : QFrame(parent)
 {
@@ -14,9 +14,9 @@ LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialVa
     layout = new QVBoxLayout(this);
     initLayoutSpacing(layout, 2, 0);
 
-    slidersView = new LimitedValuesWidget(value, this);
+    slidersView = new LimitedValueVecSlidersWidget(value, this);
     {
-        connect(slidersView, &LimitedValuesWidget::valueChanged, this, [this](auto &val)
+        connect(slidersView, &LimitedValueVecSlidersWidget::valueChanged, this, [this](auto &val)
         {
             setValue(val);
         });
@@ -35,12 +35,12 @@ LimitedDoubleVecWidget::LimitedDoubleVecWidget(const LimitedDoubleVec& initialVa
     }    
 }
 
-const LimitedDoubleVec& LimitedDoubleVecWidget::getValue() const
+const LimitedIntOrDoubleVec& LimitedValueVecWidget::getValue() const
 {
     return value;
 }
 
-void LimitedDoubleVecWidget::setValue(const LimitedDoubleVec& newValue)
+void LimitedValueVecWidget::setValue(const LimitedIntOrDoubleVec& newValue)
 {
     //static int i = 0;
     //SV_LOG("Master: setValue " + std::to_string(i++));
@@ -52,7 +52,7 @@ void LimitedDoubleVecWidget::setValue(const LimitedDoubleVec& newValue)
     emit valueChanged(value);
 }
 
-QJsonObjectWithWidgetOptionsOpt LimitedDoubleVecWidget::makeOptions() const
+QJsonObjectWithWidgetOptionsOpt LimitedValueVecWidget::makeOptions() const
 {
     QJsonObjectWithWidgetOptions options = xyPadView->makeOptions().value_or(QJsonObjectWithWidgetOptions());
 
@@ -64,7 +64,7 @@ QJsonObjectWithWidgetOptionsOpt LimitedDoubleVecWidget::makeOptions() const
     return options;
 }
 
-void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
+void LimitedValueVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
 {
     viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::MediaPlaybackStop,
                                                                      QIcon::ThemeIcon::FormatJustifyLeft);
@@ -86,7 +86,7 @@ void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *
     }
 }
 
-void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& value)
+void LimitedValueVecWidget::setViewsStateFromValue(const LimitedIntOrDoubleVec& value)
 {
     QSignalBlocker blockSliders(slidersView);
     slidersView->setValue(value);
@@ -94,7 +94,7 @@ void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& valu
     xyPadView->updateEverythingToMatchParentValue();
 }
 
-void LimitedDoubleVecWidget::setMode(Mode mode)
+void LimitedValueVecWidget::setMode(Mode mode)
 {
     if (mode == Mode::ShowJustLimitedValueWidgets)
     {

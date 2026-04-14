@@ -4,13 +4,13 @@
 #include <QStackedLayout>
 #include "WidgetLogic/WidgetDefs.h"
 
-class LimitedValuesWidget;
+class LimitedValueVecSlidersWidget;
 class XYPadWithPresetsWidget;
 class DataNodeWrapperWidget;
 
 //todo on value change check validation
 
-class LimitedDoubleVecWidget : public QFrame
+class LimitedValueVecWidget : public QFrame
 {
     Q_OBJECT
 public:
@@ -20,30 +20,31 @@ public:
         ShowXYPad
     };
 
-    LimitedDoubleVecWidget(const LimitedDoubleVec& vec,
+    LimitedValueVecWidget(const LimitedDoubleVec& vec,
                            const QJsonObjectWithWidgetOptionsOpt& options = {},
                            QWidget *parent = nullptr);
 
-    const LimitedDoubleVec& getValue() const;
+    const LimitedIntOrDoubleVec& getValue() const;
 
     //may add or remove widgets based on difference between current value and new value
-    void setValue(const LimitedDoubleVec& newValue);
+    void setValue(const LimitedIntOrDoubleVec& newValue);
 
     QJsonObjectWithWidgetOptionsOpt makeOptions() const;
     void setupButtonsOnWrapperParent(DataNodeWrapperWidget* wrapper, const QJsonObjectWithWidgetOptionsOpt& options = {} );
 
 signals:
-    void valueChanged(const LimitedDoubleVec &val);
+    void valueChanged(const LimitedIntOrDoubleVec &val);
 
 private:
     //no signals will be emitted from views
-    void setViewsStateFromValue(const LimitedDoubleVec& value);
+    void setViewsStateFromValue(const LimitedIntOrDoubleVec& value);
     void setMode(Mode mode);
 
 private:
-    LimitedDoubleVec value;
+    LimitedIntOrDoubleVec value;
+
     QVBoxLayout*            layout          = nullptr;
-    LimitedValuesWidget*       slidersView = nullptr;
+    LimitedValueVecSlidersWidget*       slidersView = nullptr;
     XYPadWithPresetsWidget*     xyPadView   = nullptr;
 
     // Button to select views, it will be created on a DataNodeWrapperWidget, but stored here.
@@ -53,13 +54,13 @@ private:
     static inline const QString modeIsXYKey = "modeIsXY";
 };
 
-Q_DECLARE_METATYPE(LimitedDoubleVecWidget*);
+Q_DECLARE_METATYPE(LimitedValueVecWidget*);
 
 template<>
-class Serializer< LimitedDoubleVecWidget* >
+class Serializer< LimitedValueVecWidget* >
 {
 public:
-    using WidgetPtr = LimitedDoubleVecWidget*;
+    using WidgetPtr = LimitedValueVecWidget*;
 
     QJsonValue toJson(const WidgetPtr& value)
     {

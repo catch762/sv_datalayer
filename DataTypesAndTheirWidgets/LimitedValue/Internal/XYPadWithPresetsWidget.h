@@ -6,7 +6,7 @@
 #include "WidgetLogic/WidgetDefs.h"
 
 class LimitedValueWidget;
-class LimitedDoubleVecWidget;
+class LimitedValueVecWidget;
 class XYPadWithPresetsWidget;
 
 // The actual XY Pad space.
@@ -29,7 +29,7 @@ class XYPadWithPresetsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    XYPadWithPresetsWidget(LimitedDoubleVecWidget* parent = nullptr);
+    XYPadWithPresetsWidget(LimitedValueVecWidget* parent = nullptr);
 
     struct PresetData
     {
@@ -98,7 +98,7 @@ private:
     QSpinBox*                           currentYIndex   = nullptr;
 
 private:
-    LimitedDoubleVecWidget* parent = nullptr;
+    LimitedValueVecWidget* parent = nullptr;
 
     static inline const int PresetsCount = 9;
     std::array<PresetData, PresetsCount> presets;
