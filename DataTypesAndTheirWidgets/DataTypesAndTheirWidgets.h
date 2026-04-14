@@ -19,7 +19,7 @@ using LimitedIntOrDoubleVec = std::variant<LimitedIntVec, LimitedDoubleVec>;
 using doubleOrInt = std::variant<double, int>;
 
 
-#include "LimitedValue/LimitedDoubleWidget.h"
+#include "LimitedValue/LimitedValueWidget.h"
 #include "LimitedValue/LimitedIntWidget.h"
 
 #include "LimitedValue/LimitedDoubleVecWidget.h"

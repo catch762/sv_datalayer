@@ -1,11 +1,11 @@
 #pragma once
-#include "../LimitedDoubleWidget.h"
+#include "../LimitedValueWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 
 class BaseXYPadWidget;
 class XYPadWithPresetsWidget;
 
-// Simplest widget for LimitedDoubleVec: just creates N LimitedDoubleWidget's in a layout 
+// Simplest widget for LimitedDoubleVec: just creates N LimitedValueWidget's in a layout 
 class LimitedDoublesWidget : public QFrame
 {
     Q_OBJECT
@@ -41,5 +41,5 @@ private:
     LimitedDoubleVec value;
 
     QVBoxLayout*                        basicWidgetsLayout = nullptr;
-    std::vector<LimitedDoubleWidget*>   basicWidgets;
+    std::vector<LimitedValueWidget*>   basicWidgets;
 };

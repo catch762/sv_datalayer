@@ -72,7 +72,7 @@ void LimitedDoubleVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *
 
     connect(viewSelectorWrapperButton, &QPushButton::toggled, this, [this](bool checked)
     {
-        setMode(checked ? Mode::ShowXYPad : Mode::ShowJustLimitedDoubleWidgets);
+        setMode(checked ? Mode::ShowXYPad : Mode::ShowJustLimitedValueWidgets);
     });
 
     wrapper->getStripeButtonsLayout()->addWidget(viewSelectorWrapperButton);
@@ -96,7 +96,7 @@ void LimitedDoubleVecWidget::setViewsStateFromValue(const LimitedDoubleVec& valu
 
 void LimitedDoubleVecWidget::setMode(Mode mode)
 {
-    if (mode == Mode::ShowJustLimitedDoubleWidgets)
+    if (mode == Mode::ShowJustLimitedValueWidgets)
     {
         slidersView->setVisible(true);
         xyPadView->setVisible(false);

@@ -43,11 +43,11 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNode
         return {};
     }
 
-    auto *widget = new LimitedDoubleWidget(leafWithLimitedDouble->tryGetLeafvalue()->value<LimitedDouble>());
+    auto *widget = new LimitedValueWidget(leafWithLimitedDouble->tryGetLeafvalue()->value<LimitedDouble>());
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedDouble);
 
-    QObject::connect(widget, &LimitedDoubleWidget::doubleValueChanged, widget, [nodeWeak](const LimitedDouble &v)
+    QObject::connect(widget, &LimitedValueWidget::doubleValueChanged, widget, [nodeWeak](const LimitedDouble &v)
     {
         if (auto nodeShared = nodeWeak.lock())
         {

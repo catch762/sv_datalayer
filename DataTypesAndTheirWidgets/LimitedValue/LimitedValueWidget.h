@@ -5,11 +5,11 @@
 template<typename T>
 concept StrictlyIntOrDouble = std::same_as<T, int> || 
                               std::same_as<T, double>;
-class LimitedDoubleWidget : public QWidget
+class LimitedValueWidget : public QWidget
 {
     Q_OBJECT
 public:
-    LimitedDoubleWidget(const LimitedIntOrDouble &initialValue, QWidget *parent = nullptr);
+    LimitedValueWidget(const LimitedIntOrDouble &initialValue, QWidget *parent = nullptr);
 
     void setValue(const LimitedIntOrDouble &value);
     LimitedIntOrDouble currentValueVariant() const;
@@ -110,4 +110,4 @@ private:
     
 };
 
-Q_DECLARE_METATYPE(LimitedDoubleWidget*);
+Q_DECLARE_METATYPE(LimitedValueWidget*);

@@ -1,5 +1,5 @@
 #pragma once
-#include "LimitedDoubleWidget.h"
+#include "LimitedValueWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include <QStackedLayout>
 #include "WidgetLogic/WidgetDefs.h"
@@ -16,7 +16,7 @@ class LimitedDoubleVecWidget : public QFrame
 public:
     enum Mode
     {
-        ShowJustLimitedDoubleWidgets,
+        ShowJustLimitedValueWidgets,
         ShowXYPad
     };
 

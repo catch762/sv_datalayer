@@ -1,7 +1,7 @@
-#include "LimitedDoubleWidget.h"
+#include "LimitedValueWidget.h"
 #include "DataLayerUtils.h"
 
-LimitedDoubleWidget::LimitedDoubleWidget(const LimitedIntOrDouble &initialValue, QWidget *parent)
+LimitedValueWidget::LimitedValueWidget(const LimitedIntOrDouble &initialValue, QWidget *parent)
     //todo: figure out why doesnt compile without 'spinboxes{Spinboxes<double>()}' 
  : QWidget(parent), isDouble(std::holds_alternative<LimitedDouble>(initialValue)), spinboxes{Spinboxes<double>()}
 {
@@ -38,7 +38,7 @@ LimitedDoubleWidget::LimitedDoubleWidget(const LimitedIntOrDouble &initialValue,
     setValue(initialValue);
 }
 
-QDoubleSpinBox *LimitedDoubleWidget::createDoubleSpinbox()
+QDoubleSpinBox *LimitedValueWidget::createDoubleSpinbox()
 {
     auto* spinbox = new QDoubleSpinBox(this);
     spinbox->setKeyboardTracking(false);
@@ -57,7 +57,7 @@ QDoubleSpinBox *LimitedDoubleWidget::createDoubleSpinbox()
     return spinbox;
 }
 
-QSpinBox *LimitedDoubleWidget::createIntSpinbox()
+QSpinBox *LimitedValueWidget::createIntSpinbox()
 {
     auto* spinbox = new QSpinBox(this);
     spinbox->setKeyboardTracking(false);
@@ -75,7 +75,7 @@ QSpinBox *LimitedDoubleWidget::createIntSpinbox()
     return spinbox;
 }
 
-LimitedDoubleWidget::DoubleOrIntSpinboxes LimitedDoubleWidget::createSpinboxes()
+LimitedValueWidget::DoubleOrIntSpinboxes LimitedValueWidget::createSpinboxes()
 {
     if (isDouble)
     {
@@ -99,31 +99,31 @@ LimitedDoubleWidget::DoubleOrIntSpinboxes LimitedDoubleWidget::createSpinboxes()
     }
 }
 
-const LimitedDoubleWidget::DoubleSpinboxes& LimitedDoubleWidget::getDoubleSpinboxes() const
+const LimitedValueWidget::DoubleSpinboxes& LimitedValueWidget::getDoubleSpinboxes() const
 {
     return std::get<DoubleSpinboxes>(spinboxes);
 }
 
-const LimitedDoubleWidget::IntSpinboxes& LimitedDoubleWidget::getIntSpinboxes() const
+const LimitedValueWidget::IntSpinboxes& LimitedValueWidget::getIntSpinboxes() const
 {
     return std::get<IntSpinboxes>(spinboxes);
 }
 
-LimitedDoubleWidget::DoubleSpinboxes& LimitedDoubleWidget::getDoubleSpinboxes() 
+LimitedValueWidget::DoubleSpinboxes& LimitedValueWidget::getDoubleSpinboxes() 
 {
     return const_cast<DoubleSpinboxes&>(
-        static_cast<const LimitedDoubleWidget*>(this)->getDoubleSpinboxes()
+        static_cast<const LimitedValueWidget*>(this)->getDoubleSpinboxes()
     );
 }
 
-LimitedDoubleWidget::IntSpinboxes& LimitedDoubleWidget::getIntSpinboxes() 
+LimitedValueWidget::IntSpinboxes& LimitedValueWidget::getIntSpinboxes() 
 {
     return const_cast<IntSpinboxes&>(
-        static_cast<const LimitedDoubleWidget*>(this)->getIntSpinboxes()
+        static_cast<const LimitedValueWidget*>(this)->getIntSpinboxes()
     );
 }
 
-void LimitedDoubleWidget::updateLeftToRightSliderBasedOnSpinboxes()
+void LimitedValueWidget::updateLeftToRightSliderBasedOnSpinboxes()
 {
     const QSignalBlocker blocker(sliderValueLeftToRight);
 
@@ -139,7 +139,7 @@ void LimitedDoubleWidget::updateLeftToRightSliderBasedOnSpinboxes()
     setSliderValue01(sliderValueLeftToRight, getValue01BasedOnSpinboxes());
 }
 
-void LimitedDoubleWidget::onSomethingChanged(QWidget *changedWidget)
+void LimitedValueWidget::onSomethingChanged(QWidget *changedWidget)
 {
     if (changedWidget == sliderValueLeftToRight)
     {
@@ -171,39 +171,39 @@ void LimitedDoubleWidget::onSomethingChanged(QWidget *changedWidget)
     else          emit intValueChanged   (currentIntValue   ());
 }
 
-LimitedIntOrDouble LimitedDoubleWidget::currentValueVariant() const
+LimitedIntOrDouble LimitedValueWidget::currentValueVariant() const
 {
     if (isDouble) return currentDoubleValue();
     else          return currentIntValue();
 }
 
-LimitedDouble LimitedDoubleWidget::currentDoubleValue() const
+LimitedDouble LimitedValueWidget::currentDoubleValue() const
 {
     if(!isDouble)
     {
-        SV_ERROR("Calling LimitedDoubleWidget::currentDoubleValue() while its holding LimitedInt");
+        SV_ERROR("Calling LimitedValueWidget::currentDoubleValue() while its holding LimitedInt");
         return LimitedDouble{};
     }
 
     return getDoubleSpinboxes().getLimitedValue();
 }
 
-LimitedInt LimitedDoubleWidget::currentIntValue() const
+LimitedInt LimitedValueWidget::currentIntValue() const
 {
     if(isDouble)
     {
-        SV_ERROR("Calling LimitedDoubleWidget::currentIntValue() while its holding LimitedDouble");
+        SV_ERROR("Calling LimitedValueWidget::currentIntValue() while its holding LimitedDouble");
         return LimitedInt{};
     }
 
     return getIntSpinboxes().getLimitedValue();
 }
 
-void LimitedDoubleWidget::setValue(const LimitedIntOrDouble &value)
+void LimitedValueWidget::setValue(const LimitedIntOrDouble &value)
 {
     if (std::holds_alternative<LimitedDouble>(value) != isDouble)
     {
-        SV_ERROR("LimitedDoubleWidget::setValue mismatch");
+        SV_ERROR("LimitedValueWidget::setValue mismatch");
         return;
     }
 
@@ -219,7 +219,7 @@ void LimitedDoubleWidget::setValue(const LimitedIntOrDouble &value)
     else          emit intValueChanged   (currentIntValue   ());
 }
 
-double LimitedDoubleWidget::getValue01BasedOnSpinboxes() const
+double LimitedValueWidget::getValue01BasedOnSpinboxes() const
 {
     return std::visit([](auto &&spinboxes)
     {
@@ -229,7 +229,7 @@ double LimitedDoubleWidget::getValue01BasedOnSpinboxes() const
 }
 
 
-doubleOrInt LimitedDoubleWidget::getValueBasedOnSlider() const
+doubleOrInt LimitedValueWidget::getValueBasedOnSlider() const
 {
     return std::visit([this](auto &&spinboxes)
     {

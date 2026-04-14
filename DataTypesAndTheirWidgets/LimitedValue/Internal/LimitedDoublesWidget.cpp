@@ -77,9 +77,9 @@ void LimitedDoublesWidget::setBasicWidgetsCount(int requiredBasicWidgetsCount)
         for (int i = 0; i < widgetsToAdd; ++i)
         {
             //not even setting value, well do it later
-            auto widget = new LimitedDoubleWidget(LimitedDouble{}, this);
+            auto widget = new LimitedValueWidget(LimitedDouble{}, this);
 
-            connect(widget, &LimitedDoubleWidget::doubleValueChanged, this, &LimitedDoublesWidget::onSomethingChanged);
+            connect(widget, &LimitedValueWidget::doubleValueChanged, this, &LimitedDoublesWidget::onSomethingChanged);
 
             basicWidgets.push_back(widget);
             basicWidgetsLayout->addWidget(widget);

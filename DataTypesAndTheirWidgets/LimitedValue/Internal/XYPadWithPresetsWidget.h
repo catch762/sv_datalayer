@@ -5,7 +5,7 @@
 #include "BaseXYPadWidget.h"
 #include "WidgetLogic/WidgetDefs.h"
 
-class LimitedDoubleWidget;
+class LimitedValueWidget;
 class LimitedDoubleVecWidget;
 class XYPadWithPresetsWidget;
 
@@ -78,7 +78,7 @@ private:
     void updatePresetButtonIfNeeded(QPushButton* btn, int index);
 
     //pass paramX or paramY
-    void setupSliderWidgetForIndex(LimitedDoubleWidget* sliderParam, intOpt indexOpt);
+    void setupSliderWidgetForIndex(LimitedValueWidget* sliderParam, intOpt indexOpt);
     //pass currentXIndex or currentYIndex. Any invalid value on spinbox will change to -1
     intOpt getIndexOptAndHandleInvalid(QSpinBox* indexSpinbox); 
     void updateCurrentIndexesUIToMatchPresetData();
@@ -86,8 +86,8 @@ private:
 private:
     QGridLayout*            layout                      = nullptr;
     //Current XY: Slider Representation. Sync'ed to the other.
-    LimitedDoubleWidget*        paramX                  = nullptr;
-    LimitedDoubleWidget*        paramY                  = nullptr;
+    LimitedValueWidget*        paramX                  = nullptr;
+    LimitedValueWidget*        paramY                  = nullptr;
     //Current XY: XY pad Representation. Sync'ed to the other.
     BaseXYPadWidget*            xyPad                   = nullptr;
     QWidget*                    presetsWidget           = nullptr;

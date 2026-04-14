@@ -1,6 +1,6 @@
 #include "XYPadWithPresetsWidget.h"
 #include "BaseXYPadWidget.h"
-#include "../LimitedDoubleWidget.h"
+#include "../LimitedValueWidget.h"
 #include "../LimitedDoubleVecWidget.h"
 #include <QPainter>
 
@@ -135,10 +135,10 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
     layout = new QGridLayout(this);
     initLayoutSpacing(layout);
 
-    paramX = new LimitedDoubleWidget(LimitedDouble{}, this);
-    paramY = new LimitedDoubleWidget(LimitedDouble{}, this);
+    paramX = new LimitedValueWidget(LimitedDouble{}, this);
+    paramY = new LimitedValueWidget(LimitedDouble{}, this);
     {
-        auto onSliderRepresentationChange = [this](LimitedDoubleWidget *changedInWidget)
+        auto onSliderRepresentationChange = [this](LimitedValueWidget *changedInWidget)
         {
             //special case we need to handle, or we ll have two different values for same index:
             if (currentXIndex->value() == currentYIndex->value())
@@ -161,8 +161,8 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedDoubleVecWidget *theParent
             onXYRepresentationChanged(*point);
         };
 
-        connect(paramX, &LimitedDoubleWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramX));
-        connect(paramY, &LimitedDoubleWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramY));
+        connect(paramX, &LimitedValueWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramX));
+        connect(paramY, &LimitedValueWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramY));
 
         layout->addWidget(paramX, 0, 2);
         layout->addWidget(paramY, 1, 2);
@@ -521,7 +521,7 @@ void XYPadWithPresetsWidget::iterateValidPresetPoints(std::function<void(const L
     }
 }
 
-void XYPadWithPresetsWidget::setupSliderWidgetForIndex(LimitedDoubleWidget* sliderParam, intOpt indexOpt)
+void XYPadWithPresetsWidget::setupSliderWidgetForIndex(LimitedValueWidget* sliderParam, intOpt indexOpt)
 {
     auto isValidIdx = indexOpt && componentIndexIsValid(*indexOpt);
 
