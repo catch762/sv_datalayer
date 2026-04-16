@@ -214,6 +214,7 @@ SV_DECL_ALIASES(LimitedDoubleVec)
 
 using LimitedIntOrDouble    = std::variant<LimitedInt, LimitedDouble>;
 using LimitedIntOrDoubleVec = std::variant<LimitedIntVec, LimitedDoubleVec>;
+SV_DECL_ALIASES(LimitedIntOrDoubleVec)
 
 using doubleOrInt = std::variant<double, int>;
 

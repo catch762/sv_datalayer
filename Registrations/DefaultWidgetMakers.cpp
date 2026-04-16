@@ -73,14 +73,20 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedDoubleVec);
 
-    QObject::connect(widget, &LimitedValueVecWidget::valueChanged, widget, [nodeWeak](const LimitedDoubleVec &v)
+    QObject::connect(widget, &LimitedValueVecWidget::valueChanged, widget, [nodeWeak](const LimitedIntOrDoubleVec &v)
     {
+        if (!std::holds_alternative<LimitedDoubleVec>(v))
+        {
+            SV_ERROR("Widget for LimitedDoubleVec did emit LimitedDoubleInt, ignoring");
+            return;
+        }
+
         if (auto nodeShared = nodeWeak.lock())
         {
             if (auto leaf = nodeShared->tryGetLeafvalue())
             {
                 //SV_LOG("Saving LimitedDoubleVec to node...");
-                *leaf = QVariant::fromValue(v);
+                *leaf = QVariant::fromValue( std::get<LimitedDoubleVec>(v) );
             }
         }
     });

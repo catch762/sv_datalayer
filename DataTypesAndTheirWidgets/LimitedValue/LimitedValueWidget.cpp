@@ -199,6 +199,15 @@ LimitedInt LimitedValueWidget::currentIntValue() const
     return getIntSpinboxes().getLimitedValue();
 }
 
+double LimitedValueWidget::getValue11()
+{
+    return std::visit([](auto&& v)
+    {
+        return v.getValue11();
+    },
+    currentValueVariant());
+}
+
 void LimitedValueWidget::setValue(const LimitedIntOrDouble &value)
 {
     if (std::holds_alternative<LimitedDouble>(value) != isDouble)

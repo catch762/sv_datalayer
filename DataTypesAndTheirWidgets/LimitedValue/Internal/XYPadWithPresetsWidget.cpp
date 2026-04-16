@@ -45,10 +45,14 @@ void XYPadForPresets::paintEvent(QPaintEvent *event)
     QPen pen;
     pen.setCapStyle(Qt::RoundCap);
     
-    parent->iterateValidPresetPoints([&](const LimitedDoublePair &point, int presetIndex, int presetIsSelected)
+    parent->iterateValidPresetPoints([&](const LimitedIntOrDoublePair &point, int presetIndex, int presetIsSelected)
     {
-        double x11 = value01To11( point.first.getValue01() );
-        double y11 = value01To11( point.second.getValue01() );
+        auto [x11, y11] = std::visit([](auto&& point)
+        {
+            return std::tuple(point.first.getValue11(),
+                              point.second.getValue11());
+        },
+        point);
 
         QPointF pixCoord = coord11ToPixcoord(QPointF(x11, y11));
 
@@ -149,35 +153,17 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
             }
 
 
-            auto point = tryGetPointFromPreset(currentPresetSaveData());
-            if (!point)
+            if(auto point = tryGetPointFromPreset(currentPresetSaveData()))
             {
-                return;
+                std::visit([this](auto&& point)
+                {   
+                    point.first.setValue11 ( paramX->getValue11() );
+                    point.second.setValue11( paramY->getValue11() );
+                },
+                *point);
+
+                onXYRepresentationChanged(*point);
             }
-
-
-
-
-
-
-            
-
-            /*std::visit([this](auto&& point)
-            {   
-                
-                point.first.setValue11 ( paramX->currentDoubleValue().getValue11() );
-            }, *point);*/
-
-
-
-
-
-
-
-            point->first.setValue11 ( paramX->currentDoubleValue().getValue11() );
-            point->second.setValue11( paramY->currentDoubleValue().getValue11() );
-
-            onXYRepresentationChanged(*point);
         };
 
         connect(paramX, &LimitedValueWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramX));
@@ -203,16 +189,17 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
 
         auto onPadRepresentationChange = [this](QPointF coord11)
         {
-            auto point = tryGetPointFromPreset(currentPresetSaveData());
-            if (!point)
+            if(auto point = tryGetPointFromPreset(currentPresetSaveData()))
             {
-                return;
+                std::visit([&](auto&& point)
+                {   
+                    point.first.setValue11 ( coord11.x() );
+                    point.second.setValue11( coord11.y() );
+                },
+                *point);
+
+                onXYRepresentationChanged(*point);
             }
-
-            point->first.setValue11 (coord11.x());
-            point->second.setValue11(coord11.y());
-
-            onXYRepresentationChanged(*point);
         };
 
         connect(xyPad, &BaseXYPadWidget::positionChanged, this, onPadRepresentationChange);
@@ -336,10 +323,10 @@ LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromPreset(const Pr
         {
             using VecT          = typename std::decay_t<decltype(parentValueVec)>::value_type;
 
-            return std::pair<VecT, VecT>{
+            return LimitedIntOrDoublePairOpt{std::pair<VecT, VecT>{
                 parentValueVec[*preset.xIndex],
                 parentValueVec[*preset.yIndex]
-            };
+            }};
 
             //return LimitedIntOrDoublePairOpt{parentValue[*preset.xIndex], parentValue[*preset.yIndex]};
         }, 
@@ -428,24 +415,6 @@ void XYPadWithPresetsWidget::updateCurrentIndexesUIToMatchPresetData()
     currentYIndex->setValue(yIndex);
 
     SV_LOG(std::format("Set indexes {} {}", xIndex, yIndex));
-}
-
-std::pair<double, double> XYPadWithPresetsWidget::getValue11PairFromSliderRepresentation()
-{
-    return std::pair<double, double>();
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int presetIdx, bool isValid)
@@ -559,7 +528,7 @@ void XYPadWithPresetsWidget::restoreFromOptions(const QJsonObjectWithWidgetOptio
     }
 }
 
-void XYPadWithPresetsWidget::iterateValidPresetPoints(std::function<void(const LimitedDoublePair &xy,
+void XYPadWithPresetsWidget::iterateValidPresetPoints(std::function<void(const LimitedIntOrDoublePair &xy,
                                                                          int presetIndex,
                                                                          bool presetIsSelected)> visitor)
 {
@@ -581,7 +550,14 @@ void XYPadWithPresetsWidget::setupSliderWidgetForIndex(LimitedValueWidget* slide
     sliderParam->setEnabled(isValidIdx);
 
     QSignalBlocker block(sliderParam);
-    sliderParam->setValue(isValidIdx ? parent->getValue()[*indexOpt] : LimitedDouble{});
+
+
+    std::visit([&](auto&& parentValue)
+    {
+        using VecT = typename std::decay_t<decltype(parentValue)>::value_type;
+        sliderParam->setValue(isValidIdx ? parentValue[*indexOpt] : VecT{0,0,0});
+    },
+    parent->getValue());
 }
 
 void XYPadWithPresetsWidget::updateEverythingToMatchParentValue()
@@ -606,32 +582,41 @@ void XYPadWithPresetsWidget::updateEverythingToMatchParentValue()
     update();
 }
 
-void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedDoublePair &point)
+void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedIntOrDoublePair &point)
 {
-    auto getNewValueOpt = [&]() -> LimitedDoubleVecOpt
+    auto getNewValueOpt = [&]() -> LimitedIntOrDoubleVecOpt
     {
         const auto &preset = currentPresetSaveData();
-
-        LimitedDoubleVec value = parent->getValue();
-
         if (!presetIsValid(preset))
         {
             SV_WARN("current preset not valid, but representation got changed somehow, this shouldnt happen");
             return {};
         }
 
-        value[*preset.xIndex] = point.first;
-        value[*preset.yIndex] = point.second;
+        return std::visit([&](auto&& valueVec)
+        {
+            auto valueVecCopy = std::move(valueVec);
 
-        return value;
+            using VecT = typename std::decay_t<decltype(valueVecCopy)>::value_type;
+            using PairT = std::pair<VecT, VecT>;
+
+            SV_ASSERT(std::holds_alternative<PairT>(point));
+
+            valueVecCopy[*preset.xIndex] = std::get<PairT>( point ).first;
+            valueVecCopy[*preset.yIndex] = std::get<PairT>( point ).second;
+
+            return LimitedIntOrDoubleVecOpt{valueVecCopy};
+        }, 
+        parent->getValue());
     };
 
-    LimitedDoubleVecOpt newValue = getNewValueOpt();
-    if (!newValue) return;
 
-    //note that we are not changing 'other representation' of this widget:
-    //we just set it on parent, and parent will synchronize everything
-    parent->setValue(*newValue);
+    if (auto newValue = getNewValueOpt())
+    {
+        //note that we are not changing 'other representation' of this widget:
+        //we just set it on parent, and parent will synchronize everything
+        parent->setValue(*newValue);
+    }
 }
 
 void XYPadWithPresetsWidget::keyPressEvent(QKeyEvent *event)

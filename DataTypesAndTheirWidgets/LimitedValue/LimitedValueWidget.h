@@ -18,6 +18,8 @@ public:
     LimitedDouble currentDoubleValue() const;
     LimitedInt    currentIntValue() const;
 
+    double getValue11();
+
 signals:
     void doubleValueChanged(const LimitedDouble& value);
     void intValueChanged(const LimitedInt& value);

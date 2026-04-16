@@ -41,7 +41,7 @@ public:
         intOpt yIndex;
     };
 
-    void iterateValidPresetPoints(std::function<void(const LimitedDoublePair& xy,
+    void iterateValidPresetPoints(std::function<void(const LimitedIntOrDoublePair& xy,
                                                      int presetIndex,
                                                      bool presetIsSelected)> visitor);
     struct ColorData
@@ -61,7 +61,7 @@ public slots:
                                                      
 private slots:
     void onPresetSelected(int presetIdx);
-    void onXYRepresentationChanged(const LimitedDoublePair& point);
+    void onXYRepresentationChanged(const LimitedIntOrDoublePair& point);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -84,7 +84,6 @@ private:
     void updateCurrentIndexesUIToMatchPresetData();
 
 private:
-    std::pair<double, double> getValue11PairFromSliderRepresentation();
 
 private:
     QGridLayout*            layout                      = nullptr;
