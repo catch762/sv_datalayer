@@ -23,6 +23,7 @@ public:
 signals:
     void doubleValueChanged(const LimitedDouble& value);
     void intValueChanged(const LimitedInt& value);
+    void valueChanged(const LimitedIntOrDouble& value);
 
 private slots:
     void onSomethingChanged(QWidget *changedWidget);
@@ -36,6 +37,7 @@ private:
     //      if slider is in rightmost position      -> spinboxRightLimit->value()
     doubleOrInt getValueBasedOnSlider() const;
 
+    void emitValueChangedSignals();
 //here's everything regarding difference 'do we hold int or double'    
 private:
     template<StrictlyIntOrDouble UnderlyingType>

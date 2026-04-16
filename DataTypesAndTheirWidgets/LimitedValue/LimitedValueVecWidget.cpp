@@ -5,7 +5,7 @@
 #include <QToolButton>
 
 
-LimitedValueVecWidget::LimitedValueVecWidget(const LimitedDoubleVec& initialValue,
+LimitedValueVecWidget::LimitedValueVecWidget(const LimitedIntOrDoubleVec& initialValue,
     const QJsonObjectWithWidgetOptionsOpt& options, QWidget *parent)
     : QFrame(parent)
 {

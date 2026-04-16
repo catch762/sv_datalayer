@@ -14,6 +14,9 @@ void DefaultSerializers::Register(SerializationSystem *systemInstance)
     systemInstance->registerSerialization<LimitedDouble>();
     systemInstance->registerSerialization<LimitedDoubleVec>();
 
+    systemInstance->registerSerialization<LimitedInt>();
+    systemInstance->registerSerialization<LimitedIntVec>();
+
     systemInstance->registerSerialization<DataNodeWrapperWidget*>();
     systemInstance->registerSerialization<LimitedValueVecWidget*>();
     

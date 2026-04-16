@@ -167,8 +167,7 @@ void LimitedValueWidget::onSomethingChanged(QWidget *changedWidget)
         updateLeftToRightSliderBasedOnSpinboxes();
     }
 
-    if (isDouble) emit doubleValueChanged(currentDoubleValue());
-    else          emit intValueChanged   (currentIntValue   ());
+    emitValueChangedSignals();
 }
 
 LimitedIntOrDouble LimitedValueWidget::currentValueVariant() const
@@ -212,7 +211,7 @@ void LimitedValueWidget::setValue(const LimitedIntOrDouble &value)
 {
     if (std::holds_alternative<LimitedDouble>(value) != isDouble)
     {
-        SV_ERROR("LimitedValueWidget::setValue mismatch");
+        SV_ERROR(std::format("LimitedValueWidget::setValue mismatch, isDouble={}", isDouble));
         return;
     }
 
@@ -224,8 +223,7 @@ void LimitedValueWidget::setValue(const LimitedIntOrDouble &value)
         updateLeftToRightSliderBasedOnSpinboxes();
     }
 
-    if (isDouble) emit doubleValueChanged(currentDoubleValue());
-    else          emit intValueChanged   (currentIntValue   ());
+    emitValueChangedSignals();
 }
 
 double LimitedValueWidget::getValue01BasedOnSpinboxes() const
@@ -246,4 +244,20 @@ doubleOrInt LimitedValueWidget::getValueBasedOnSlider() const
         return doubleOrInt(spinboxes.getValueFromValue01(value01));
     },
     spinboxes);
+}
+
+void LimitedValueWidget::emitValueChangedSignals()
+{
+    auto valueVariant = currentValueVariant();
+
+    emit valueChanged(valueVariant);
+
+    if (std::holds_alternative<LimitedInt>(valueVariant))
+    {
+        emit intValueChanged(std::get<LimitedInt>(valueVariant));
+    }
+    else
+    {
+        emit doubleValueChanged(std::get<LimitedDouble>(valueVariant));
+    }
 }

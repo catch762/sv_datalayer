@@ -99,7 +99,7 @@ public:
         //avoiding dividing by both 'int, zero' and 'double, practically zero'
         if (double(abs(span)) < std::numeric_limits<double>::epsilon()) return 0.0;
 
-        return diffFromLeft/span;
+        return diffFromLeft/double(span);
     }
 
     //returns value from -1.0 (if value==left) to 1.0 (if value==right)

@@ -73,6 +73,7 @@ private:
     bool presetIsValid(const PresetData& data);
     //if !presetIsValid(), returns {}
     LimitedIntOrDoublePairOpt tryGetPointFromPreset(const PresetData& data);
+    LimitedIntOrDoublePairOpt tryGetPointFromSliders();
 
     void setPresetButtonStylesheetAndColors(QPushButton* btn, ColorData colors);
     void updatePresetButtonIfNeeded(QPushButton* btn, int index);

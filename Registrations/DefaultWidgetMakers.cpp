@@ -8,6 +8,8 @@ void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
     system->registerWidgetMaker<QString>(widgetMakerForQString, "std");
     system->registerWidgetMaker<LimitedDouble>(widgetMakerForLimitedDouble, QString("std"));
     system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec, QString("std"));
+    system->registerWidgetMaker<LimitedInt>(widgetMakerForLimitedInt, QString("std"));
+    system->registerWidgetMaker<LimitedIntVec>(widgetMakerForLimitedIntVec, QString("std"));
 }
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
@@ -61,6 +63,30 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNode
     return new DataNodeWrapperWidget( widget, leafWithLimitedDouble->getName(), options);
 }
 
+DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedInt(DataNodeShared leafWithLimitedInt, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedInt>(leafWithLimitedInt))
+    {
+        return {};
+    }
+
+    auto *widget = new LimitedValueWidget(leafWithLimitedInt->tryGetLeafvalue()->value<LimitedInt>());
+
+    auto nodeWeak = DataNodeWeak(leafWithLimitedInt);
+
+    QObject::connect(widget, &LimitedValueWidget::intValueChanged, widget, [nodeWeak](const LimitedInt &v)
+    {
+        if (auto nodeShared = nodeWeak.lock())
+        {
+            if (auto leaf = nodeShared->tryGetLeafvalue())
+            {
+                *leaf = QVariant::fromValue(v);
+            }
+        }
+    });
+
+    return new DataNodeWrapperWidget( widget, leafWithLimitedInt->getName(), options);
+}
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
@@ -77,7 +103,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
     {
         if (!std::holds_alternative<LimitedDoubleVec>(v))
         {
-            SV_ERROR("Widget for LimitedDoubleVec did emit LimitedDoubleInt, ignoring");
+            SV_ERROR("Widget for LimitedDoubleVec did emit LimitedIntVec, ignoring");
             return;
         }
 
@@ -85,13 +111,45 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
         {
             if (auto leaf = nodeShared->tryGetLeafvalue())
             {
-                //SV_LOG("Saving LimitedDoubleVec to node...");
                 *leaf = QVariant::fromValue( std::get<LimitedDoubleVec>(v) );
             }
         }
     });
 
     auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedDoubleVec->getName(), options);
+    widget->setupButtonsOnWrapperParent(wrapper, options);
+    return wrapper;
+}
+
+DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedIntVec(DataNodeShared leafWithLimitedIntVec, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedIntVec>(leafWithLimitedIntVec))
+    {
+        return {};
+    }
+
+    auto *widget = new LimitedValueVecWidget(leafWithLimitedIntVec->tryGetLeafvalue()->value<LimitedIntVec>(), options);
+
+    auto nodeWeak = DataNodeWeak(leafWithLimitedIntVec);
+
+    QObject::connect(widget, &LimitedValueVecWidget::valueChanged, widget, [nodeWeak](const LimitedIntOrDoubleVec &v)
+    {
+        if (!std::holds_alternative<LimitedIntVec>(v))
+        {
+            SV_ERROR("Widget for LimitedIntVec did emit LimitedDoubleVec, ignoring");
+            return;
+        }
+
+        if (auto nodeShared = nodeWeak.lock())
+        {
+            if (auto leaf = nodeShared->tryGetLeafvalue())
+            {
+                *leaf = QVariant::fromValue( std::get<LimitedIntVec>(v) );
+            }
+        }
+    });
+
+    auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedIntVec->getName(), options);
     widget->setupButtonsOnWrapperParent(wrapper, options);
     return wrapper;
 }

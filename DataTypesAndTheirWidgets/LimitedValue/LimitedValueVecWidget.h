@@ -20,7 +20,7 @@ public:
         ShowXYPad
     };
 
-    LimitedValueVecWidget(const LimitedDoubleVec& vec,
+    LimitedValueVecWidget(const LimitedIntOrDoubleVec& vec,
                            const QJsonObjectWithWidgetOptionsOpt& options = {},
                            QWidget *parent = nullptr);
 

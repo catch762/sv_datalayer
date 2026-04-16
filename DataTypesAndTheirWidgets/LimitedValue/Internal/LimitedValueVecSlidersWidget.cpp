@@ -82,7 +82,11 @@ void LimitedValueVecSlidersWidget::setBasicWidgetsCount(int requiredBasicWidgets
         for (int i = 0; i < widgetsToAdd; ++i)
         {
             //not even setting value, well do it later
-            auto widget = new LimitedValueWidget(LimitedDouble{}, this);
+            auto widget = std::visit([&](auto&& value)
+            {
+                using VecT = typename std::decay_t<decltype(value)>::value_type;
+                return new LimitedValueWidget(VecT{}, this);
+            }, value);
 
             connect(widget, &LimitedValueWidget::doubleValueChanged, this, &LimitedValueVecSlidersWidget::onSomethingChanged);
 

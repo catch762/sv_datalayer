@@ -139,8 +139,15 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
     layout = new QGridLayout(this);
     initLayoutSpacing(layout);
 
-    paramX = new LimitedValueWidget(LimitedDouble{}, this);
-    paramY = new LimitedValueWidget(LimitedDouble{}, this);
+    auto limitedValueForParamInit = [&]() -> LimitedIntOrDouble
+    {
+        auto isInt = std::holds_alternative<LimitedIntVec>(theParent->getValue());
+        if (isInt) return LimitedInt{};
+        else       return LimitedDouble{};
+    }();
+
+    paramX = new LimitedValueWidget(limitedValueForParamInit, this);
+    paramY = new LimitedValueWidget(limitedValueForParamInit, this);
     {
         auto onSliderRepresentationChange = [this](LimitedValueWidget *changedInWidget)
         {
@@ -149,25 +156,17 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
             {
                 auto *otherWidget = changedInWidget == paramX ? paramY : paramX;
                 QSignalBlocker block(otherWidget);
-                otherWidget->setValue(changedInWidget->currentDoubleValue());
+                otherWidget->setValue(changedInWidget->currentValueVariant());
             }
 
-
-            if(auto point = tryGetPointFromPreset(currentPresetSaveData()))
+            if(auto point = tryGetPointFromSliders())
             {
-                std::visit([this](auto&& point)
-                {   
-                    point.first.setValue11 ( paramX->getValue11() );
-                    point.second.setValue11( paramY->getValue11() );
-                },
-                *point);
-
                 onXYRepresentationChanged(*point);
             }
         };
 
-        connect(paramX, &LimitedValueWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramX));
-        connect(paramY, &LimitedValueWidget::doubleValueChanged, this, std::bind(onSliderRepresentationChange, paramY));
+        connect(paramX, &LimitedValueWidget::valueChanged, this, std::bind(onSliderRepresentationChange, paramX));
+        connect(paramY, &LimitedValueWidget::valueChanged, this, std::bind(onSliderRepresentationChange, paramY));
 
         layout->addWidget(paramX, 0, 2);
         layout->addWidget(paramY, 1, 2);
@@ -334,6 +333,27 @@ LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromPreset(const Pr
     }
 
     return {};
+}
+
+LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromSliders()
+{
+    auto x = paramX->currentValueVariant();
+    auto y = paramY->currentValueVariant();
+
+    if(x.index() != y.index())
+    {
+        SV_ERROR("Sliders representation: paramX and paramY hold different types, cant get point");
+        return {};
+    }
+
+    if (std::holds_alternative<LimitedInt>(x))
+    {
+        return std::pair( std::get<LimitedInt>(x), std::get<LimitedInt>(y) );
+    }
+    else
+    {
+        return std::pair( std::get<LimitedDouble>(x), std::get<LimitedDouble>(y) );
+    }
 }
 
 void XYPadWithPresetsWidget::setPresetButtonStylesheetAndColors(QPushButton *btn, ColorData colors)
@@ -610,9 +630,18 @@ void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedIntOrDoubleP
         parent->getValue());
     };
 
+    //std::visit([](auto&& point)
+    //{
+    //    SV_LOG(std::format("onXYRepresentationChanged: point {} {}", point.first, point.second));
+    //}, point);
 
     if (auto newValue = getNewValueOpt())
     {
+        //std::visit([](auto&& newValue)
+        //{
+        //    SV_LOG(std::format("onXYRepresentationChanged: newValue {}", newValue));
+        //}, *newValue);
+
         //note that we are not changing 'other representation' of this widget:
         //we just set it on parent, and parent will synchronize everything
         parent->setValue(*newValue);
