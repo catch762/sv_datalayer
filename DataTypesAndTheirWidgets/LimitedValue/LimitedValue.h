@@ -220,8 +220,8 @@ SV_DECL_ALIASES(LimitedIntOrDoublePair)
 
 template <typename LimitedValueT>
 concept IsLimitedValue = std::same_as<
-    std::remove_cvref_t<LimitedValueT>,
-    LimitedValue<typename std::remove_cvref_t<LimitedValueT>::UnderlyingType>
+    std::decay_t<LimitedValueT>,
+    LimitedValue<typename std::decay_t<LimitedValueT>::UnderlyingType>
 >;
 
 //Example: using TypeInt = getUnderlyingType< decltype( LimitedValue<int>{} ) >;

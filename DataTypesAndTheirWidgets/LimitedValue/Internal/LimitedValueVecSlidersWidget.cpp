@@ -37,7 +37,7 @@ void LimitedValueVecSlidersWidget::setCurrentValueFromWidgetsState()
 {
     std::visit([this](auto&& value)
     {
-        using LimitedValueType = typename std::decay_t<decltype(value)>::value_type;
+        using LimitedValueType = getVectorElementType<decltype(value)>;
 
         auto valueSize = value.size();
         auto widgetsSize = basicWidgets.size();

@@ -320,14 +320,12 @@ LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromPreset(const Pr
     {
         return std::visit([&](auto &&parentValueVec)
         {
-            using VecT          = typename std::decay_t<decltype(parentValueVec)>::value_type;
+            using VecT = getVectorElementType<decltype(parentValueVec)>;
 
             return LimitedIntOrDoublePairOpt{std::pair<VecT, VecT>{
                 parentValueVec[*preset.xIndex],
                 parentValueVec[*preset.yIndex]
             }};
-
-            //return LimitedIntOrDoublePairOpt{parentValue[*preset.xIndex], parentValue[*preset.yIndex]};
         }, 
         parent->getValue());
     }
@@ -574,7 +572,7 @@ void XYPadWithPresetsWidget::setupSliderWidgetForIndex(LimitedValueWidget* slide
 
     std::visit([&](auto&& parentValue)
     {
-        using VecT = typename std::decay_t<decltype(parentValue)>::value_type;
+        using VecT = getVectorElementType<decltype(parentValue)>;
         sliderParam->setValue(isValidIdx ? parentValue[*indexOpt] : VecT{0,0,0});
     },
     parent->getValue());
@@ -617,7 +615,7 @@ void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedIntOrDoubleP
         {
             auto valueVecCopy = std::move(valueVec);
 
-            using VecT = typename std::decay_t<decltype(valueVecCopy)>::value_type;
+            using VecT = getVectorElementType<decltype(valueVecCopy)>;
             using PairT = std::pair<VecT, VecT>;
 
             SV_ASSERT(std::holds_alternative<PairT>(point));
