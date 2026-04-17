@@ -35,7 +35,7 @@ private:
 
     //e.g   if slider is in leftmost position       -> spinboxLeftLimit->value()
     //      if slider is in rightmost position      -> spinboxRightLimit->value()
-    doubleOrInt getValueBasedOnSlider() const;
+    intOrDouble getValueBasedOnSlider() const;
 
     void emitValueChangedSignals();
 //here's everything regarding difference 'do we hold int or double'    

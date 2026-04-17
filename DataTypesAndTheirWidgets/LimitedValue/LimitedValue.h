@@ -188,39 +188,42 @@ public:
 
 using LimitedInt    = LimitedValue<int>;
 using LimitedDouble = LimitedValue<double>;
-
 SV_DECL_STD_FORMATTER(LimitedInt,    obj.toString().toStdString());
 SV_DECL_STD_FORMATTER(LimitedDouble, obj.toString().toStdString());
-
 Q_DECLARE_METATYPE(LimitedInt)
 Q_DECLARE_METATYPE(LimitedDouble)
-
 SV_DECL_ALIASES(LimitedInt)
 SV_DECL_ALIASES(LimitedDouble)
 
-
-
-
-
 using LimitedIntVec     = std::vector<LimitedInt>;
 using LimitedDoubleVec  = std::vector<LimitedDouble>;
-
 Q_DECLARE_METATYPE(LimitedIntVec)
 Q_DECLARE_METATYPE(LimitedDoubleVec)
-
 SV_DECL_ALIASES(LimitedIntVec)
 SV_DECL_ALIASES(LimitedDoubleVec)
 
 
 using LimitedIntOrDouble    = std::variant<LimitedInt, LimitedDouble>;
 using LimitedIntOrDoubleVec = std::variant<LimitedIntVec, LimitedDoubleVec>;
+SV_DECL_ALIASES(LimitedIntOrDouble)
 SV_DECL_ALIASES(LimitedIntOrDoubleVec)
 
-using doubleOrInt = std::variant<double, int>;
-
-using LimitedDoublePair         = std::pair<LimitedDouble,      LimitedDouble>;
+using intOrDouble               = std::variant<int, double>;
 using LimitedIntPair            = std::pair<LimitedInt,         LimitedInt>;
+using LimitedDoublePair         = std::pair<LimitedDouble,      LimitedDouble>;
 using LimitedIntOrDoublePair    = std::variant<LimitedIntPair,  LimitedDoublePair>;
-SV_DECL_ALIASES(LimitedDoublePair)
+SV_DECL_ALIASES(intOrDouble)
 SV_DECL_ALIASES(LimitedIntPair)
+SV_DECL_ALIASES(LimitedDoublePair)
 SV_DECL_ALIASES(LimitedIntOrDoublePair)
+
+
+template <typename LimitedValueT>
+concept IsLimitedValue = std::same_as<
+    std::remove_cvref_t<LimitedValueT>,
+    LimitedValue<typename std::remove_cvref_t<LimitedValueT>::UnderlyingType>
+>;
+
+//Example: using TypeInt = getUnderlyingType< decltype( LimitedValue<int>{} ) >;
+template <IsLimitedValue LimitedValueT>
+using getUnderlyingType = typename std::decay_t<LimitedValueT>::UnderlyingType;

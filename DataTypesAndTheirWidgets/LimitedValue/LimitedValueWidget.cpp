@@ -158,7 +158,9 @@ void LimitedValueWidget::onSomethingChanged(QWidget *changedWidget)
         // - write sliders value from that (potentially fixed) LimitedValue
         std::visit([this](auto&& limitedIntOrDouble)
         {
-            using SpinboxesT = Spinboxes< typename std::decay_t<decltype(limitedIntOrDouble)>::UnderlyingType >;
+            //using SpinboxesT = Spinboxes< typename std::decay_t<decltype(limitedIntOrDouble)>::UnderlyingType >;
+
+            using SpinboxesT = Spinboxes< getUnderlyingType<decltype(limitedIntOrDouble)> >;
 
             std::get<SpinboxesT>(spinboxes).setValue(limitedIntOrDouble);
         },
@@ -236,12 +238,12 @@ double LimitedValueWidget::getValue01BasedOnSpinboxes() const
 }
 
 
-doubleOrInt LimitedValueWidget::getValueBasedOnSlider() const
+intOrDouble LimitedValueWidget::getValueBasedOnSlider() const
 {
     return std::visit([this](auto &&spinboxes)
     {
         double value01 = getSliderValue01(sliderValueLeftToRight);
-        return doubleOrInt(spinboxes.getValueFromValue01(value01));
+        return intOrDouble(spinboxes.getValueFromValue01(value01));
     },
     spinboxes);
 }
