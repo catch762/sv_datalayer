@@ -118,7 +118,7 @@ private:
 
     void setWidgetsStateFromValue(const VectorOfElements& valueVec)
     {
-        setBasicWidgetsCount(valueVec.size());
+        setElemWidgetsCount(valueVec.size());
         SV_ASSERT(valueVec.size() == elemWidgets.size());
 
         for (int i = 0; i < elemWidgets.size(); ++i)
@@ -127,7 +127,7 @@ private:
 
             QSignalBlocker blocker(widget);
 
-            setValueOnWidgetFunc(widget, value[i]);
+            setWidgetValueFunc(widget, value[i]);
         }
     }
 
@@ -147,12 +147,13 @@ private:
 #define ELEM_TYPE LimitedInt
 #define ELEM_WIDGET LimitedValueWidget
 #define CREATE_WIDGET_FUNC []()->LimitedValueWidget*{ return new LimitedValueWidget(LimitedInt{}); }
-#define GETVAL_WIDGET_FUNC [](const LimitedValueWidget* w){ return std::get<LimitedInt>(w->getValue()); }
+#define GETVAL_WIDGET_FUNC [](const LimitedValueWidget* w)->const LimitedInt&{ return std::get<LimitedInt>(w->getValue()); }
 #define SETVAL_WIDGET_FUNC [](LimitedValueWidget* w, const LimitedInt& v){ w->setValue(v); }
 #define WIDGET_VALCHANGED_SIGNAL LimitedValueWidget::valueChanged
 
 class VectorWidget : public QWidget
 {
+    Q_OBJECT
 public:
     using VectorOfElements       = std::vector<ELEM_TYPE>;
     using VectorWidgetHelperType = VectorWidgetHelper<ELEM_TYPE, ELEM_WIDGET>;
@@ -161,9 +162,9 @@ public:
     :   QWidget(parent),
         helper( this,
                 CREATE_WIDGET_FUNC,
+                std::bind(setupElementWidget, this, std::placeholders::_1),
                 GETVAL_WIDGET_FUNC,
-                SETVAL_WIDGET_FUNC,
-                std::bind(setupElementWidget, this))
+                SETVAL_WIDGET_FUNC)
     {
     }
 
@@ -175,17 +176,13 @@ public:
     void setValue(const VectorOfElements& newValue)
     {
         helper.setValue(newValue);
+        emit valueChanged(getValue());
     }
     
 signals:
     void valueChanged(const VectorOfElements& value);
 
 private:
-    void onValueChanged()
-    {
-        emit valueChanged(getValue());
-    }
-
     void onElementWidgetValueChanged()
     {
         helper.setCurrentValueFromWidgetsState();
