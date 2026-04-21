@@ -52,7 +52,7 @@ void LimitedValueVecSlidersWidget::setCurrentValueFromWidgetsState()
         SV_ASSERT(value.size() == basicWidgets.size());
         for (int i = 0; i < widgetsSize; ++i)
         {
-            value[i] = std::get<LimitedValueType>( basicWidgets[i]->currentValueVariant() );
+            value[i] = std::get<LimitedValueType>( basicWidgets[i]->getValue() );
         }
     }, value);
 }

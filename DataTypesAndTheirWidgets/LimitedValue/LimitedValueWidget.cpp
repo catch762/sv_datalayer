@@ -129,7 +129,7 @@ void LimitedValueWidget::updateLeftToRightSliderBasedOnSpinboxes()
 
     if(!isDouble)
     {
-        LimitedInt limInt = currentIntValue();
+        LimitedInt limInt = currentIntValueFromSpinboxes();
 
         //this should work?
         sliderValueLeftToRight->setMinimum(limInt.min());
@@ -162,21 +162,24 @@ void LimitedValueWidget::onSomethingChanged(QWidget *changedWidget)
 
             std::get<SpinboxesT>(spinboxes).setValue(limitedIntOrDouble);
         },
-        currentValueVariant());
+        currentValueVariantFromSpinboxes());
 
         updateLeftToRightSliderBasedOnSpinboxes();
     }
 
+    //at this point, all widgets are fully synchronized with each other, so we update value from them:
+    currentValue = currentValueVariantFromSpinboxes(); 
+
     emitValueChangedSignals();
 }
 
-LimitedIntOrDouble LimitedValueWidget::currentValueVariant() const
+LimitedIntOrDouble LimitedValueWidget::currentValueVariantFromSpinboxes() const
 {
-    if (isDouble) return currentDoubleValue();
-    else          return currentIntValue();
+    if (isDouble) return currentDoubleValueFromSpinboxes();
+    else          return currentIntValueFromSpinboxes();
 }
 
-LimitedDouble LimitedValueWidget::currentDoubleValue() const
+LimitedDouble LimitedValueWidget::currentDoubleValueFromSpinboxes() const
 {
     if(!isDouble)
     {
@@ -187,7 +190,7 @@ LimitedDouble LimitedValueWidget::currentDoubleValue() const
     return getDoubleSpinboxes().getLimitedValue();
 }
 
-LimitedInt LimitedValueWidget::currentIntValue() const
+LimitedInt LimitedValueWidget::currentIntValueFromSpinboxes() const
 {
     if(isDouble)
     {
@@ -204,11 +207,13 @@ double LimitedValueWidget::getValue11()
     {
         return v.getValue11();
     },
-    currentValueVariant());
+    currentValue);
 }
 
 void LimitedValueWidget::setValue(const LimitedIntOrDouble &value)
 {
+    currentValue = value;
+
     if (std::holds_alternative<LimitedDouble>(value) != isDouble)
     {
         SV_ERROR(std::format("LimitedValueWidget::setValue mismatch, isDouble={}", isDouble));
@@ -224,6 +229,11 @@ void LimitedValueWidget::setValue(const LimitedIntOrDouble &value)
     }
 
     emitValueChangedSignals();
+}
+
+const LimitedIntOrDouble &LimitedValueWidget::getValue() const
+{
+    return currentValue;
 }
 
 double LimitedValueWidget::getValue01BasedOnSpinboxes() const
@@ -248,16 +258,14 @@ intOrDouble LimitedValueWidget::getValueBasedOnSlider() const
 
 void LimitedValueWidget::emitValueChangedSignals()
 {
-    auto valueVariant = currentValueVariant();
+    emit valueChanged(currentValue);
 
-    emit valueChanged(valueVariant);
-
-    if (std::holds_alternative<LimitedInt>(valueVariant))
+    if (std::holds_alternative<LimitedInt>(currentValue))
     {
-        emit intValueChanged(std::get<LimitedInt>(valueVariant));
+        emit intValueChanged(std::get<LimitedInt>(currentValue));
     }
     else
     {
-        emit doubleValueChanged(std::get<LimitedDouble>(valueVariant));
+        emit doubleValueChanged(std::get<LimitedDouble>(currentValue));
     }
 }

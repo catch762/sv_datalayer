@@ -11,3 +11,6 @@
 #include "LimitedValue/LimitedValueVecWidget.h"
 
 #include "WidgetLogic/WidgetDefs.h"
+
+
+#include "VectorOfAnyTypeWidgetCreator.h"

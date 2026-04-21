@@ -156,7 +156,7 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
             {
                 auto *otherWidget = changedInWidget == paramX ? paramY : paramX;
                 QSignalBlocker block(otherWidget);
-                otherWidget->setValue(changedInWidget->currentValueVariant());
+                otherWidget->setValue(changedInWidget->getValue());
             }
 
             if(auto point = tryGetPointFromSliders())
@@ -335,8 +335,8 @@ LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromPreset(const Pr
 
 LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromSliders()
 {
-    auto x = paramX->currentValueVariant();
-    auto y = paramY->currentValueVariant();
+    auto x = paramX->getValue();
+    auto y = paramY->getValue();
 
     if(x.index() != y.index())
     {

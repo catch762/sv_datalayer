@@ -12,11 +12,8 @@ public:
     LimitedValueWidget(const LimitedIntOrDouble &initialValue, QWidget *parent = nullptr);
 
     void setValue(const LimitedIntOrDouble &value);
-    LimitedIntOrDouble currentValueVariant() const;
 
-    //calling wrong version will return {} and log error, thats all.
-    LimitedDouble currentDoubleValue() const;
-    LimitedInt    currentIntValue() const;
+    const LimitedIntOrDouble&      getValue() const;
 
     double getValue11();
 
@@ -62,6 +59,11 @@ private:
             return LimitedType(spinboxValue->value(), spinboxLeftLimit->value(), spinboxRightLimit->value());
         }
 
+        LimitedIntOrDouble getLimitedValueVariant() const
+        {
+            return LimitedIntOrDouble( getLimitedValue() );
+        }
+
         void setValue(const LimitedType& value)
         {
             QSignalBlocker block0(spinboxValue), block1(spinboxLeftLimit), block2(spinboxRightLimit);
@@ -94,21 +96,27 @@ private:
     using IntSpinboxes          = Spinboxes<int>;
     using DoubleOrIntSpinboxes  = std::variant<DoubleSpinboxes, IntSpinboxes>;
 
-    QDoubleSpinBox*      createDoubleSpinbox();
-    QSpinBox*            createIntSpinbox();
-    DoubleOrIntSpinboxes createSpinboxes();
+    QDoubleSpinBox*         createDoubleSpinbox();
+    QSpinBox*               createIntSpinbox();
+    DoubleOrIntSpinboxes    createSpinboxes();
 
     //these two will assert on mismatch, check 'isDouble' first
-    const DoubleSpinboxes& getDoubleSpinboxes() const;
-    const IntSpinboxes&    getIntSpinboxes() const;
-    DoubleSpinboxes&       getDoubleSpinboxes();
-    IntSpinboxes&          getIntSpinboxes();
+    const DoubleSpinboxes&  getDoubleSpinboxes() const;
+    const IntSpinboxes&     getIntSpinboxes() const;
+    DoubleSpinboxes&        getDoubleSpinboxes();
+    IntSpinboxes&           getIntSpinboxes();
 
+    LimitedIntOrDouble      currentValueVariantFromSpinboxes() const;
+    //calling wrong version will return {} and log error, thats all.
+    LimitedDouble           currentDoubleValueFromSpinboxes() const;
+    LimitedInt              currentIntValueFromSpinboxes() const;
+    
     void updateLeftToRightSliderBasedOnSpinboxes();
-
 private:
     const bool isDouble;
     
+    LimitedIntOrDouble   currentValue;
+
     DoubleOrIntSpinboxes spinboxes;
     QSlider*             sliderValueLeftToRight  = nullptr; // this is just representation, how much is Value between Left and Right.
     
