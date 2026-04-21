@@ -153,15 +153,12 @@ private:
 #define WIDGET_VALCHANGED_SIGNAL LimitedValueWidget::valueChanged
 */
 
-#define DEFINE_VECTOR_OF_T_WIDGET(  CLASS_NAME,                                         \
-                                    ELEM_TYPE,                                          \
+#define DEFINE_VECTOR_OF_T_WIDGET(  ELEM_TYPE,                                          \
                                     ELEM_WIDGET,                                        \
                                     CREATE_WIDGET_FUNC,                                 \
                                     GETVAL_WIDGET_FUNC,                                 \
                                     SETVAL_WIDGET_FUNC,                                 \
                                     WIDGET_VALCHANGED_SIGNAL)                           \
-class CLASS_NAME : public QWidget {                                                     \
-    Q_OBJECT                                                                            \
 public:                                                                                 \
     using VectorOfElements       = std::vector<ELEM_TYPE>;                              \
     using VectorWidgetHelperType = VectorWidgetHelper<ELEM_TYPE, ELEM_WIDGET>;          \
@@ -181,8 +178,6 @@ public:                                                                         
         emit valueChanged(getValue());                                                  \
     }                                                                                   \
                                                                                         \
-signals:                                                                                \
-    void valueChanged(const VectorOfElements& value);                                   \
                                                                                         \
 private:                                                                                \
     void onElementWidgetValueChanged() {                                                \
@@ -194,6 +189,5 @@ private:                                                                        
         connect(widget, &WIDGET_VALCHANGED_SIGNAL, this, onElementWidgetValueChanged);  \
     }                                                                                   \
 private:                                                                                \
-    VectorWidgetHelperType helper;                                                      \
-};
+    VectorWidgetHelperType helper;
 
