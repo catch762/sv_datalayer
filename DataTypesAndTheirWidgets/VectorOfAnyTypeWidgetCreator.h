@@ -144,57 +144,56 @@ private:
     std::vector<WidgetType*> elemWidgets;
 };
 
+/*
 #define ELEM_TYPE LimitedInt
 #define ELEM_WIDGET LimitedValueWidget
 #define CREATE_WIDGET_FUNC []()->LimitedValueWidget*{ return new LimitedValueWidget(LimitedInt{}); }
 #define GETVAL_WIDGET_FUNC [](const LimitedValueWidget* w)->const LimitedInt&{ return std::get<LimitedInt>(w->getValue()); }
 #define SETVAL_WIDGET_FUNC [](LimitedValueWidget* w, const LimitedInt& v){ w->setValue(v); }
 #define WIDGET_VALCHANGED_SIGNAL LimitedValueWidget::valueChanged
+*/
 
-class VectorWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    using VectorOfElements       = std::vector<ELEM_TYPE>;
-    using VectorWidgetHelperType = VectorWidgetHelper<ELEM_TYPE, ELEM_WIDGET>;
-
-    VectorWidget(QWidget *parent = nullptr)
-    :   QWidget(parent),
-        helper( this,
-                CREATE_WIDGET_FUNC,
-                std::bind(setupElementWidget, this, std::placeholders::_1),
-                GETVAL_WIDGET_FUNC,
-                SETVAL_WIDGET_FUNC)
-    {
-    }
-
-    const VectorOfElements& getValue()
-    {
-        return helper.getValue();
-    }
-
-    void setValue(const VectorOfElements& newValue)
-    {
-        helper.setValue(newValue);
-        emit valueChanged(getValue());
-    }
-    
-signals:
-    void valueChanged(const VectorOfElements& value);
-
-private:
-    void onElementWidgetValueChanged()
-    {
-        helper.setCurrentValueFromWidgetsState();
-        emit valueChanged(getValue());
-    }
-
-    void setupElementWidget(ELEM_WIDGET* widget)
-    {
-        connect(widget, &WIDGET_VALCHANGED_SIGNAL, this, onElementWidgetValueChanged);
-    }
-
-private:
-    VectorWidgetHelperType helper;
+#define DEFINE_VECTOR_OF_T_WIDGET(  CLASS_NAME,                                         \
+                                    ELEM_TYPE,                                          \
+                                    ELEM_WIDGET,                                        \
+                                    CREATE_WIDGET_FUNC,                                 \
+                                    GETVAL_WIDGET_FUNC,                                 \
+                                    SETVAL_WIDGET_FUNC,                                 \
+                                    WIDGET_VALCHANGED_SIGNAL)                           \
+class CLASS_NAME : public QWidget {                                                     \
+    Q_OBJECT                                                                            \
+public:                                                                                 \
+    using VectorOfElements       = std::vector<ELEM_TYPE>;                              \
+    using VectorWidgetHelperType = VectorWidgetHelper<ELEM_TYPE, ELEM_WIDGET>;          \
+                                                                                        \
+    VectorWidget(QWidget *parent = nullptr)                                             \
+    :   QWidget(parent),                                                                \
+        helper( this,                                                                   \
+                CREATE_WIDGET_FUNC,                                                     \
+                std::bind(setupElementWidget, this, std::placeholders::_1),             \
+                GETVAL_WIDGET_FUNC,                                                     \
+                SETVAL_WIDGET_FUNC) {}                                                  \
+                                                                                        \
+    const VectorOfElements& getValue() {return helper.getValue();}                      \
+                                                                                        \
+    void setValue(const VectorOfElements& newValue) {                                   \
+        helper.setValue(newValue);                                                      \
+        emit valueChanged(getValue());                                                  \
+    }                                                                                   \
+                                                                                        \
+signals:                                                                                \
+    void valueChanged(const VectorOfElements& value);                                   \
+                                                                                        \
+private:                                                                                \
+    void onElementWidgetValueChanged() {                                                \
+        helper.setCurrentValueFromWidgetsState();                                       \
+        emit valueChanged(getValue());                                                  \
+    }                                                                                   \
+                                                                                        \
+    void setupElementWidget(ELEM_WIDGET* widget){                                       \
+        connect(widget, &WIDGET_VALCHANGED_SIGNAL, this, onElementWidgetValueChanged);  \
+    }                                                                                   \
+private:                                                                                \
+    VectorWidgetHelperType helper;                                                      \
 };
 
