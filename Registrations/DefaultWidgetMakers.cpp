@@ -3,6 +3,32 @@
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 
+//FOR FUTURE
+template<typename ValueChangedSignal, typename ValueType>
+void setupUpdatingNodeOnChanges(QWidget* widget, ValueChangedSignal widgetChangedSignal, DataNodeWeak weakNode)
+{
+    QObject::connect(widget, widgetChangedSignal, [weakNode](const ValueType& value)
+    {
+        constexpr std::string basicErr = "Widget changed value, but couldnt update its weak DataNode: ";
+
+        if (auto nodeShared = weakNode.lock())
+        {
+            if (auto leaf = nodeShared->tryGetLeafvalue())
+            {
+                if (leaf->typeId() != qtTypeId<ValueType>(value))
+                {
+                    SV_WARN(std::format("Changing node leaf value type: from {} to {}",
+                                        qVariantInfo(*leaf), qtTypeInfo<ValueType>())); 
+                }
+
+                *leaf = QVariant::fromValue( value );
+            }
+            else SV_ERROR(basicErr + "node is not leaf");
+        }
+        else SV_WARN(basicErr + "node has expired");
+    });
+}
+
 void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
 {
     system->registerWidgetMaker<QString>(widgetMakerForQString, "std");
