@@ -10,7 +10,7 @@ class VectorWidgetHelper
 public:
     using VectorOfElements          = std::vector<ElemType>;
 
-    using CreateWidgetFunc          = std::function<WidgetType*()>;
+    using CreateWidgetFunc          = std::function<WidgetType*(const ElemType&)>;
     using SetupWidgetFunc           = std::function<void(WidgetType*)>; //called after CreateWidgetFunc for signal connections
     using GetWidgetValueFunc        = std::function<const ElemType& (const WidgetType*)>;
     using SetWidgetValueFunc        = std::function<void            (WidgetType*, const ElemType&)>;
@@ -97,9 +97,14 @@ private:
 
     void addElemWidgets(int widgetsToAdd)
     {
-        for (int i = 0; i < widgetsToAdd; ++i)
+        int existingWidgetsCount = elemWidgets.size();
+        int requiredWidgetsCount = existingWidgetsCount + widgetsToAdd;
+
+        SV_ASSERT(requiredWidgetsCount <= value.size());
+
+        for (int widgetIdx = existingWidgetsCount; widgetIdx < requiredWidgetsCount; ++widgetIdx)
         {
-            WidgetType* widget = createWidgetFunc();
+            WidgetType* widget = createWidgetFunc(value[widgetIdx]);
             setupWidgetFunc(widget);
 
             elemWidgets.push_back(widget);
