@@ -21,7 +21,8 @@ public:
                         CreateWidgetFunc    _createWidgetFunc,
                         SetupWidgetFunc     _setupWidgetFunc,
                         GetWidgetValueFunc  _getValueFunc,
-                        SetWidgetValueFunc  _setValueFunc)
+                        SetWidgetValueFunc  _setValueFunc,
+                        const VectorOfElements& initialValue)
     {
         actualWidget         = _actualWidget;
         createWidgetFunc     = _createWidgetFunc;
@@ -37,6 +38,8 @@ public:
         SV_ASSERT(setupWidgetFunc);
         SV_ASSERT(getWidgetValueFunc);
         SV_ASSERT(setWidgetValueFunc);
+
+        setValue(initialValue);
     }
 
     const VectorOfElements& getValue()
@@ -168,13 +171,14 @@ public:                                                                         
     using VectorOfElements       = std::vector<ELEM_TYPE>;                              \
     using VectorWidgetHelperType = VectorWidgetHelper<ELEM_TYPE, ELEM_WIDGET>;          \
                                                                                         \
-    VectorWidget(QWidget *parent = nullptr)                                             \
+    VectorWidget(const VectorOfElements& initialValue, QWidget *parent = nullptr)       \
     :   QWidget(parent),                                                                \
         helper( this,                                                                   \
                 CREATE_WIDGET_FUNC,                                                     \
                 std::bind(setupElementWidget, this, std::placeholders::_1),             \
                 GETVAL_WIDGET_FUNC,                                                     \
-                SETVAL_WIDGET_FUNC) {}                                                  \
+                SETVAL_WIDGET_FUNC,                                                     \
+                initialValue) {}                                                        \
                                                                                         \
     const VectorOfElements& getValue() {return helper.getValue();}                      \
                                                                                         \

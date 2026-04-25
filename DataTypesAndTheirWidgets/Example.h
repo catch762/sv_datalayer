@@ -11,7 +11,7 @@ signals:
 
     DEFINE_VECTOR_OF_T_WIDGET(  LimitedInt,
                                 LimitedValueWidget,
-                                [](const LimitedInt&)->LimitedValueWidget*{ return new LimitedValueWidget(LimitedInt{}); },
+                                [](const LimitedInt& v)->LimitedValueWidget*{ return new LimitedValueWidget(v); },
                                 [](const LimitedValueWidget* w)->const LimitedInt&{ return std::get<LimitedInt>(w->getValue()); },
                                 [](LimitedValueWidget* w, const LimitedInt& v){ w->setValue(v); },
                                 LimitedValueWidget::valueChanged )
