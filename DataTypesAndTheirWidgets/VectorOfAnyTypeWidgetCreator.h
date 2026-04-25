@@ -12,23 +12,26 @@ public:
 
     using CreateWidgetFunc          = std::function<WidgetType*(const ElemType&)>;
     using SetupWidgetFunc           = std::function<void(WidgetType*)>; //called after CreateWidgetFunc for signal connections
-    using GetWidgetValueFunc        = std::function<const ElemType& (const WidgetType*)>;
+    using GetWidgetValueFunc_ByRef  = std::function<const ElemType& (const WidgetType*)>;
+    using GetWidgetValueFunc_ByVal  = std::function<      ElemType  (const WidgetType*)>;
     using SetWidgetValueFunc        = std::function<void            (WidgetType*, const ElemType&)>;
+
+    using GetWidgetValueFuncVariant = std::variant<GetWidgetValueFunc_ByRef, GetWidgetValueFunc_ByVal>;
 
     VectorWidgetHelper() = default;
 
-    VectorWidgetHelper( QWidget*            _actualWidget,
-                        CreateWidgetFunc    _createWidgetFunc,
-                        SetupWidgetFunc     _setupWidgetFunc,
-                        GetWidgetValueFunc  _getValueFunc,
-                        SetWidgetValueFunc  _setValueFunc,
-                        const VectorOfElements& initialValue)
+    VectorWidgetHelper( QWidget*                    _actualWidget,
+                        CreateWidgetFunc            _createWidgetFunc,
+                        SetupWidgetFunc             _setupWidgetFunc,
+                        GetWidgetValueFuncVariant   _getValueFuncVariant,
+                        SetWidgetValueFunc          _setValueFunc,
+                        const VectorOfElements&     initialValue)
     {
-        actualWidget         = _actualWidget;
-        createWidgetFunc     = _createWidgetFunc;
-        setupWidgetFunc      = _setupWidgetFunc;
-        getWidgetValueFunc   = _getValueFunc;
-        setWidgetValueFunc   = _setValueFunc;
+        actualWidget                = _actualWidget;
+        createWidgetFunc            = _createWidgetFunc;
+        setupWidgetFunc             = _setupWidgetFunc;
+        getWidgetValueFuncVariant   = _getValueFuncVariant;
+        setWidgetValueFunc          = _setValueFunc;
 
         elemWidgetsLayout = new QVBoxLayout(actualWidget);
         initLayoutSpacing(elemWidgetsLayout);
@@ -36,7 +39,6 @@ public:
         SV_ASSERT(actualWidget);
         SV_ASSERT(createWidgetFunc);
         SV_ASSERT(setupWidgetFunc);
-        SV_ASSERT(getWidgetValueFunc);
         SV_ASSERT(setWidgetValueFunc);
 
         setValue(initialValue);
@@ -67,10 +69,14 @@ public:
         }
 
         SV_ASSERT(value.size() == widgetsSize);
-        for (int i = 0; i < widgetsSize; ++i)
+
+        std::visit([this, widgetsSize](auto&& func)
         {
-            value[i] = getWidgetValueFunc( elemWidgets[i] );
-        }
+            for (int i = 0; i < widgetsSize; ++i)
+            {
+                value[i] = func( elemWidgets[i] );
+            }
+        }, getWidgetValueFuncVariant);
     }
 
 private:
@@ -142,7 +148,7 @@ private:
 private:
     CreateWidgetFunc         createWidgetFunc;
     SetupWidgetFunc          setupWidgetFunc;
-    GetWidgetValueFunc       getWidgetValueFunc;
+    GetWidgetValueFuncVariant       getWidgetValueFuncVariant;
     SetWidgetValueFunc       setWidgetValueFunc;
 
     QWidget*                 actualWidget = nullptr;
@@ -161,22 +167,30 @@ private:
 #define WIDGET_VALCHANGED_SIGNAL LimitedValueWidget::valueChanged
 */
 
-#define DEFINE_VECTOR_OF_T_WIDGET(  ELEM_TYPE,                                          \
+enum class GetValReturnType
+{
+    ConstRef = 0,
+    Value
+};
+
+#define DEFINE_VECTOR_OF_T_WIDGET(  CLASS_NAME,                                         \
+                                    ELEM_TYPE,                                          \
                                     ELEM_WIDGET,                                        \
                                     CREATE_WIDGET_FUNC,                                 \
                                     GETVAL_WIDGET_FUNC,                                 \
+                                    GETVAL_RETURN_TYPE,                                 \
                                     SETVAL_WIDGET_FUNC,                                 \
                                     WIDGET_VALCHANGED_SIGNAL)                           \
 public:                                                                                 \
     using VectorOfElements       = std::vector<ELEM_TYPE>;                              \
     using VectorWidgetHelperType = VectorWidgetHelper<ELEM_TYPE, ELEM_WIDGET>;          \
                                                                                         \
-    VectorWidget(const VectorOfElements& initialValue, QWidget *parent = nullptr)       \
+    CLASS_NAME(const VectorOfElements& initialValue, QWidget *parent = nullptr)         \
     :   QWidget(parent),                                                                \
         helper( this,                                                                   \
                 CREATE_WIDGET_FUNC,                                                     \
                 std::bind(setupElementWidget, this, std::placeholders::_1),             \
-                GETVAL_WIDGET_FUNC,                                                     \
+                VectorWidgetHelperType::GetWidgetValueFuncVariant(std::in_place_index<int(GETVAL_RETURN_TYPE)>, GETVAL_WIDGET_FUNC), \
                 SETVAL_WIDGET_FUNC,                                                     \
                 initialValue) {}                                                        \
                                                                                         \
