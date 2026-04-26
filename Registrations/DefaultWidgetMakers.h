@@ -14,9 +14,13 @@ public:
 
     static DataNodeWrapperWidget* widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options);
 
+    static DataNodeWrapperWidget* widgetMakerForBool    (DataNodeShared leafWithBool,    const QJsonObjectWithWidgetOptionsOpt &options);
+    static DataNodeWrapperWidget* widgetMakerForBoolVec (DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt &options);
+
     static DataNodeWrapperWidget* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options);
     static DataNodeWrapperWidget* widgetMakerForLimitedInt   (DataNodeShared leafWithLimitedInt,    const QJsonObjectWithWidgetOptionsOpt &options);
 
     static DataNodeWrapperWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options);
     static DataNodeWrapperWidget* widgetMakerForLimitedIntVec   (DataNodeShared leafWithLimitedIntVec,    const QJsonObjectWithWidgetOptionsOpt &options);
+    
 };

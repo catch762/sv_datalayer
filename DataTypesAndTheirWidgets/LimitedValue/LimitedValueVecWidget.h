@@ -34,6 +34,8 @@ public:
 
 signals:
     void valueChanged(const LimitedIntOrDoubleVec &val);
+    void intValueChanged(const LimitedIntVec& val);
+    void doubleValueChanged(const LimitedDoubleVec& val);
 
 private:
     //no signals will be emitted from views

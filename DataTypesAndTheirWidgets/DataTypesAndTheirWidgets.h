@@ -10,6 +10,8 @@
 
 #include "LimitedValue/LimitedValueVecWidget.h"
 
+#include "Bool/BoolVecWidget.h"
+
 #include "WidgetLogic/WidgetDefs.h"
 
 

@@ -1,10 +1,10 @@
 #pragma once
 #include <QCheckBox>
-#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include "DataTypesAndTheirWidgets/VectorOfAnyTypeWidgetCreator.h"
 #include "sv_qtcommon.h"
 
-class VectorWidget : public QWidget
+
+/*class VectorWidget : public QWidget
 {
     Q_OBJECT
 
@@ -19,7 +19,7 @@ signals:
                                 GetValReturnType::ConstRef,
                                 [](LimitedValueWidget* w, const LimitedInt& v){ w->setValue(v); },
                                 LimitedValueWidget::valueChanged )
-};
+};*/
 
 using BoolVec = std::vector<bool>;
 

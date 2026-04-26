@@ -88,7 +88,7 @@ void LimitedValueVecSlidersWidget::setBasicWidgetsCount(int requiredBasicWidgets
                 return new LimitedValueWidget(VecT{}, this);
             }, value);
 
-            connect(widget, &LimitedValueWidget::doubleValueChanged, this, &LimitedValueVecSlidersWidget::onSomethingChanged);
+            connect(widget, &LimitedValueWidget::valueChanged, this, &LimitedValueVecSlidersWidget::onSomethingChanged);
 
             basicWidgets.push_back(widget);
             basicWidgetsLayout->addWidget(widget);

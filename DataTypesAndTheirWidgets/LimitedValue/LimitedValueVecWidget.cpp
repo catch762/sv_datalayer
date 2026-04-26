@@ -50,6 +50,19 @@ void LimitedValueVecWidget::setValue(const LimitedIntOrDoubleVec& newValue)
     setViewsStateFromValue(value);
 
     emit valueChanged(value);
+
+    if (std::holds_alternative<LimitedIntVec>(value))
+    {
+        emit intValueChanged(std::get<LimitedIntVec>(value));
+    }
+    else if (std::holds_alternative<LimitedDoubleVec>(value))
+    {
+        emit doubleValueChanged(std::get<LimitedDoubleVec>(value));
+    }
+    else
+    {
+        SV_UNREACHABLE();
+    }
 }
 
 QJsonObjectWithWidgetOptionsOpt LimitedValueVecWidget::makeOptions() const

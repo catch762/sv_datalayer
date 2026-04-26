@@ -10,6 +10,8 @@ void DefaultSerializers::Register(SerializationSystem *systemInstance)
     systemInstance->registerSerialization<double> ();
     systemInstance->registerSerialization<bool>   ();
     systemInstance->registerSerialization<QString>();
+    
+    systemInstance->registerSerialization<BoolVec>   ();
 
     systemInstance->registerSerialization<LimitedDouble>();
     systemInstance->registerSerialization<LimitedDoubleVec>();

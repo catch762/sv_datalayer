@@ -3,23 +3,25 @@
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 
-//FOR FUTURE
-template<typename ValueChangedSignal, typename ValueType>
-void setupUpdatingNodeOnChanges(QWidget* widget, ValueChangedSignal widgetChangedSignal, DataNodeWeak weakNode)
+//Note that value type may be const reference, or may be raw value, depending on signal
+template<typename ValueType, typename WidgetT, typename ValueChangedSignal>
+void setupUpdatingNodeOnChanges(WidgetT* widget, ValueChangedSignal widgetChangedSignal, DataNodeWeak weakNode)
 {
-    QObject::connect(widget, widgetChangedSignal, [weakNode](const ValueType& value)
+    QObject::connect(widget, widgetChangedSignal, [weakNode](ValueType value)
     {
-        constexpr std::string basicErr = "Widget changed value, but couldnt update its weak DataNode: ";
+        static const std::string basicErr = "Widget changed value, but couldnt update its weak DataNode: ";
 
         if (auto nodeShared = weakNode.lock())
         {
             if (auto leaf = nodeShared->tryGetLeafvalue())
             {
-                if (leaf->typeId() != qtTypeId<ValueType>(value))
+                if (leaf->typeId() != qtTypeId<ValueType>())
                 {
                     SV_WARN(std::format("Changing node leaf value type: from {} to {}",
                                         qVariantInfo(*leaf), qtTypeInfo<ValueType>())); 
                 }
+
+                SV_LOG(std::format("upd val {}", qVariantInfo(*leaf)));
 
                 *leaf = QVariant::fromValue( value );
             }
@@ -31,11 +33,13 @@ void setupUpdatingNodeOnChanges(QWidget* widget, ValueChangedSignal widgetChange
 
 void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
 {
-    system->registerWidgetMaker<QString>(widgetMakerForQString, "std");
-    system->registerWidgetMaker<LimitedDouble>(widgetMakerForLimitedDouble, QString("std"));
-    system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec, QString("std"));
-    system->registerWidgetMaker<LimitedInt>(widgetMakerForLimitedInt, QString("std"));
-    system->registerWidgetMaker<LimitedIntVec>(widgetMakerForLimitedIntVec, QString("std"));
+    system->registerWidgetMaker<QString>         (widgetMakerForQString,            "std");
+    system->registerWidgetMaker<bool>            (widgetMakerForBool,               "std");
+    system->registerWidgetMaker<BoolVec>         (widgetMakerForBoolVec,            "std");
+    system->registerWidgetMaker<LimitedDouble>   (widgetMakerForLimitedDouble,      "std");
+    system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec,   "std");
+    system->registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt,         "std");
+    system->registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec,      "std");
 }
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
@@ -49,19 +53,41 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared
 
     auto nodeWeak = DataNodeWeak(leafWithQString);
 
-    //todo check if 3rd param...
-    QObject::connect(widget, &QLineEdit::textChanged, widget, [nodeWeak](const QString &s)
-    {
-        if (auto nodeShared = nodeWeak.lock())
-        {
-            if (auto leaf = nodeShared->tryGetLeafvalue())
-            {
-                *leaf = QVariant::fromValue(s);
-            }
-        }
-    });
+    setupUpdatingNodeOnChanges<const QString&>(widget, &QLineEdit::textChanged, nodeWeak);
 
     return new DataNodeWrapperWidget( widget, leafWithQString->getName(), options);
+}
+
+DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForBool(DataNodeShared leafWithBool, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<bool>(leafWithBool))
+    {
+        return {};
+    }
+
+    auto *widget = makeBoolWidget(leafWithBool->tryGetLeafvalue()->value<bool>());
+
+    auto nodeWeak = DataNodeWeak(leafWithBool);
+
+    setupUpdatingNodeOnChanges<bool>(widget, &QCheckBox::toggled, nodeWeak);
+
+    return new DataNodeWrapperWidget( widget, leafWithBool->getName(), options);
+}
+
+DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForBoolVec(DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<BoolVec>(leafWithBoolVec))
+    {
+        return {};
+    }
+
+    auto *widget = new BoolVecWidget(leafWithBoolVec->tryGetLeafvalue()->value<BoolVec>());
+
+    auto nodeWeak = DataNodeWeak(leafWithBoolVec);
+
+    setupUpdatingNodeOnChanges<const BoolVec&>(widget, &BoolVecWidget::valueChanged, nodeWeak);
+
+    return new DataNodeWrapperWidget( widget, leafWithBoolVec->getName(), options);
 }
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
@@ -75,16 +101,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNode
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedDouble);
 
-    QObject::connect(widget, &LimitedValueWidget::doubleValueChanged, widget, [nodeWeak](const LimitedDouble &v)
-    {
-        if (auto nodeShared = nodeWeak.lock())
-        {
-            if (auto leaf = nodeShared->tryGetLeafvalue())
-            {
-                *leaf = QVariant::fromValue(v);
-            }
-        }
-    });
+    setupUpdatingNodeOnChanges<const LimitedDouble&>(widget, &LimitedValueWidget::doubleValueChanged, nodeWeak);
 
     return new DataNodeWrapperWidget( widget, leafWithLimitedDouble->getName(), options);
 }
@@ -100,16 +117,7 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedInt(DataNodeSha
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedInt);
 
-    QObject::connect(widget, &LimitedValueWidget::intValueChanged, widget, [nodeWeak](const LimitedInt &v)
-    {
-        if (auto nodeShared = nodeWeak.lock())
-        {
-            if (auto leaf = nodeShared->tryGetLeafvalue())
-            {
-                *leaf = QVariant::fromValue(v);
-            }
-        }
-    });
+    setupUpdatingNodeOnChanges<const LimitedInt&>(widget, &LimitedValueWidget::intValueChanged, nodeWeak);
 
     return new DataNodeWrapperWidget( widget, leafWithLimitedInt->getName(), options);
 }
@@ -125,22 +133,7 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedDoubleVec);
 
-    QObject::connect(widget, &LimitedValueVecWidget::valueChanged, widget, [nodeWeak](const LimitedIntOrDoubleVec &v)
-    {
-        if (!std::holds_alternative<LimitedDoubleVec>(v))
-        {
-            SV_ERROR("Widget for LimitedDoubleVec did emit LimitedIntVec, ignoring");
-            return;
-        }
-
-        if (auto nodeShared = nodeWeak.lock())
-        {
-            if (auto leaf = nodeShared->tryGetLeafvalue())
-            {
-                *leaf = QVariant::fromValue( std::get<LimitedDoubleVec>(v) );
-            }
-        }
-    });
+    setupUpdatingNodeOnChanges<const LimitedDoubleVec&>(widget, &LimitedValueVecWidget::doubleValueChanged, nodeWeak);
 
     auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedDoubleVec->getName(), options);
     widget->setupButtonsOnWrapperParent(wrapper, options);
@@ -158,22 +151,7 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedIntVec(DataNode
 
     auto nodeWeak = DataNodeWeak(leafWithLimitedIntVec);
 
-    QObject::connect(widget, &LimitedValueVecWidget::valueChanged, widget, [nodeWeak](const LimitedIntOrDoubleVec &v)
-    {
-        if (!std::holds_alternative<LimitedIntVec>(v))
-        {
-            SV_ERROR("Widget for LimitedIntVec did emit LimitedDoubleVec, ignoring");
-            return;
-        }
-
-        if (auto nodeShared = nodeWeak.lock())
-        {
-            if (auto leaf = nodeShared->tryGetLeafvalue())
-            {
-                *leaf = QVariant::fromValue( std::get<LimitedIntVec>(v) );
-            }
-        }
-    });
+    setupUpdatingNodeOnChanges<const LimitedIntVec&>(widget, &LimitedValueVecWidget::intValueChanged, nodeWeak);
 
     auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedIntVec->getName(), options);
     widget->setupButtonsOnWrapperParent(wrapper, options);
