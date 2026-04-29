@@ -32,15 +32,16 @@ public:
 class SerializerForDataNodeTreeAndItsWidgets
 {
 public:
-    static bool onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode);
-
-    bool onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode);
 
     QJsonValue toJson(const DataNodeShared& value);
-    
+
     //returns root node and widget for root node
     std::tuple<DataNodeShared, QVariantHoldingWidget> fromJson(const QJsonValue& json);
 
+private:
+    static bool onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode);
+    bool onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode);
+    
 private:
     //Since we go depth first, when we are done deserializing, lastCreatedWidget should hold root widget.
     QVariantHoldingWidget lastCreatedWidget;

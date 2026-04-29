@@ -35,17 +35,19 @@ class SerializationSystem
 public:
     using QVariantToJsonFunc = std::function<QJsonValue(const QVariant&)>;
 	using JsonToQVariantFunc = std::function<QVariant(const QJsonValue&)>;
+	using DefaultValueFunc 	 = std::function<QVariant()>; 
 
-    struct SerializerEntry
+    struct Entry
 	{
-		QVariantToJsonFunc serializer;
-		JsonToQVariantFunc deserializer;
+		QVariantToJsonFunc 	serializer;
+		JsonToQVariantFunc 	deserializer;
+		DefaultValueFunc 	defaultValueMaker;
 	};
 
 	using TwoKeysOneValSerializersMap = boost::bimaps::bimap<
 		boost::bimaps::tagged<QtTypeIndex, 	struct QtTypeIndexTag>,
 		boost::bimaps::tagged<QString, 		struct QStringTag>,
-		boost::bimaps::with_info<SerializerEntry>
+		boost::bimaps::with_info<Entry>
 	>;
 
 	static SerializationSystem& instance();
@@ -68,10 +70,10 @@ public:
 	template<class T>
 	std::optional<T> fromJson(const QJsonValue& json);
 
-	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
+	const Entry* getSerializerByIndex(QtTypeIndex id);
 	
 
-	const SerializerEntry* getSerializerByTypeName(QString typeName);
+	const Entry* getSerializerByTypeName(QString typeName);
 	
 
 private:
@@ -83,7 +85,7 @@ private:
 	// This could ve been public method too, but i feel like leaving only one way to do things -
 	// the other, and the only one, public 'registerSerialization()'
     template<class T>
-	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer);
+	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer, DefaultValueFunc defaultValueMaker);
 
 private:
 	TwoKeysOneValSerializersMap serializerEntries;
@@ -92,11 +94,11 @@ private:
 
 
 template<class T>
-void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer)
+void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer, DefaultValueFunc defaultValueMaker)
 {
 	SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
 
-	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer} } );
+	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), Entry{serializer, deserializer, defaultValueMaker} } );
 }
 
 template<class T>
@@ -139,5 +141,10 @@ void SerializationSystem::registerSerialization()
 		else return QVariant();
 	};
 
-	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
+	DefaultValueFunc defaultValueMaker = []()->QVariant
+	{
+		return QVariant::fromValue(T{});
+	};
+
+	registerSerialization<T>(wrappedSerializer, wrappedDeserializer, defaultValueMaker);
 }

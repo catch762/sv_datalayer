@@ -1,5 +1,6 @@
 #pragma once
 #include "sv_qtcommon.h"
+#include "DataNode/DataNode.h"
 
 static constexpr auto TypeFieldKey = "_type";
 template <typename T>
@@ -63,3 +64,15 @@ inline void setWidgetMakerName(const QJsonObjectWithWidgetOptions &obj, QString 
 {
     obj[WidgetMakerNameKey] = widgetMakerName;
 }
+
+struct NodeAndWidgetPair
+{
+    DataNodeShared node;
+    QVariantHoldingWidget widget;
+
+    inline bool isValid()
+    {
+        return node && qVariantHasWidget(widget);
+    }
+};
+SV_DECL_OPT(NodeAndWidgetPair);
