@@ -66,9 +66,20 @@ public:
     static DataNodeShared makeLeaf(const QString &_name = QString(), const LeafValueT& value = {})
     {
         auto node = new DataNode(_name, NodeType::Leaf);
-        *node->tryGetLeafvalue() = QVariant::fromValue(value);
+
+        //avoiding double wrapping qvariant in qvariant:
+        if constexpr (std::is_same_v<LeafValueT, QVariant>)
+        {
+            *node->tryGetLeafvalue() = value;
+        }
+        else
+        {
+            *node->tryGetLeafvalue() = QVariant::fromValue(value);
+        }
+
         return DataNodeShared(node);
     }
+    
     static DataNodeShared makeComposite(const QString &_name = QString())
     {
         return DataNodeShared(new DataNode(_name, NodeType::Composite));
