@@ -93,6 +93,7 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForNode(DataNodeShared node
                             createWidgetisForCompositeNode(node, options);
 }
 
+//todo rename
 QVariantHoldingWidget WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     SV_ASSERT(node);

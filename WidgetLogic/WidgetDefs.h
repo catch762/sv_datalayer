@@ -45,6 +45,11 @@ SV_DECL_OPT(QJsonObjectWithWidgetOptions);
 
 constexpr auto WidgetMakerNameKey = "_maker";
 
+inline QJsonObjectWithWidgetOptionsOpt getWidgetOptionsFromString(const QStringOpt &jsonString)
+{
+    return jsonString ? jsonStringToObject(*jsonString) : QJsonObjectWithWidgetOptionsOpt{};
+}
+
 inline QStringOpt getWidgetMakerNameOpt(const QJsonObjectWithWidgetOptions &obj)
 {
     //return getFromJsonAndLogError<QString>(obj, WidgetMakerNameKey);
@@ -76,3 +81,6 @@ struct NodeAndWidgetPair
     }
 };
 SV_DECL_OPT(NodeAndWidgetPair);
+
+using NodeAndWidgetPairList = std::vector<NodeAndWidgetPair>;
+SV_DECL_OPT(NodeAndWidgetPairList);
