@@ -41,7 +41,7 @@ public:
 	{
 		QVariantToJsonFunc 	serializer;
 		JsonToQVariantFunc 	deserializer;
-		DefaultValueFunc 	defaultValueMaker;
+		DefaultValueFunc 	defaultValueMaker; //todo delete it ?
 	};
 
 	using TwoKeysOneValSerializersMap = boost::bimaps::bimap<

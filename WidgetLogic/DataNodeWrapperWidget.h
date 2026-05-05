@@ -23,6 +23,16 @@ class DataNodeWrapperWidget : public QWidget
 {
     Q_OBJECT
 public:
+    // Assuming argument is a widget for certain DataNode, this function should update
+    // widget value from that DataNode.
+    //
+    // Its simply called on all content widgets when you call updateContentWidgetsFromDataNode()
+    //
+    // (At this point, its only supplied when we are wrapping single widget for leaf node - 
+    // because currently i dont change tree structure, only leaf node values, so thats all
+    // widgets should account for. At the moment. So its only passed in constructor taking single widget.)
+    using UpdateContentWidgetFromNodeFunc = std::function<void(QWidget*, ConstDataNodeWeak)>;
+
     DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets,
                             bool                                      isForCompositeNode,
                             const QString&                            name           = {},
@@ -33,6 +43,7 @@ public:
     DataNodeWrapperWidget(  WidgetType*                             widget,
                             const QString&                          name    = {},
                             const QJsonObjectWithWidgetOptionsOpt&  options = {},
+                            UpdateContentWidgetFromNodeFunc         contentUpdater = nullptr,
                             QWidget*                                parent  = nullptr )
         : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
     {
@@ -43,6 +54,9 @@ public:
     QHBoxLayout* getStripeButtonsLayout();
     
     QJsonObjectWithWidgetOptions makeOptions() const;
+
+    void updateContentWidgetsFromDataNode(ConstDataNodeWeak weakNode);
+
 private:
     void createAndInitTopStripe(const QString &name);
     void iterateContentWidgets(std::function<void(QWidget*)> visitor);
@@ -67,6 +81,7 @@ private:
     std::vector<QVariantHoldingWidget>              contentWidgets;
 
     bool isForCompositeNode = false;
+    UpdateContentWidgetFromNodeFunc contentUpdater;
 };
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);

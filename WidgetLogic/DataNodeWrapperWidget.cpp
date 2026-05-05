@@ -255,3 +255,21 @@ QJsonObjectWithWidgetOptions DataNodeWrapperWidget::makeOptions() const
 
     return obj;
 }
+
+void DataNodeWrapperWidget::updateContentWidgetsFromDataNode(ConstDataNodeWeak weakNode)
+{
+    if (!contentUpdater)
+    {
+        if (!isForCompositeNode)
+        {
+            SV_WARN(std::format("DataNodeWrapperWidget::updateContentWidgetsFromDataNode "
+                "called on leaf node widget, but it doesnt have updater. Node is {}", weakNode));
+        }
+        return;
+    }
+
+    iterateContentWidgets([this, weakNode](QWidget *widget)
+    {
+        contentUpdater(widget, weakNode);
+    });
+}
