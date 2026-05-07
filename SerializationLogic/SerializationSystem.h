@@ -30,6 +30,7 @@
 // You may want to look into it, and load your own serializers collection in a simillar fashion.
 //
 //**************************************************************************************************************
+
 class SerializationSystem
 {
 public:
