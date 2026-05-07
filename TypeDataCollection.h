@@ -6,7 +6,7 @@ template<typename DataEntry>
 class TypeDataCollection
 {
 public:
-    //its like std::map but with two keys
+    //Its like std::map but with two keys
     using DataForTypesMap = boost::bimaps::bimap<
 		boost::bimaps::tagged<QtTypeIndex, 	struct TypeIndexKey_Tag>,   // key 1: type index
 		boost::bimaps::tagged<QString, 		struct TypeNameKey_Tag>,    // key 2: type name
@@ -18,12 +18,13 @@ public:
     using DataForTypesAsTypeNameMap  = typename DataForTypesMap::template map_by<TypeNameKey_Tag>::type;
 
 
-    //These will overwrite DataEntry if it exists for the type, but will LOG_WARN about it.
-    void addEntryForType(QtTypeIndex    typeIndex, DataEntry&& entry);
-    void addEntryForType(const QString& typeName,  DataEntry&& entry);
+    //Will overwrite DataEntry if it exists for the type, but will LOG_WARN about it.
+    void addEntryForType(QtTypeIndex    typeIndex, const QString &typeName, DataEntry&& entry);
 
-    const DataEntry* getEntry();
-    DataEntry*       getEntryPtr();
+    const DataEntry* getEntry   (QtTypeIndex    typeIndex);
+    const DataEntry* getEntry   (const QString& typeName);
+    DataEntry*       getEntryPtr(QtTypeIndex    typeIndex);
+    DataEntry*       getEntryPtr(const QString& typeName);
 
 	DataForTypesAsTypeIndexMap& getDataMapAsTypeindexMap();
     DataForTypesAsTypeNameMap&  getDataMapAsTypeNameMap();
@@ -34,37 +35,73 @@ private:
 };
 
 template <typename DataEntry>
-inline void TypeDataCollection<DataEntry>::addEntryForType(QtTypeIndex typeIndex, DataEntry &&entry)
+inline void TypeDataCollection<DataEntry>::addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
 {
+    auto typeIndexExists = getDataMapAsTypeindexMap().find(typeIndex) != getDataMapAsTypeindexMap().end();
+    auto typeNameExists  = getDataMapAsTypeNameMap().find(typeName) != getDataMapAsTypeNameMap().end();
+
+    if (typeIndexExists != typeNameExists)
+    {
+        SV_ERROR(std::format("TypeDataCollection: typeIndexExists is [{}] for [{}] but typeNameExists is [{}] for [{}], "
+                             "so you are not even supplying properly unique key pair. Entry will not be added",
+                             typeIndexExists, typeIndex, typeNameExists, typeName));
+        return;
+    }
+
+    if (typeIndexExists || typeNameExists)
+    {
+        SV_WARN(std::format("TypeDataCollection: overwriting entry for type [{}, {}]", typeIndex, typeName));
+    }
+
+    theMap.insert({typeIndex, typeName, std::move(entry)});
 }
 
 template <typename DataEntry>
-inline void TypeDataCollection<DataEntry>::addEntryForType(const QString &typeName, DataEntry &&entry)
+inline const DataEntry *TypeDataCollection<DataEntry>::getEntry(QtTypeIndex typeIndex)
 {
+    auto& theMap = getDataMapAsTypeindexMap();
+    auto found = theMap.find(typeIndex);
+    if (found != theMap.end()) return &found->info;
+    else return nullptr;
 }
 
 template <typename DataEntry>
-inline const DataEntry *TypeDataCollection<DataEntry>::getEntry()
+inline const DataEntry *TypeDataCollection<DataEntry>::getEntry(const QString &typeName)
 {
-    return nullptr;
+    auto& theMap = getDataMapAsTypeNameMap();
+    auto found = theMap.find(typeName);
+    if (found != theMap.end()) return &found->info;
+    else return nullptr;
 }
 
 template <typename DataEntry>
-inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr()
+inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr(QtTypeIndex typeIndex)
 {
-    return nullptr;
+    auto& theMap = getDataMapAsTypeindexMap();
+    auto found = theMap.find(typeIndex);
+    if (found != theMap.end()) return &found->info;
+    else return nullptr;
+}
+
+template <typename DataEntry>
+inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr(const QString &typeName)
+{
+    auto& theMap = getDataMapAsTypeNameMap();
+    auto found = theMap.find(typeName);
+    if (found != theMap.end()) return &found->info;
+    else return nullptr;
 }
 
 template <typename DataEntry>
 inline TypeDataCollection<DataEntry>::DataForTypesAsTypeIndexMap &TypeDataCollection<DataEntry>::getDataMapAsTypeindexMap()
 {
-    // TODO: insert return statement here
+    return dataMap.by<TypeIndexKey_Tag>();
 }
 
 template <typename DataEntry>
 inline TypeDataCollection<DataEntry>::DataForTypesAsTypeNameMap &TypeDataCollection<DataEntry>::getDataMapAsTypeNameMap()
 {
-    // TODO: insert return statement here
+    return dataMap.by<TypeNameKey_Tag>();
 }
 
 template <typename DataEntry>
