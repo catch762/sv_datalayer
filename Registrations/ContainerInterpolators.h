@@ -1,23 +1,23 @@
 #pragma once
 #include "sv_qtcommon.h"
-#include "SerializationLogic/SerializationSystem.h"
-#include "SerializationLogic/SerializerInterface.h"
+#include "Interpolation/InterpolationInterface.h"
 
 //*****************************************************************************************
 //
-// The idea is simple: if we have type T registered in SerializationSystem,
-// surely we can have templated serializer and deserializer for container
+// The idea is simple: if we have type T registered in InterpolationSystem,
+// surely we can have templated interpolator for container
 // types such as std::vector<T> so we dont have to write them every time.
 //
-// (Same idea as in ContainerInterpolators.h)
+// (Same idea as in ContainerSerializers.h)
 //
 // However, for every ConcreteType you will use with the container (lets say its a vector):
 //  a) you still need to Q_DECLARE_METATYPE(std::vector<ConcreteType>)
-//  b) you still need to register 'std::vector<ConcreteType>' in SerializationSystem
-//     passing serializers from this ContainerSerializers class.
+//  b) you still need to register 'std::vector<ConcreteType>' in InterpolationSystem
+//     passing interpolator from this ContainerSerializers class.
 //
 //*****************************************************************************************
 
+/*
 template<Serializable T>
 class Serializer< std::vector<T> >
 {
@@ -78,3 +78,5 @@ public:
 private:
     static inline const auto ValuesKey = "values";
 };
+
+*/

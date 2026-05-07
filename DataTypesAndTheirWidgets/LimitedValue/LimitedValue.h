@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "WidgetLogic/WidgetDefs.h"
 #include "SerializationLogic/SerializerInterface.h"
+#include "Interpolation/InterpolationInterface.h"
 #include "WidgetLogic/WidgetDefs.h"
 
 //todo rewrite for if float, if integer, not type names
@@ -185,6 +186,19 @@ public:
     }
 };
 
+template<typename T>
+class Interpolator<LimitedValue<T>>
+{
+public:
+    static LimitedValue<T> interpolate(const LimitedValue<T> &A, const LimitedValue<T> &B, double ratioAToB01)
+    {
+        return LimitedValue<T>{
+            mix(A.value(),  B.value(),  ratioAToB01),
+            mix(A.left(),   B.left(),   ratioAToB01),
+            mix(A.right(),  B.right(),  ratioAToB01)
+        };
+    }
+};
 
 using LimitedInt    = LimitedValue<int>;
 using LimitedDouble = LimitedValue<double>;

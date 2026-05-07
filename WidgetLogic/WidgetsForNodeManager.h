@@ -50,24 +50,7 @@ public:
         SV_LOG(std::format("Registered widget (now {}) for node {}", container->size(), node));
     }
     
-    static void updateAllWidgetsFromNodeState(ConstDataNodeWeak node)
-    {
-        if (auto container = getWidgetsForNode(node))
-        {
-            for (const auto &widgetEntry : *container)
-            {
-                if (widgetEntry.stillAlive())
-                {
-                    if (auto* wrapperWidget = qobject_cast<DataNodeWrapperWidget*>(widgetEntry.qPointer.data()))
-                    {
-                        wrapperWidget->updateContentWidgetsFromDataNode(node);
-                    }
-                    else SV_WARN(std::format("WidgetsForNodeManager: couldnt cast widget to DataNodeWrapperWidget "
-                                             "to update it from node {}", node));
-                }
-            }
-        }
-    }
+    static void updateAllWidgetsFromNodeState(ConstDataNodeWeak node);
 
     static WidgetsContainer* getWidgetsForNode(ConstDataNodeWeak node)
     {
