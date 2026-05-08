@@ -3,46 +3,47 @@
 #include <boost/bimap.hpp>
 
 template<typename DataEntry>
-class TypeDataCollection
+class DataForTypeMap
 {
 public:
     //Its like std::map but with two keys
-    using DataForTypesMap = boost::bimaps::bimap<
+    using DataMap = boost::bimaps::bimap<
 		boost::bimaps::tagged<QtTypeIndex, 	struct TypeIndexKey_Tag>,   // key 1: type index
 		boost::bimaps::tagged<QString, 		struct TypeNameKey_Tag>,    // key 2: type name
 		boost::bimaps::with_info<DataEntry>                             // value: DataEntry
 	>;
-    //DataForTypesMap as if it was simple map with just QtTypeIndex for key
-    using DataForTypesAsTypeIndexMap = typename DataForTypesMap::template map_by<TypeIndexKey_Tag>::type;
-    //DataForTypesMap as if it was simple map with just QString for key
-    using DataForTypesAsTypeNameMap  = typename DataForTypesMap::template map_by<TypeNameKey_Tag>::type;
+    //DataMap as if it was simple map with just QtTypeIndex for key
+    using DataMapAsTypeIndexMap = typename DataMap::template map_by<TypeIndexKey_Tag>::type;
+    //DataMap as if it was simple map with just QString for key
+    using DataMapAsTypeNameMap  = typename DataMap::template map_by<TypeNameKey_Tag>::type;
 
 
     //Will overwrite DataEntry if it exists for the type, but will LOG_WARN about it.
-    void addEntryForType(QtTypeIndex    typeIndex, const QString &typeName, DataEntry&& entry);
+    //User is responsible for supplying correct pair of keys (which uniquely identify the same value)
+    void addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry&& entry);
 
     const DataEntry* getEntry   (QtTypeIndex    typeIndex);
     const DataEntry* getEntry   (const QString& typeName);
     DataEntry*       getEntryPtr(QtTypeIndex    typeIndex);
     DataEntry*       getEntryPtr(const QString& typeName);
 
-	DataForTypesAsTypeIndexMap& getDataMapAsTypeindexMap();
-    DataForTypesAsTypeNameMap&  getDataMapAsTypeNameMap();
-    DataForTypesMap& getDataMap();
+	DataMapAsTypeIndexMap& getDataMapAsTypeindexMap();
+    DataMapAsTypeNameMap&  getDataMapAsTypeNameMap();
+    DataMap& getDataMap();
 
 private:
-    DataForTypesMap dataMap;
+    DataMap dataMap;
 };
 
 template <typename DataEntry>
-inline void TypeDataCollection<DataEntry>::addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
+inline void DataForTypeMap<DataEntry>::addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
 {
     auto typeIndexExists = getDataMapAsTypeindexMap().find(typeIndex) != getDataMapAsTypeindexMap().end();
     auto typeNameExists  = getDataMapAsTypeNameMap().find(typeName) != getDataMapAsTypeNameMap().end();
 
     if (typeIndexExists != typeNameExists)
     {
-        SV_ERROR(std::format("TypeDataCollection: typeIndexExists is [{}] for [{}] but typeNameExists is [{}] for [{}], "
+        SV_ERROR(std::format("DataForTypeMap: typeIndexExists is [{}] for [{}] but typeNameExists is [{}] for [{}], "
                              "so you are not even supplying properly unique key pair. Entry will not be added",
                              typeIndexExists, typeIndex, typeNameExists, typeName));
         return;
@@ -50,14 +51,14 @@ inline void TypeDataCollection<DataEntry>::addEntryForType(QtTypeIndex typeIndex
 
     if (typeIndexExists || typeNameExists)
     {
-        SV_WARN(std::format("TypeDataCollection: overwriting entry for type [{}, {}]", typeIndex, typeName));
+        SV_WARN(std::format("DataForTypeMap: overwriting entry for type [{}, {}]", typeIndex, typeName));
     }
 
-    theMap.insert({typeIndex, typeName, std::move(entry)});
+    dataMap.insert({typeIndex, typeName, std::move(entry)});
 }
 
 template <typename DataEntry>
-inline const DataEntry *TypeDataCollection<DataEntry>::getEntry(QtTypeIndex typeIndex)
+inline const DataEntry *DataForTypeMap<DataEntry>::getEntry(QtTypeIndex typeIndex)
 {
     auto& theMap = getDataMapAsTypeindexMap();
     auto found = theMap.find(typeIndex);
@@ -66,7 +67,7 @@ inline const DataEntry *TypeDataCollection<DataEntry>::getEntry(QtTypeIndex type
 }
 
 template <typename DataEntry>
-inline const DataEntry *TypeDataCollection<DataEntry>::getEntry(const QString &typeName)
+inline const DataEntry *DataForTypeMap<DataEntry>::getEntry(const QString &typeName)
 {
     auto& theMap = getDataMapAsTypeNameMap();
     auto found = theMap.find(typeName);
@@ -75,7 +76,7 @@ inline const DataEntry *TypeDataCollection<DataEntry>::getEntry(const QString &t
 }
 
 template <typename DataEntry>
-inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr(QtTypeIndex typeIndex)
+inline DataEntry *DataForTypeMap<DataEntry>::getEntryPtr(QtTypeIndex typeIndex)
 {
     auto& theMap = getDataMapAsTypeindexMap();
     auto found = theMap.find(typeIndex);
@@ -84,7 +85,7 @@ inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr(QtTypeIndex typeInd
 }
 
 template <typename DataEntry>
-inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr(const QString &typeName)
+inline DataEntry *DataForTypeMap<DataEntry>::getEntryPtr(const QString &typeName)
 {
     auto& theMap = getDataMapAsTypeNameMap();
     auto found = theMap.find(typeName);
@@ -93,19 +94,19 @@ inline DataEntry *TypeDataCollection<DataEntry>::getEntryPtr(const QString &type
 }
 
 template <typename DataEntry>
-inline TypeDataCollection<DataEntry>::DataForTypesAsTypeIndexMap &TypeDataCollection<DataEntry>::getDataMapAsTypeindexMap()
+inline DataForTypeMap<DataEntry>::DataMapAsTypeIndexMap &DataForTypeMap<DataEntry>::getDataMapAsTypeindexMap()
 {
-    return dataMap.by<TypeIndexKey_Tag>();
+    return dataMap.template by<TypeIndexKey_Tag>();
 }
 
 template <typename DataEntry>
-inline TypeDataCollection<DataEntry>::DataForTypesAsTypeNameMap &TypeDataCollection<DataEntry>::getDataMapAsTypeNameMap()
+inline DataForTypeMap<DataEntry>::DataMapAsTypeNameMap &DataForTypeMap<DataEntry>::getDataMapAsTypeNameMap()
 {
-    return dataMap.by<TypeNameKey_Tag>();
+    return dataMap.template by<TypeNameKey_Tag>();
 }
 
 template <typename DataEntry>
-inline TypeDataCollection<DataEntry>::DataForTypesMap &TypeDataCollection<DataEntry>::getDataMap()
+inline DataForTypeMap<DataEntry>::DataMap &DataForTypeMap<DataEntry>::getDataMap()
 {
     return dataMap;
 }

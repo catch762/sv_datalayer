@@ -3,6 +3,7 @@
 #include <boost/bimap.hpp>
 #include "WidgetLogic/WidgetDefs.h"
 #include "SerializationLogic/SerializerInterface.h"
+#include "DataForTypeMap.h"
 
 //**************************************************************************************************************
 //
@@ -38,18 +39,14 @@ public:
 	using JsonToQVariantFunc = std::function<QVariant(const QJsonValue&)>;
 	using DefaultValueFunc 	 = std::function<QVariant()>; 
 
-    struct Entry
+    struct SerializerEntry
 	{
 		QVariantToJsonFunc 	serializer;
 		JsonToQVariantFunc 	deserializer;
 		DefaultValueFunc 	defaultValueMaker; //todo delete it ?
 	};
 
-	using TwoKeysOneValSerializersMap = boost::bimaps::bimap<
-		boost::bimaps::tagged<QtTypeIndex, 	struct QtTypeIndexTag>,
-		boost::bimaps::tagged<QString, 		struct QStringTag>,
-		boost::bimaps::with_info<Entry>
-	>;
+	using SerializerMap = DataForTypeMap<SerializerEntry>;
 
 	static SerializationSystem& instance();
 
@@ -71,10 +68,10 @@ public:
 	template<class T>
 	std::optional<T> fromJson(const QJsonValue& json);
 
-	const Entry* getSerializerByIndex(QtTypeIndex id);
+	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
 	
 
-	const Entry* getSerializerByTypeName(QString typeName);
+	const SerializerEntry* getSerializerByTypeName(QString typeName);
 	
 
 private:
@@ -99,7 +96,7 @@ void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, J
 {
 	SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
 
-	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), Entry{serializer, deserializer, defaultValueMaker} } );
+	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer, defaultValueMaker} } );
 }
 
 template<class T>
