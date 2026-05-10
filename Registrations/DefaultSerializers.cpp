@@ -1,25 +1,27 @@
 #include "DefaultSerializers.h"
 #include "SerializationLogic/SerializationSystem.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
-#include "ContainerSerializers.h"
+#include "Utils/ContainerSerializers.h"
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 
 
-void DefaultSerializers::Register(SerializationSystem *systemInstance)
+void DefaultSerializers::RegisterEverything()
 {
-    systemInstance->registerSerialization<double> ();
-    systemInstance->registerSerialization<bool>   ();
-    systemInstance->registerSerialization<QString>();
+    auto& system = SerializationSystem::instance();
+
+    system.registerSerialization<double> ();
+    system.registerSerialization<bool>   ();
+    system.registerSerialization<QString>();
     
-    systemInstance->registerSerialization<BoolVec>   ();
+    system.registerSerialization<BoolVec>   ();
 
-    systemInstance->registerSerialization<LimitedDouble>();
-    systemInstance->registerSerialization<LimitedDoubleVec>();
+    system.registerSerialization<LimitedDouble>();
+    system.registerSerialization<LimitedDoubleVec>();
 
-    systemInstance->registerSerialization<LimitedInt>();
-    systemInstance->registerSerialization<LimitedIntVec>();
+    system.registerSerialization<LimitedInt>();
+    system.registerSerialization<LimitedIntVec>();
 
-    systemInstance->registerSerialization<DataNodeWrapperWidget*>();
-    systemInstance->registerSerialization<LimitedValueVecWidget*>();
+    system.registerSerialization<DataNodeWrapperWidget*>();
+    system.registerSerialization<LimitedValueVecWidget*>();
     
 }

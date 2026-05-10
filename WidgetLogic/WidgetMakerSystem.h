@@ -111,7 +111,7 @@ private:
 
     QVariantHoldingWidget createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
-    WidgetMakerSystem();
+    WidgetMakerSystem() = default;
 
 private:
     std::map<QtTypeIndex, WidgetMakerCollection> widgetMakerCollections;

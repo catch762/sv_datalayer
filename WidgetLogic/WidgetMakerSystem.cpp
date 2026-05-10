@@ -1,5 +1,4 @@
 #include "WidgetLogic/WidgetMakerSystem.h"
-#include "Registrations/DefaultWidgetMakers.h"
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 
 #include "WidgetLogic/WidgetsForNodeManager.h"
@@ -160,9 +159,4 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared 
         SV_ERROR(std::format("No widget maker exist for {}", node)); 
         return {};
     }
-}
-
-WidgetMakerSystem::WidgetMakerSystem()
-{
-    DefaultWidgetMakers::RegisterEverything(this);
 }

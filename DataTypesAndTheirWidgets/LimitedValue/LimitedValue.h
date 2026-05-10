@@ -190,9 +190,9 @@ template<typename T>
 class Interpolator<LimitedValue<T>>
 {
 public:
-    static LimitedValue<T> interpolate(const LimitedValue<T> &A, const LimitedValue<T> &B, double ratioAToB01)
+    static void interpolate(const LimitedValue<T> &A, const LimitedValue<T> &B, LimitedValue<T> &Result, double ratioAToB01)
     {
-        return LimitedValue<T>{
+        Result = LimitedValue<T>{
             mix(A.value(),  B.value(),  ratioAToB01),
             mix(A.left(),   B.left(),   ratioAToB01),
             mix(A.right(),  B.right(),  ratioAToB01)

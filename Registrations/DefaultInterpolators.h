@@ -4,8 +4,5 @@
 class DefaultInterpolators
 {
 public:
-    static void registerInterpolators()
-    {
-        
-    }
+    static void registerEverything();
 };

@@ -4,13 +4,12 @@
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include "WidgetLogic/WidgetDefs.h"
 
-class WidgetMakerSystem;
 class DataNodeWrapperWidget;
 
 class DefaultWidgetMakers
 {
 public:
-    static void RegisterEverything(WidgetMakerSystem *system);
+    static void RegisterEverything();
 
     static DataNodeWrapperWidget* widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options);
 

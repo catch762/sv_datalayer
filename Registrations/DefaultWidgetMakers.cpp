@@ -69,15 +69,17 @@ void updateWidgetFromNodeState(QWidget* qwidget, ConstDataNodeWeak nodeWeak)
     (*widget.*WidgetSetValueMethod)(leaf->value<ValueType>());
 }
 
-void DefaultWidgetMakers::RegisterEverything(WidgetMakerSystem *system)
+void DefaultWidgetMakers::RegisterEverything()
 {
-    system->registerWidgetMaker<QString>         (widgetMakerForQString,            "std");
-    system->registerWidgetMaker<bool>            (widgetMakerForBool,               "std");
-    system->registerWidgetMaker<BoolVec>         (widgetMakerForBoolVec,            "std");
-    system->registerWidgetMaker<LimitedDouble>   (widgetMakerForLimitedDouble,      "std");
-    system->registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec,   "std");
-    system->registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt,         "std");
-    system->registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec,      "std");
+    auto& system = WidgetMakerSystem::instance();
+
+    system.registerWidgetMaker<QString>         (widgetMakerForQString,            "std");
+    system.registerWidgetMaker<bool>            (widgetMakerForBool,               "std");
+    system.registerWidgetMaker<BoolVec>         (widgetMakerForBoolVec,            "std");
+    system.registerWidgetMaker<LimitedDouble>   (widgetMakerForLimitedDouble,      "std");
+    system.registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec,   "std");
+    system.registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt,         "std");
+    system.registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec,      "std");
 }
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)

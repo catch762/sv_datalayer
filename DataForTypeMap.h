@@ -2,6 +2,8 @@
 #include "sv_qtcommon.h"
 #include <boost/bimap.hpp>
 
+// This is used when i need to save some metadata for a type, AND access it by both type index and type name.
+
 template<typename DataEntry>
 class DataForTypeMap
 {
@@ -18,14 +20,19 @@ public:
     using DataMapAsTypeNameMap  = typename DataMap::template map_by<TypeNameKey_Tag>::type;
 
 
-    //Will overwrite DataEntry if it exists for the type, but will LOG_WARN about it.
-    //User is responsible for supplying correct pair of keys (which uniquely identify the same value)
+    // Will overwrite DataEntry if it exists for the type, but will LOG_WARN about it.
+    // User is responsible for supplying correct pair of keys (which uniquely identify the same value)
+    // If both keys CLEARLY dont identify same value, will do nothing and LOG_ERROR.
     void addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry&& entry);
 
     const DataEntry* getEntry   (QtTypeIndex    typeIndex);
     const DataEntry* getEntry   (const QString& typeName);
     DataEntry*       getEntryPtr(QtTypeIndex    typeIndex);
     DataEntry*       getEntryPtr(const QString& typeName);
+
+    bool entryExists(QtTypeIndex typeIndex);
+    bool entryExists(const QString& typeName);
+    bool entryExistsForEither(QtTypeIndex typeIndex, const QString& typeName);
 
 	DataMapAsTypeIndexMap& getDataMapAsTypeindexMap();
     DataMapAsTypeNameMap&  getDataMapAsTypeNameMap();
@@ -38,8 +45,8 @@ private:
 template <typename DataEntry>
 inline void DataForTypeMap<DataEntry>::addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
 {
-    auto typeIndexExists = getDataMapAsTypeindexMap().find(typeIndex) != getDataMapAsTypeindexMap().end();
-    auto typeNameExists  = getDataMapAsTypeNameMap().find(typeName) != getDataMapAsTypeNameMap().end();
+    auto typeIndexExists = entryExists(typeIndex);
+    auto typeNameExists  = entryExists(typeName);
 
     if (typeIndexExists != typeNameExists)
     {
@@ -91,6 +98,24 @@ inline DataEntry *DataForTypeMap<DataEntry>::getEntryPtr(const QString &typeName
     auto found = theMap.find(typeName);
     if (found != theMap.end()) return &found->info;
     else return nullptr;
+}
+
+template <typename DataEntry>
+inline bool DataForTypeMap<DataEntry>::entryExists(QtTypeIndex typeIndex)
+{
+    return getDataMapAsTypeindexMap().find(typeIndex) != getDataMapAsTypeindexMap().end();
+}
+
+template <typename DataEntry>
+inline bool DataForTypeMap<DataEntry>::entryExists(const QString &typeName)
+{
+    return getDataMapAsTypeNameMap().find(typeName) != getDataMapAsTypeNameMap().end();
+}
+
+template <typename DataEntry>
+inline bool DataForTypeMap<DataEntry>::entryExistsForEither(QtTypeIndex typeIndex, const QString &typeName)
+{
+    return entryExists(typeIndex) || entryExists(typeName);
 }
 
 template <typename DataEntry>

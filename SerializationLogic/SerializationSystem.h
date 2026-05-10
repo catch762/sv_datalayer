@@ -26,7 +26,7 @@
 //	  Thats how SerializationSystem knows which deserializer to pick when it receives JSON.
 //	  (just FYI raw 'double', 'bool' and 'QString' types dont save it, but its the only exception)
 //
-// SerializationSystem comes with some types already registered: thats because
+// SerializationSystem comes with some types already registered: thats because ---REMOVE
 // in its constructor it loads registrations from DefaultSerializers class.
 // You may want to look into it, and load your own serializers collection in a simillar fashion.
 //
@@ -48,45 +48,41 @@ public:
 
 	using SerializerMap = DataForTypeMap<SerializerEntry>;
 
-	static SerializationSystem& instance();
-
+	
 	//If has defined Serializer<T>, just call this
 	template <Serializable T>
 	void registerSerialization();
-
+	
 	
 	//todo its bad cause qvariant also fits
 	//convenience function, wraps in QVariant and calls 'qVariantToJson'
 	template<class T>
 	QJsonValue toJson(const T& value);
-
+	
 	QJsonValue qVariantToJson(const QVariant& val, bool logOnError = false);
-
+	
 	//todo write about type and how its not needed for double bool qstring
 	QVariant jsonToQVariant(const QJsonValue& json);
 	
 	template<class T>
 	std::optional<T> fromJson(const QJsonValue& json);
-
-	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
 	
-
-	const SerializerEntry* getSerializerByTypeName(QString typeName);
-	
+	static SerializationSystem& instance();
 
 private:
-	SerializationSystem();
-
-	TwoKeysOneValSerializersMap::map_by<QStringTag>::type& serializersAsQStringMap();
-	TwoKeysOneValSerializersMap::map_by<QtTypeIndexTag>::type& serializersAsTypeindexMap();
-
+	SerializationSystem() = default;
+	DISABLE_COPY_AND_ASSIGNMENT(SerializationSystem);
+	
+	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
+	const SerializerEntry* getSerializerByTypeName(QString typeName);
+	
 	// This could ve been public method too, but i feel like leaving only one way to do things -
 	// the other, and the only one, public 'registerSerialization()'
     template<class T>
 	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer, DefaultValueFunc defaultValueMaker);
 
 private:
-	TwoKeysOneValSerializersMap serializerEntries;
+	DataForTypeMap<SerializerEntry> serializerEntries;
 };
 
 
@@ -96,7 +92,7 @@ void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, J
 {
 	SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
 
-	serializerEntries.insert( {qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer, defaultValueMaker} } );
+	serializerEntries.addEntryForType( qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer, defaultValueMaker} );
 }
 
 template<class T>

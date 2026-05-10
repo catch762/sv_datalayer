@@ -1,24 +1,28 @@
 #include "InterpolationSystem.h"
 
-QVariantOpt InterpolationSystem::interpolate(const QVariant &A, const QVariant &B, double ratioAToB01)
+bool InterpolationSystem::interpolate(const QVariant &A, const QVariant &B, QVariant &Result, double ratioAToB01)
 {
-    QtTypeIndex aType = A.typeId();
-    QtTypeIndex bType = B.typeId();
+    QtTypeIndex aType       = A.typeId();
+    QtTypeIndex bType       = B.typeId();
+    QtTypeIndex resultType  = Result.typeId();
 
-    if (aType != bType)
+    bool allSameType = aType == bType && aType == resultType;
+
+    if (!allSameType)
     {
-        SV_ERROR(std::format("Trying to interpolate mismatching values: {} {}", qVariantInfo(A), qVariantInfo(B)));
-        return {};
+        SV_ERROR(std::format("Trying to interpolate mismatching values: {} {} to {}",
+                                qVariantInfo(A), qVariantInfo(B), qVariantInfo(Result)));
+        return false;
     }
 
     if (auto* interpolator = getInterpolator(aType))
     {
-        return (*interpolator)(A, B, ratioAToB01);
+        (*interpolator)(A, B, Result, ratioAToB01);
     }
     else
     {
         //its fine, dont even need to log error.
-        return {};
+        return false;
     }
 }
 

@@ -3,11 +3,10 @@
 #include "sv_qtcommon.h"
 #include "SerializationLogic/SerializerInterface.h"
 
-class SerializationSystem;
 class DefaultSerializers
 {
 public:
-	static void Register(SerializationSystem *systemInstance);
+	static void RegisterEverything();
 };
 
 // Note, that double, bool and QString are the only, exceptional, basic types

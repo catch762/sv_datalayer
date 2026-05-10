@@ -77,28 +77,10 @@ QVariant SerializationSystem::jsonToQVariant(const QJsonValue &json)
 
 const SerializationSystem::SerializerEntry *SerializationSystem::getSerializerByIndex(QtTypeIndex id)
 {
-    auto found = serializersAsTypeindexMap().find(id);
-    if (found != serializersAsTypeindexMap().end()) return &found->info;
-    else return nullptr;
+    return serializerEntries.getEntry(id);
 }
 
 const SerializationSystem::SerializerEntry *SerializationSystem::getSerializerByTypeName(QString typeName)
 {
-    auto found = serializersAsQStringMap().find(typeName);
-    if (found != serializersAsQStringMap().end()) return &found->info;
-    else return nullptr;
+    return serializerEntries.getEntry(typeName);
 }
-
-SerializationSystem::SerializationSystem()
-{
-    DefaultSerializers::Register(this);
-}
-
-SerializationSystem::TwoKeysOneValSerializersMap::map_by<QStringTag>::type& SerializationSystem::serializersAsQStringMap()
-{
-    return serializerEntries.by<QStringTag>();
-}
-SerializationSystem::TwoKeysOneValSerializersMap::map_by<QtTypeIndexTag>::type& SerializationSystem::serializersAsTypeindexMap()
-{
-    return serializerEntries.by<QtTypeIndexTag>();
-}  
