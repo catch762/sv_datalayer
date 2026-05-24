@@ -80,9 +80,11 @@ public:
         return DataNodeShared(node);
     }
     
-    static DataNodeShared makeComposite(const QString &_name = QString())
+    static DataNodeShared makeComposite(const QString &_name = QString(), std::vector<DataNodeShared>&& children = {})
     {
-        return DataNodeShared(new DataNode(_name, NodeType::Composite));
+        auto node = DataNodeShared(new DataNode(_name, NodeType::Composite));
+        node->tryGetCompositeData()->children = std::move(children);
+        return node;
     }
 
     //Returns added node.
@@ -113,7 +115,7 @@ public:
         return std::holds_alternative<CompositeData>(payload);
     }
 
-    QString getName()
+    QString getName() const
     {
         return name;
     }
@@ -180,11 +182,12 @@ public:
     // When DataNode gets serialized or deserialized, you can use corresponding
     // action to do something else (inject or read additional data, for example.)
     // Return value in both: means 'success'. If false is returned, it means entire operation is failed.
-    using OnJsonCreatedFromNodeAction = std::function<bool(ConstDataNodeShared node,       QJsonObject &jsonOfNode)>;
-    using OnNodeCreatedFromJsonAction = std::function<bool(     DataNodeShared node, const QJsonObject &jsonOfNode)>;
+    // '_level': 0 is root, 1 is child, 2 is granchild, etc
+    using OnJsonCreatedFromNodeAction = std::function<bool(ConstDataNodeShared node,       QJsonObject &jsonOfNode, int _level)>;
+    using OnNodeCreatedFromJsonAction = std::function<bool(     DataNodeShared node, const QJsonObject &jsonOfNode, int _level)>;
 
-    QJsonObjectOpt toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction = nullptr) const;
-    static DataNodeShared fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAction onNodeCreatedAction = nullptr);
+    QJsonObjectOpt toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction = nullptr, int _level = 0) const;
+    static DataNodeShared fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAction onNodeCreatedAction = nullptr, int _level = 0);
 
     //These methods can not operate on wrong type, so will assert in case of mismatch:
     void addChild(DataNodeShared child)
@@ -216,11 +219,17 @@ public:
         return compData->getChild(idx);
     }
 
+    //returns 0 for Leaf nodes
+    int childrenCount() const
+    {
+        return isLeaf() ? 0 : tryGetCompositeData()->childrenCount();
+    }
+
     QString basicInfo() const
     {
-        return QString("DataNode{name=%1, type=%2, holds=%3}")
-            .arg(name)
+        return QString("DataNode{%1, name=%2, holds=%3}")
             .arg(isLeaf() ? "leaf":"comp")
+            .arg(name)
             .arg(isLeaf() ? *tryGetLeafTypeName() : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
     }
     std::string stdBasicInfo() const
@@ -237,6 +246,16 @@ public:
         }
         else return false;
     }
+
+    //'Structural equality': both trees must have exact structure.
+    //
+    // That means we check everything, child count, names, all has to match exactly.
+    // The only thing we DONT check: 
+    //    - when we compare two LeafNodes they must hold same type, but we dont check the value.
+    //
+    // - You can pass string address to second arg to receive exact mismatch info.
+    // - Keep '_currentLevel' at 0, it is to check recursion level for better logs.
+    static bool structurallyEqual(const DataNode& first, const DataNode& second, std::string *out_MismatchError = nullptr, int _currentLevel = 0);
 
 private:
     void initPayload(NodeType nodeType)
@@ -265,5 +284,6 @@ private:
     static inline const std::string logCategory = "DataNode";
 };
 
+SV_DECL_STD_FORMATTER(DataNode,          obj.stdBasicInfo());
 SV_DECL_STD_FORMATTER(DataNodeShared,    obj        ? obj->stdBasicInfo()        : "DataNode{nullptr}");
 SV_DECL_STD_FORMATTER(ConstDataNodeWeak, obj.lock() ? obj.lock()->stdBasicInfo() : "DataNode{nullptr}");

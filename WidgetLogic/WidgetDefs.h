@@ -27,6 +27,7 @@ inline void addTypeFieldToJson(QJsonObject &obj)
 // say, QLineEdit, you dont make more widget classes, you just supply Serializer< QPointer<QLineEdit> >
 // and everything should just work.
 using QVariantHoldingWidget = QVariant;
+using QVariantHoldingWidgetVec = std::vector<QVariantHoldingWidget>;
 
 //Yes, this casts from QPointer<ConcreteWidget> to QPointer<QWidget>
 inline QWidget* getWidgetFromQVariant(const QVariantHoldingWidget& qvariant)
@@ -39,6 +40,18 @@ inline bool qVariantHasWidget(const QVariantHoldingWidget& qvariant)
     return getWidgetFromQVariant(qvariant) != nullptr;
 }  
 
+inline void deleteWidgetsAndClear(QVariantHoldingWidgetVec& vec)
+{
+    for (auto &qvariant : vec)
+    {
+        if (auto* widget = getWidgetFromQVariant(qvariant))
+        {
+            delete widget;
+        }
+    }
+
+    vec.clear();
+}
 
 using QJsonObjectWithWidgetOptions = QJsonObject;
 SV_DECL_OPT(QJsonObjectWithWidgetOptions);

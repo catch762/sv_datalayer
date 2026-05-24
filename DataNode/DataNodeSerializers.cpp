@@ -6,7 +6,7 @@
 #include "WidgetLogic/WidgetMakerSystem.h"
 #include "WidgetLogic/DataNodeWrapperWidget.h"
 
-bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode)
+bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level)
 {
     auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node);
     auto hasWidget = qVariantHasWidget(widgetVariant);
@@ -25,13 +25,21 @@ bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOpt
     return true;
 }
 
-bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode)
+bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget(   DataNodeShared      node,
+                                                                                    const QJsonObject&  jsonOfNode,
+                                                                                    int                 level,
+                                                                                    bool                makeWidgetForRootNode)
 {
+    if (level == 0 && !makeWidgetForRootNode)
+    {
+        return true;
+    }
+
     QJsonObjectWithWidgetOptionsOpt widgetOptionsOpt = getFromJson<QJsonObject>(jsonOfNode, widgetsKey);
 
-    lastCreatedWidget = WidgetMakerSystem::instance().createAndRegisterWidgetForNode(node, widgetOptionsOpt);
+    auto createdWidget = WidgetMakerSystem::instance().createAndRegisterWidgetForNode(node, widgetOptionsOpt);
 
-    if (!qVariantHasWidget(lastCreatedWidget))
+    if (!qVariantHasWidget(createdWidget))
     {
         SV_ERROR(std::format("restoring widget failed: Received null QVariantHoldingWidget for leaf node {}", node));
         return false;
@@ -56,9 +64,51 @@ QJsonValue SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& 
     else return QJsonValue();
 }
 
-std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndItsWidgets::fromJson(const QJsonValue& json)
+std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndItsWidget(const QJsonValue& json)
 {
-    auto resultNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget, this, std::placeholders::_1, std::placeholders::_2));
-    return {resultNode, lastCreatedWidget};
+    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget, this,
+                                            std::placeholders::_1,
+                                            std::placeholders::_2,
+                                            std::placeholders::_3,
+                                            true)); // <- will make widget for root
+
+    if (!rootNode) return {};
+
+    auto rootNodeWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(rootNode);
+
+    if (!qVariantHasWidget(rootNodeWidget))
+    {
+        SV_ERROR("jsonToRootNodeAndItsWidget: didnt find widget for root");
+    }
+
+    return {rootNode, rootNodeWidget};
 }
 
+std::tuple<DataNodeShared, QVariantHoldingWidgetVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
+{
+    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget, this,
+                                            std::placeholders::_1,
+                                            std::placeholders::_2,
+                                            std::placeholders::_3,
+                                            false)); // <- will NOT make widget for root
+
+    if (!rootNode) return {};
+
+    QVariantHoldingWidgetVec topLevelChildrenWidgets;
+    if (rootNode->isComposite())
+    {
+        for (auto child : rootNode->tryGetCompositeData()->children)
+        {   
+            auto childWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(rootNode);
+
+            if (!qVariantHasWidget(childWidget))
+            {
+                SV_ERROR("jsonToRootNodeAndTopLevelChildrenWidgets: didnt find widget for root's child");
+            }
+
+            topLevelChildrenWidgets.push_back(childWidget);
+        }
+    }
+
+    return {rootNode, topLevelChildrenWidgets};
+}

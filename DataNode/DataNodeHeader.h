@@ -4,3 +4,4 @@
 // (This ensures the following files get included in correct order)
 #include "DataNode.h"
 #include "DataNodeSerializers.h"
+#include "DataNodeHelpers.h"
