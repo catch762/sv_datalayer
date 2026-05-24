@@ -2,8 +2,8 @@
 #include "DataNode.h"
 #include <functional>
 
-template <class... OtherDataNodes>
-bool doVisit(const std::function<void(DataNode&, OtherDataNodes&...)>& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, DataNode& nodeFirst, OtherDataNodes&... nodesRest)
+template <class Visitor, class... OtherDataNodes>
+bool doVisit(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, DataNode& nodeFirst, OtherDataNodes&... nodesRest)
 {
     static_assert((std::is_same_v<OtherDataNodes, DataNode> && ...),
                   "All node arguments must be DataNode&");
@@ -16,8 +16,6 @@ bool doVisit(const std::function<void(DataNode&, OtherDataNodes&...)>& siblingVi
                                         _currentLevel, nodeFirst, mismatchedNodeIndex, mismatchedNode, std::move(errorText));
         }
     };
-
-
 
     // Nodes must have same name
     {
@@ -145,7 +143,7 @@ bool doVisit(const std::function<void(DataNode&, OtherDataNodes&...)>& siblingVi
                 }
             }
 
-            if (!doVisit(outMismatchInfo, _currentLevel + 1, *nodeFirst.tryGetChild(i), *nodesRest.tryGetChild(i)...))
+            if (!doVisit(siblingVisitor, outMismatchInfo, _currentLevel + 1, *nodeFirst.tryGetChild(i), *nodesRest.tryGetChild(i)...))
             {
                 //So, the call that decided that children were not equal did save
                 //error to 'outMismatchInfo' already - now we just silently return.
@@ -153,10 +151,10 @@ bool doVisit(const std::function<void(DataNode&, OtherDataNodes&...)>& siblingVi
             }
         }
     }
-
-    if (siblingVisitor)
+   
+    if constexpr (!std::is_null_pointer_v<std::remove_cvref_t<Visitor>>)
     {
-        siblingVisitor(nodeFirst, nodesRest...);
+        if (siblingVisitor) siblingVisitor(nodeFirst, nodesRest...);
     }
 
     return true;
