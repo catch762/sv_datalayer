@@ -2,12 +2,10 @@
 #include "DataNode.h"
 #include <functional>
 
-//These are helper functions, wrapping call to visitStructurallyEqualTrees() function below.
-//Read comments below to figure out details.
-
-bool treesAreStructurallyEqual()
-
 //****************************************************************************************************************
+//
+// This is impl function which does all the work - i ll describe it in depth.
+// But you really should use helper functions below. You ll figure them out
 //
 // Function takes variable number of trees. So, you pass N trees. They are supposed to be
 // structurally equal. What this means is:
@@ -17,7 +15,7 @@ bool treesAreStructurallyEqual()
 //
 // So, this function iterates all N trees one by one, checking if they are infact structurally equal.
 // If they are not, function immediately returns false. If they are, and you supplied a visitor,
-// on each step it takes all nodes on same place in the trees, and calls visitor on them.
+// on each step it takes all nodes on same place in the trees (siblings), and calls visitor on them.
 //
 // Return value: 'are all trees structurally equal or not' 
 // 
@@ -36,7 +34,71 @@ bool treesAreStructurallyEqual()
 //
 //****************************************************************************************************************
 template <class Visitor, class... OtherDataNodes>
-bool visitStructurallyEqualTrees(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, DataNode& nodeFirst, OtherDataNodes&... nodesRest)
+bool visitStructurallyEqualTreesImpl(const Visitor&             siblingVisitor,
+                                     std::string*               outMismatchInfo,
+                                     int                        _currentLevel,
+                                     const DataNode&            nodeFirst,
+                                     const OtherDataNodes&...   nodesRest);
+
+// 1) Const nodes version - just calls Impl
+template <class Visitor, class... OtherDataNodes>
+bool visitStructurallyEqualConstTrees(const Visitor&             siblingVisitor,
+                                 std::string*               outMismatchInfo,
+                                 const DataNode&            nodeFirst,
+                                 const OtherDataNodes&...   nodesRest);
+
+// 2) Non-const nodes version - wraps visitor and calls Impl
+template <class Visitor, class... OtherDataNodes>
+bool visitStructurallyEqualTrees(const Visitor&     siblingVisitor,
+                                 std::string*       outMismatchInfo,
+                                 DataNode&          nodeFirst,
+                                 OtherDataNodes&... nodesRest);
+
+//**************************************
+// ACTUAL HELPER METHODS YOU SHOULD USE:
+//**************************************
+
+//When all you need is to check if trees are structurally equal.
+//Two variants, one logs mismatch.
+template <class... OtherDataNodes>
+bool treesAreStructurallyEqual(const DataNode& nodeFirst,
+                               const OtherDataNodes&... nodesRest)
+{
+    return visitStructurallyEqualConstTrees(nullptr, nullptr, nodeFirst, nodesRest...);
+}
+template <class... OtherDataNodes>
+bool treesAreStructurallyEqual_withMismatchLog(const DataNode& nodeFirst,
+                                               const OtherDataNodes&... nodesRest)
+{
+    std::string mismatchError;
+    bool result = visitStructurallyEqualConstTrees(nullptr, &mismatchError, nodeFirst, nodesRest...);
+    if (!result) SV_ERROR(mismatchError);
+    return result;
+}
+
+inline bool visitThreeStructurallyEqualTrees_withMismatchLog(   const DataNode& nodeFirst,
+                                                                const DataNode& nodeSecond,
+                                                                      DataNode& nodeThird,
+                                                                const std::function<void(   const DataNode&,
+                                                                                            const DataNode&,
+                                                                                                  DataNode&)> &visitor )
+{
+    //one tree is non-const, so we have to cast all to non-const
+
+    std::string mismatchError;
+    bool result = visitStructurallyEqualTrees(visitor, &mismatchError, const_cast<DataNode&>(nodeFirst), const_cast<DataNode&>(nodeSecond), nodeThird);
+    if (!result) SV_ERROR(mismatchError);
+    return result;
+};
+
+
+
+//********************************
+// IMPLEMENTATION FUNCTIONS:
+//********************************
+
+template <class Visitor, class... OtherDataNodes>
+bool visitStructurallyEqualTreesImpl(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, const DataNode& nodeFirst, const OtherDataNodes&... nodesRest)
 {
     static_assert((std::is_same_v<OtherDataNodes, DataNode> && ...),
                   "All node arguments must be DataNode&");
@@ -158,7 +220,7 @@ bool visitStructurallyEqualTrees(const Visitor& siblingVisitor, std::string *out
                 }
 
                 int argIndex = 1;
-                auto checkNullptrChild = [&](DataNode& nodeNext, int childIndex)->bool
+                auto checkNullptrChild = [&](const DataNode& nodeNext, int childIndex)->bool
                 {
                     if (!nodeNext.tryGetChild(childIndex))
                     {
@@ -176,7 +238,7 @@ bool visitStructurallyEqualTrees(const Visitor& siblingVisitor, std::string *out
                 }
             }
 
-            if (!doVisit(siblingVisitor, outMismatchInfo, _currentLevel + 1, *nodeFirst.tryGetChild(i), *nodesRest.tryGetChild(i)...))
+            if (!visitStructurallyEqualTreesImpl(siblingVisitor, outMismatchInfo, _currentLevel + 1, *nodeFirst.tryGetChild(i), *nodesRest.tryGetChild(i)...))
             {
                 //So, the call that decided that children were not equal did save
                 //error to 'outMismatchInfo' already - now we just silently return.
@@ -187,11 +249,58 @@ bool visitStructurallyEqualTrees(const Visitor& siblingVisitor, std::string *out
    
     if constexpr (!std::is_null_pointer_v<std::remove_cvref_t<Visitor>>)
     {
-        if (siblingVisitor) siblingVisitor(nodeFirst, nodesRest...);
+        siblingVisitor(nodeFirst, nodesRest...);
     }
 
     return true;
 }
+
+template <class Visitor, class... OtherDataNodes>
+bool visitStructurallyEqualConstTrees(const Visitor&             siblingVisitor,
+                                 std::string*               outMismatchInfo,
+                                 const DataNode&            nodeFirst,
+                                 const OtherDataNodes&...   nodesRest)
+{
+    static_assert((std::is_same_v<std::remove_cvref_t<OtherDataNodes>, DataNode> && ...),
+                  "All node arguments must be: const DataNode&");
+
+    return visitStructurallyEqualTreesImpl(
+        siblingVisitor, outMismatchInfo, 0,
+        nodeFirst, nodesRest...);
+}
+
+template <class Visitor, class... OtherDataNodes>
+bool visitStructurallyEqualTrees(const Visitor&     siblingVisitor,
+                                 std::string*       outMismatchInfo,
+                                 DataNode&          nodeFirst,
+                                 OtherDataNodes&... nodesRest)
+{
+    static_assert((std::is_same_v<std::remove_cvref_t<OtherDataNodes>, DataNode> && ...),
+                  "All node arguments must be: DataNode&");
+
+    if constexpr (std::is_null_pointer_v<std::remove_cvref_t<Visitor>>)
+    {
+        return visitStructurallyEqualTreesImpl(
+        nullptr, outMismatchInfo, 0,
+        nodeFirst, nodesRest...);
+    }
+    else
+    {
+        // Visitor must take const args, so we wrap in const version, then cast const away inside
+        auto constVisitor = [&](const DataNode& f, const OtherDataNodes&... r)
+        {
+            siblingVisitor(
+                const_cast<DataNode&>(f),
+                const_cast<OtherDataNodes&>(r)...
+            );
+        };
+
+        return visitStructurallyEqualTreesImpl(
+            constVisitor, outMismatchInfo, 0,
+            nodeFirst, nodesRest...);
+    }
+}
+
 
 inline void testvisitor()
 {
@@ -213,7 +322,7 @@ inline void testvisitor()
 
     c->tryGetChild(2)->tryGetCompositeData()->children[0].reset();
 
-    auto thevisit = [](DataNode& a, DataNode& b)
+    auto thevisit = [](const DataNode& a, const DataNode& b)
     {
         if (a.isLeaf())
         {
@@ -221,11 +330,5 @@ inline void testvisitor()
         }
     };
 
-    std::string e1;
-    bool ok1 = doVisit(thevisit, &e1, 0, *a, *b);
-
-    std::string e2;
-    bool ok2 = doVisit(nullptr, &e2, 0, *a, *b, *c);
-
-    SV_LOG(std::format("{}[{}] -- {}[{}]", ok1, e1, ok2, e2));
+    treesAreStructurallyEqual_withMismatchLog(*a, *b, *c);
 }

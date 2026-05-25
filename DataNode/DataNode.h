@@ -16,6 +16,7 @@ class DataNodeWrapperWidget;
 
 class DataNode;
 SV_DECL_ALIASES(DataNode);
+using ConstDataNodeShared = std::shared_ptr<const DataNode>;
 
 // 'Composite pattern' tree node class to hold arbitrary data / nested structures.
 // 
@@ -40,6 +41,10 @@ public:
         DataNodeShared getChild(int idx)
         {
             return hasChild(idx) ? children[idx] : DataNodeShared();
+        }
+        ConstDataNodeShared getChild(int idx) const
+        {
+            return hasChild(idx) ? children[idx] : ConstDataNodeShared();
         }
         int childrenCount() const
         {
@@ -202,6 +207,13 @@ public:
     }
 
     DataNodeShared tryGetChild(int idx)
+    {
+        return std::const_pointer_cast<DataNode>(
+            static_cast<const DataNode*>(this)->tryGetChild(idx)
+        );
+    }
+
+    std::shared_ptr<const DataNode> tryGetChild(int idx) const
     {
         auto compData = tryGetCompositeData();
         if (!compData)
