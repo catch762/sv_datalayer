@@ -2,8 +2,41 @@
 #include "DataNode.h"
 #include <functional>
 
+//These are helper functions, wrapping call to visitStructurallyEqualTrees() function below.
+//Read comments below to figure out details.
+
+bool treesAreStructurallyEqual()
+
+//****************************************************************************************************************
+//
+// Function takes variable number of trees. So, you pass N trees. They are supposed to be
+// structurally equal. What this means is:
+//     "Trees must have exact same structure - node types, node names, child count, leaf value types,
+//      basically everything, except one thing: while leaf nodes must have same value type,
+//      they may have different actual values"
+//
+// So, this function iterates all N trees one by one, checking if they are infact structurally equal.
+// If they are not, function immediately returns false. If they are, and you supplied a visitor,
+// on each step it takes all nodes on same place in the trees, and calls visitor on them.
+//
+// Return value: 'are all trees structurally equal or not' 
+// 
+// Arguments:
+//
+// 'siblingVisitor'         - optional visitor std::function (pass nullptr if dont need it).
+//                            If no checks fail, called in the end like this:
+//                            siblingVisitor(DataNode& sibling1, DataNode& sibling2, ..., DataNode& siblingN);
+//
+// 'outMismatchInfo'        - optional error string, if there was a mismatch, it contains text of
+//                            what exactly mismatched. Pass nullptr if you dont need it.
+//
+// '_currentLevel'          - always pass 0. This is to track recursion level when filling 'outMismatchInfo'
+//
+// 'nodeFirst, nodesRest'   - just pass your DataNode& trees one by one, there must be at least two.
+//
+//****************************************************************************************************************
 template <class Visitor, class... OtherDataNodes>
-bool doVisit(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, DataNode& nodeFirst, OtherDataNodes&... nodesRest)
+bool visitStructurallyEqualTrees(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, DataNode& nodeFirst, OtherDataNodes&... nodesRest)
 {
     static_assert((std::is_same_v<OtherDataNodes, DataNode> && ...),
                   "All node arguments must be DataNode&");
