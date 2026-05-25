@@ -259,16 +259,6 @@ public:
         else return false;
     }
 
-    //'Structural equality': both trees must have exact structure.
-    //
-    // That means we check everything, child count, names, all has to match exactly.
-    // The only thing we DONT check: 
-    //    - when we compare two LeafNodes they must hold same type, but we dont check the value.
-    //
-    // - You can pass string address to second arg to receive exact mismatch info.
-    // - Keep '_currentLevel' at 0, it is to check recursion level for better logs.
-    static bool structurallyEqual(const DataNode& first, const DataNode& second, std::string *out_MismatchError = nullptr, int _currentLevel = 0);
-
 private:
     void initPayload(NodeType nodeType)
     {

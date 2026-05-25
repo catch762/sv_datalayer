@@ -301,7 +301,7 @@ bool visitStructurallyEqualTrees(const Visitor&     siblingVisitor,
     }
 }
 
-
+/*
 inline void testvisitor()
 {
 
@@ -332,3 +332,4 @@ inline void testvisitor()
 
     treesAreStructurallyEqual_withMismatchLog(*a, *b, *c);
 }
+*/
