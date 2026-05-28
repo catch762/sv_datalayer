@@ -86,7 +86,11 @@ inline bool visitThreeStructurallyEqualTrees_withMismatchLog(   const DataNode& 
     //one tree is non-const, so we have to cast all to non-const
 
     std::string mismatchError;
-    bool result = visitStructurallyEqualTrees(visitor, &mismatchError, const_cast<DataNode&>(nodeFirst), const_cast<DataNode&>(nodeSecond), nodeThird);
+    bool result = visitStructurallyEqualTrees(  visitor,
+                                                &mismatchError,
+                                                const_cast<DataNode&>(nodeFirst),
+                                                const_cast<DataNode&>(nodeSecond),
+                                                nodeThird );
     if (!result) SV_ERROR(mismatchError);
     return result;
 };

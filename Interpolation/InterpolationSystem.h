@@ -1,6 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include "InterpolationInterface.h"
+#include "DataNode/DataNodeHeader.h"
 class InterpolationSystem
 {
 public:
@@ -14,8 +15,11 @@ public:
     template<typename T>
     static void registerTypeInterpolator();
 
+    //returns success; will return false if all 3 trees are not structurally equal
+    static bool interpolateTwoTreesToThird(const DataNode& treeA, const DataNode& treeB, DataNode& treeResult, double ratioAToB01);
+
 private:
-    InterpolationSystem();
+    InterpolationSystem() = default;
     DISABLE_COPY_AND_ASSIGNMENT(InterpolationSystem);
 
     static InterpolationSystem& instance();

@@ -259,6 +259,22 @@ public:
         else return false;
     }
 
+    //visitor is called on this and all inner subnodes
+    static void iterateRecoursively(const DataNodeShared& node, const std::function<void(const DataNodeShared& node)>& visitor)
+    {
+        if (!node) return;
+
+        visitor(node);
+
+        if (auto *compData = node->tryGetCompositeData())
+        {
+            for (auto& child : compData->children)
+            {
+                iterateRecoursively(child, visitor);
+            }
+        }
+    }
+
 private:
     void initPayload(NodeType nodeType)
     {
