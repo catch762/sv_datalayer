@@ -41,6 +41,7 @@ bool InterpolationSystem::interpolateTwoTreesToThird(const DataNode &treeA, cons
                                                                              *nodeB.tryGetLeafvalue(),
                                                                              *nodeResult.tryGetLeafvalue(),
                                                                              ratioAToB01);
+                //SV_LOG(std::format("[{}] interp for type {}", actuallyInterpolated, nodeA));
             }
         });
 }

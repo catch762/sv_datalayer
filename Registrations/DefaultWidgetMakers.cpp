@@ -21,8 +21,7 @@ void setupUpdatingNodeOnChanges(WidgetT* widget, ValueChangedSignal widgetChange
                                         qVariantInfo(*leaf), qtTypeInfo<ValueType>())); 
                 }
 
-                //SV_LOG(std::format("upd val {}", qVariantInfo(*leaf)));
-
+                //SV_LOG(std::format("upd val {}", value));
                 *leaf = QVariant::fromValue( value );
 
                 //TODO: WidgetsForNodeManager.update all.
@@ -66,7 +65,9 @@ void updateWidgetFromNodeState(QWidget* qwidget, ConstDataNodeWeak nodeWeak)
         return;
     }
 
+    SV_LOG(std::format("{} widget updated", qtTypeInfo<ValueType>()));
     (*widget.*WidgetSetValueMethod)(leaf->value<ValueType>());
+    widget->update();
 }
 
 void DefaultWidgetMakers::RegisterEverything()

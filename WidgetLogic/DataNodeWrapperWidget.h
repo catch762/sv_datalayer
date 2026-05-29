@@ -43,10 +43,11 @@ public:
     DataNodeWrapperWidget(  WidgetType*                             widget,
                             const QString&                          name    = {},
                             const QJsonObjectWithWidgetOptionsOpt&  options = {},
-                            UpdateContentWidgetFromNodeFunc         contentUpdater = nullptr,
+                            UpdateContentWidgetFromNodeFunc         theContentUpdater = nullptr,
                             QWidget*                                parent  = nullptr )
         : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
     {
+        contentUpdater = std::move(theContentUpdater);
     }
 
     void setExpanded(bool expanded);

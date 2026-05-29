@@ -49,7 +49,7 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget
 }
 
 
-QJsonValue SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& value)
+QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& value)
 {
     if (!value)
     {
@@ -57,16 +57,12 @@ QJsonValue SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& 
         return QJsonValue();
     }
 
-    if (auto jsonOpt = value->toJSON(onJsonCreatedFromNode_saveWidgetOptions))
-    {
-        return *jsonOpt;
-    }
-    else return QJsonValue();
+    return value->toJSON(onJsonCreatedFromNode_saveWidgetOptions);
 }
 
 std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndItsWidget(const QJsonValue& json)
 {
-    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget, this,
+    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
                                             std::placeholders::_1,
                                             std::placeholders::_2,
                                             std::placeholders::_3,
@@ -86,7 +82,7 @@ std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndIt
 
 std::tuple<DataNodeShared, QVariantHoldingWidgetVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
 {
-    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget, this,
+    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
                                             std::placeholders::_1,
                                             std::placeholders::_2,
                                             std::placeholders::_3,

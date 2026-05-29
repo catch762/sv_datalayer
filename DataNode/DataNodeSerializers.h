@@ -33,17 +33,17 @@ class SerializerForDataNodeTreeAndItsWidgets
 {
 public:
 
-    QJsonValue toJson(const DataNodeShared& value);
+    static QJsonValueOpt toJson(const DataNodeShared& value);
 
     //returns root node and widget for root node
-    std::tuple<DataNodeShared, QVariantHoldingWidget> jsonToRootNodeAndItsWidget(const QJsonValue& json);
+    static std::tuple<DataNodeShared, QVariantHoldingWidget> jsonToRootNodeAndItsWidget(const QJsonValue& json);
 
     //returns root node (no widget is made for it. its an invisible root.) and list of widgets for all immediate children of root
-    std::tuple<DataNodeShared, QVariantHoldingWidgetVec> jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue& json);
+    static std::tuple<DataNodeShared, QVariantHoldingWidgetVec> jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue& json);
 
 private:
     static bool onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level);
-    bool onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode, int level,
+    static bool onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode, int level,
                                              bool makeWidgetForRootNode);
     
 private:

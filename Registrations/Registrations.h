@@ -11,5 +11,6 @@ public:
     {
         DefaultSerializers::RegisterEverything();
         DefaultWidgetMakers::RegisterEverything();
+        DefaultInterpolators::registerEverything();
     }
 };
