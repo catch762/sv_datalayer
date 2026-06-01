@@ -23,6 +23,7 @@ QVariantHoldingWidget WidgetMakerSystem::createAndRegisterWidgetForNode(DataNode
         WidgetsForNodeManager::registerWidgetForNode(node, resultWidget);
     }
 
+
     return resultWidget;
 }
 
@@ -83,13 +84,16 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForNode(DataNodeShared node
 {
     SV_ASSERT(node);
 
-    if (options)
+    SV_LOG(std::format("createWidgetForNode {} with options: {}", node, options ? jsonValueToString(*options) : QString("none")));
+
+    QVariantHoldingWidget res = node->isLeaf() ? createWidgetForLeafNode (node, options) :
+                                                 createWidgetisForCompositeNode(node, options);
+    if (!qVariantHasWidget(res))
     {
-        SV_LOG(std::format("createWidgetForNode {} with options {}", node, jsonValueToString(*options)));
+        SV_ERROR(std::format("createWidgetForNode failed for {}", node));
     }
 
-    return node->isLeaf() ? createWidgetForLeafNode     (node, options) :
-                            createWidgetisForCompositeNode(node, options);
+    return res;
 }
 
 //todo rename

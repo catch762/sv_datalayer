@@ -82,7 +82,7 @@ DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWi
     {
         if (auto isExpandedOpt = getFromJson<bool>(*options, isExpandedKey))
         {
-            SV_LOG("applied expansion");
+            //SV_LOG("applied expansion");
             setExpanded(*isExpandedOpt);
         }
     }

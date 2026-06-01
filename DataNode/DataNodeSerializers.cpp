@@ -95,11 +95,13 @@ std::tuple<DataNodeShared, QVariantHoldingWidgetVec> SerializerForDataNodeTreeAn
     {
         for (auto child : rootNode->tryGetCompositeData()->children)
         {   
-            auto childWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(rootNode);
+            auto childWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(child);
 
             if (!qVariantHasWidget(childWidget))
             {
-                SV_ERROR("jsonToRootNodeAndTopLevelChildrenWidgets: didnt find widget for root's child");
+                SV_ERROR(std::format("jsonToRootNodeAndTopLevelChildrenWidgets: didnt find widget for root's child {}", child));
+
+                WidgetsForNodeManager::printAllEntries();
             }
 
             topLevelChildrenWidgets.push_back(childWidget);

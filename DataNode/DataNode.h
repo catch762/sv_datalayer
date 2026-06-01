@@ -239,10 +239,11 @@ public:
 
     QString basicInfo() const
     {
-        return QString("DataNode{%1, name=%2, holds=%3}")
-            .arg(isLeaf() ? "leaf":"comp")
+        return QString("DataNode%1{%2 | %3 | 0x%4}")
+            .arg(isLeaf() ? "Leaf":"Comp")
             .arg(name)
-            .arg(isLeaf() ? *tryGetLeafTypeName() : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()));
+            .arg(isLeaf() ? *tryGetLeafTypeName() : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()))
+            .arg(reinterpret_cast<quintptr>(this), 0, 16);
     }
     std::string stdBasicInfo() const
     {

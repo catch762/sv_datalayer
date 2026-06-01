@@ -33,6 +33,15 @@ public:
             qVariant(widget), qPointer(getWidgetFromQVariant(widget)) {}
 
         bool stillAlive() const {return qPointer;}
+        std::string toString() const {
+            bool variantOk = qVariantHasWidget(qVariant);
+            bool pointerOk = stillAlive();
+            if (variantOk == pointerOk)
+            {
+                return std::format("WEntry[{}]", variantOk);
+            }
+            else return std::format("WEntry[{} {} MIXED]", variantOk, pointerOk);
+        };
 
         QVariantHoldingWidget qVariant; //e.g. QVariant holding raw pointer, like a QLineEdit* 
         QPointer<QWidget>     qPointer; //exact same pointer wrapped in QPointer so we can check if widget is already deleted.
@@ -42,12 +51,22 @@ public:
 
     static void registerWidgetForNode(ConstDataNodeWeak node, QVariantHoldingWidget widget)
     {
+        if (!qVariantHasWidget(widget))
+        {
+            SV_ERROR(std::format("Cant register empty widget for {}", node));
+        }
+
         auto *container = instance().getOrCreateContainerForNode(node);
         SV_ASSERT(container);
 
         container->push_back(widget);
 
         SV_LOG(std::format("Registered widget (now {}) for node {}", container->size(), node));
+
+        if(node.lock()->getName() == "hello")
+        {
+            SV_LOG("this is it");
+        }
     }
     
     static void updateAllWidgetsFromNodeState(ConstDataNodeWeak node);
@@ -76,6 +95,7 @@ public:
 
     static void clear()
     {
+        SV_LOG("WidgetsForNodeManager: cleared all entries");
         instance().entries.clear();
     }
 
@@ -90,6 +110,31 @@ public:
 
         //delete empty containers
         std::erase_if(entries, [](const auto &keyAndValue){ return keyAndValue.second.empty(); });
+    }
+
+    static void printEntries(ConstDataNodeWeak node)
+    {
+        if (auto *container = instance().getContainerForNode(node))
+        {
+            std::string line = "{ ";
+            for(const auto &e : *container)
+            {
+                line += e.toString() + " ";
+            }
+            line += "}";
+
+            SV_LOG(std::format("Widgets for {} ---> {}", node, line));
+        }
+        else SV_LOG(std::format("No widgets for {}", node));
+    }
+    static void printAllEntries()
+    {
+        SV_LOG("WidgetsForNodeManager ENTRIES BEGIN");
+        for (auto &e : instance().entries)
+        {
+            printEntries(e.first);
+        }
+        SV_LOG("WidgetsForNodeManager ENTRIES END");
     }
 
 private:
