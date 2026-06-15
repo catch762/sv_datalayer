@@ -156,6 +156,13 @@ public:
         return QString("%1[left=%2][right=%3][val=%4]").arg(thisTypeName()).arg(_left).arg(_right).arg(_value);
     }
 
+    bool operator==(const LimitedValue<T>& other) const
+    {
+        return  arithmeticEquals(left (), other.left ()) &&
+                arithmeticEquals(right(), other.right()) &&
+                arithmeticEquals(value(), other.value());
+    }
+
 private:
 
 
