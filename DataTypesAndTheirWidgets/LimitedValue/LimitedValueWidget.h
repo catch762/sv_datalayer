@@ -9,6 +9,8 @@ class LimitedValueWidget : public QWidget
 {
     Q_OBJECT
 public:
+    //You initialize actual type only once, in constructor.
+    //After that you cant call setValue() with different type.
     LimitedValueWidget(const LimitedIntOrDouble &initialValue, QWidget *parent = nullptr);
 
     void setValue(const LimitedIntOrDouble &value);

@@ -14,5 +14,6 @@
 
 #include "WidgetLogic/WidgetDefs.h"
 
+#include "Enum/EnumWidget.h"
 
 //#include "VectorOfAnyTypeWidgetCreator.h"
