@@ -12,7 +12,7 @@ public:
         const bool operator==(const EnumEntry& other) const;
         static QJsonValue toJson(const EnumEntry& e);
         static std::optional<EnumEntry> fromJson(const QJsonValue& json);
-
+        std::string toString() const;
     };
     
     Enum() = default;
@@ -45,10 +45,16 @@ public:
     static QJsonValue toJSON(const Enum &e);
     static std::optional<Enum> fromJSON(const QJsonValue &jsonValue);
 
+    //index points to valid data and there are no duplicate entries. Expensive check.
+    bool isValid() const;
+
+    std::string toString() const;
 private:
     std::vector<EnumEntry> entries;
     int currentIndex = 0;
 };
+SV_DECL_STD_FORMATTER(Enum, obj.toString());
+SV_DECL_STD_FORMATTER(Enum::EnumEntry, obj.toString());
 SV_DECL_ALIASES(Enum);
 
 using EnumVec = std::vector<Enum>;

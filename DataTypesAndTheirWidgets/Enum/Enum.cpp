@@ -41,6 +41,11 @@ std::optional<Enum::EnumEntry> Enum::EnumEntry::fromJson(const QJsonValue &json)
     return EnumEntry{*enumVal, *name};
 }
 
+std::string Enum::EnumEntry::toString() const
+{
+    return std::format("[{}, {}]", enumValue, name);
+}
+
 Enum::Enum(std::vector<EnumEntry> _entries, int _currentIndex)
 {
     entries = std::move(_entries);
@@ -142,6 +147,30 @@ std::optional<Enum> Enum::fromJSON(const QJsonValue &jsonValue)
     }
 
     return Enum(std::move(decodedEntries), *index);
+}
+
+bool Enum::isValid() const
+{
+    if (!isValidIndex(currentIndex, entries.size())) return false;
+
+    //check for anything duplicate:
+    std::set<QString> names;
+    std::set<int> values;
+    for (auto &e : entries)
+    {
+        if (values.contains(e.enumValue)) return false;
+        if (names.contains(e.name)) return false;
+
+        values.insert(e.enumValue);
+        names.insert(e.name);
+    }
+
+    return true;
+}
+
+std::string Enum::toString() const
+{
+    return std::format("Enum[cur={}, entries={}]", currentIndex, entries);
 }
 
 TEST_CASE("Enum to and from json round trip")
