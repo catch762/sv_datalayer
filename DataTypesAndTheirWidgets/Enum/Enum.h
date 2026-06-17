@@ -12,10 +12,10 @@ public:
     
     Enum() = default;
 
-    Enum(std::vector<EnumEntry> _entries, int _currentEnumValue)
+    Enum(std::vector<EnumEntry> _entries, int _currentIndex = 0)
     {
         entries = std::move(_entries);
-        currentEnumValue = _currentEnumValue;
+        currentIndex = _currentIndex;
     }
 
     const std::vector<EnumEntry>& getEntries()
@@ -28,14 +28,33 @@ public:
         return entries.size();
     }
 
-    int getEnumValue()
+    //its not guaranteed to be valid
+    int getCurrentIndex()
     {
-        return currentEnumValue;
+        return currentIndex;
     }
 
-    void setEnumValue(int newValue)
+    void setCurrentIndex(int newCurrentIndex)
     {
-        currentEnumValue = newValue;
+        currentIndex = newCurrentIndex;
+    }
+
+    intOpt getEnumValue()
+    {
+        if (auto *entry = getEntryForIndex(currentIndex))
+        {
+            return entry->enumValue;
+        }
+        else return {};
+    }
+
+    void setEnumValue(int newEnumValue)
+    {
+        if (auto entryWithIndex = getEntryForEnumValue(newEnumValue))
+        {
+            currentIndex = entryWithIndex->second;
+        }
+        else SV_ERROR("Unable to set enumValue " + std::to_string(newEnumValue));
     }
 
     const EnumEntry* getEntryForIndex(int index)
@@ -44,7 +63,17 @@ public:
         return &entries[index];
     }
 
+    using EntryWithIndex = std::pair<const EnumEntry*, int>;
+    std::optional<EntryWithIndex>  getEntryForEnumValue(int enumValue)
+    {
+        for (int i = 0; i < entries.size(); ++i)
+        {
+            if (entries[i].enumValue == enumValue) return EntryWithIndex{&entries[i], i};
+        }
+        return {};
+    }
+
 private:
     std::vector<EnumEntry> entries;
-    int currentEnumValue = 0;
+    int currentIndex = 0;
 };

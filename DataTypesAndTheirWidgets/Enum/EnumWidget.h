@@ -1,7 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include "Enum.h"
-
+#include <QButtonGroup>
 class EnumWidget : public QWidget
 {
     Q_OBJECT
@@ -11,13 +11,21 @@ public:
         layout = new QHBoxLayout(this);
         initLayoutSpacing(layout);
 
-        scrollArea = new HorizontalScrollAreaWidget(this);
-        scrollArea->setFixedHeight(30);
+        scrollArea = new HorizontalScrollAreaWidget(ScrollAreaContentHeight, this);
+        //scrollArea->setFixedHeight(30);
         scrollArea->setMinimumWidth(50);
+
+        
 
         layout->addWidget(scrollArea);
 
-        setFixedHeight(30);
+        enumButtonsGroup = new QButtonGroup(this);
+        enumButtonsGroup->setExclusive(true);
+        connect(enumButtonsGroup, &QButtonGroup::idClicked, [this](int btnIndex)
+        {
+            SV_LOG("BUTTON CLICKED " + std::to_string(btnIndex)); 
+        });
+
         setMinimumWidth(50);
     }
 
@@ -40,23 +48,53 @@ signals:
 private:
     QPushButton* makeEnumButton(const QString& name = "")
     {
-        auto btn = new QPushButton(name, this);
-        //btn->setFixedSize(50, 25);
-
-        // Set minimum size (100px)
-    btn->setMinimumWidth(50);
-    
-    // Allow button to expand
-    btn->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, 
-                                      QSizePolicy::Fixed));
-
         //i assume buttons index will not change.
-        int buttonIndex = enumButtonsCount();
+        const int buttonIndex = enumButtonsCount();
 
-        connect(btn, &QPushButton::clicked, [this, buttonIndex]()
-        {
-           SV_LOG("BUTTON CLICKED " + std::to_string(buttonIndex)); 
-        });
+        auto btn = new QPushButton(name, this);
+        btn->setCheckable(true);
+        btn->setFixedHeight(ScrollAreaContentHeight);
+        btn->setFlat(true);
+        /*btn->setStyleSheet(
+            "QPushButton {"
+            "    border: none;"
+            "    padding: 0px;"
+            "    border-radius: 0px;"
+            "    background-color: transparent;"
+            "}"
+            "QPushButton:hover {"
+            "    background-color: #aaaaaa;"
+            "}"
+            "QPushButton:pressed {"
+            "    background-color: #888888;"
+            "}"
+        );*/
+
+        static const QString stylePattern = 
+            "QPushButton         {background-color: %1; border: none; border-radius: 0; padding: 0; margin: 0;}"
+            "QPushButton:checked {background-color: %2; border: none; border-radius: 0; padding: 0; margin: 0;}"
+            "QPushButton:hover:!checked   {background-color: %3; border: none; border-radius: 0; padding: 0; margin: 0;}";
+
+        QColor stdColor = buttonIndex % 2 == 0 ? QColor(235,235,235) : QColor(229,229,229);
+        QColor hoverColor = QColor(119, 184, 255);
+        QColor selectColor = QColor(211, 228, 255);
+
+        QString style = stylePattern.arg(stdColor.name(QColor::HexArgb))
+                                    .arg(hoverColor.name(QColor::HexArgb))
+                                    .arg(selectColor.name(QColor::HexArgb));
+        btn->setStyleSheet(style);
+
+
+        btn->setMinimumWidth(50);
+
+        btn->setSizePolicy(QSizePolicy( QSizePolicy::Expanding, 
+                                        QSizePolicy::Fixed ));
+
+        
+
+        enumButtonsGroup->addButton(btn, buttonIndex);
+
+        
 
         return btn;
     }
@@ -111,6 +149,12 @@ private:
 
             btn->setText(enumItem->name);
         }
+
+        if(auto* btnThatShouldBeChecked = getEnumButton(enumValue.getCurrentIndex()))
+        {
+            btnThatShouldBeChecked->setChecked(true);
+        }
+        else SV_ERROR(std::format("Enum widget couldnt select button {}", enumValue.getCurrentIndex()));
     }
 
     int enumButtonsCount() const
@@ -127,7 +171,11 @@ private:
 
 private:
     Enum enumValue;
+    QButtonGroup* enumButtonsGroup = nullptr; 
+    const int ScrollAreaContentHeight = 22;
 private:
     QHBoxLayout*                layout          = nullptr;
-    HorizontalScrollAreaWidget*     scrollArea  = nullptr;
+    HorizontalScrollAreaWidget*     scrollArea  = nullptr; //buttons for enum values live here
+
+   
 };

@@ -365,7 +365,7 @@ void XYPadWithPresetsWidget::setPresetButtonStylesheetAndColors(QPushButton *btn
     static const QString stylePattern = 
         "QPushButton         {background-color: %1; border: none; border-radius: 0; padding: 1; margin: 0;}"
         "QPushButton:checked {background-color: %2; border: 1px solid rgb(37, 37, 37); border-radius: 0;}"
-        "QPushButton:hovered {background-color: %3; border: none; border-radius: 0; padding: 1; margin: 0;}";
+        "QPushButton:hover   {background-color: %3; border: none; border-radius: 0; padding: 1; margin: 0;}";
 
     QString style = stylePattern.arg(colors.notSelectedColor.name(QColor::HexArgb))
                                 .arg(colors.selectedColor.name(QColor::HexArgb))
