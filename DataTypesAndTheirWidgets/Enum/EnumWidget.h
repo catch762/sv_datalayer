@@ -23,7 +23,9 @@ public:
         enumButtonsGroup->setExclusive(true);
         connect(enumButtonsGroup, &QButtonGroup::idClicked, [this](int btnIndex)
         {
-            SV_LOG("BUTTON CLICKED " + std::to_string(btnIndex)); 
+            enumValue.setCurrentIndex(btnIndex);
+            emit valueChanged(enumValue);
+            //SV_LOG("BUTTON CLICKED " + std::to_string(btnIndex)); 
         });
 
         setMinimumWidth(50);
@@ -37,8 +39,7 @@ public:
 
         updateEnumButtonsToMatchEnumValue();
 
-
-        SV_LOG("OKKKK");
+        //SV_LOG("OKKKK");
         emit valueChanged(enumValue);
     }
 
@@ -107,8 +108,6 @@ private:
         if (requiredButtonsCount > existingCount)
         {
             const int buttonsToAdd = requiredButtonsCount - existingCount;
-
-            SV_WARN(std::format("adding {} btns", buttonsToAdd));
 
             for (int i = 0; i < buttonsToAdd; ++i)
             {

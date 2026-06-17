@@ -1,6 +1,6 @@
 #pragma once
 #include "sv_qtcommon.h"
-
+#include "SerializationLogic/SerializerInterface.h"
 struct Enum
 {
 public:
@@ -8,72 +8,63 @@ public:
     {
         int enumValue = 0;
         QString name;
+
+        const bool operator==(const EnumEntry& other) const;
+        static QJsonValue toJson(const EnumEntry& e);
+        static std::optional<EnumEntry> fromJson(const QJsonValue& json);
+
     };
     
     Enum() = default;
 
-    Enum(std::vector<EnumEntry> _entries, int _currentIndex = 0)
-    {
-        entries = std::move(_entries);
-        currentIndex = _currentIndex;
-    }
+    //this will not check if you passed entries with duplicating values.
+    Enum(std::vector<EnumEntry> _entries, int _currentIndex = 0);
 
-    const std::vector<EnumEntry>& getEntries()
-    {
-        return entries;
-    }
+    const std::vector<EnumEntry>& getEntries() const;
 
-    int entriesCount()
-    {
-        return entries.size();
-    }
+    int entriesCount() const;
 
-    //its not guaranteed to be valid
-    int getCurrentIndex()
-    {
-        return currentIndex;
-    }
+    //its not guaranteed to be valid index, check it yourself
+    int getCurrentIndex() const;
 
-    void setCurrentIndex(int newCurrentIndex)
-    {
-        currentIndex = newCurrentIndex;
-    }
+    void setCurrentIndex(int newCurrentIndex);
 
-    intOpt getEnumValue()
-    {
-        if (auto *entry = getEntryForIndex(currentIndex))
-        {
-            return entry->enumValue;
-        }
-        else return {};
-    }
+    //returns nullopt if current index doesnt point to valid EnumEntry
+    intOpt getEnumValue() const;
 
-    void setEnumValue(int newEnumValue)
-    {
-        if (auto entryWithIndex = getEntryForEnumValue(newEnumValue))
-        {
-            currentIndex = entryWithIndex->second;
-        }
-        else SV_ERROR("Unable to set enumValue " + std::to_string(newEnumValue));
-    }
+    //this only does something if there is such EnumEntry with this enumValue
+    void setEnumValue(int newEnumValue);
 
-    const EnumEntry* getEntryForIndex(int index)
-    {
-        if (!isValidIndex(index, entries.size())) return nullptr;
-        return &entries[index];
-    }
+    const EnumEntry* getEntryForIndex(int index) const;
 
     using EntryWithIndex = std::pair<const EnumEntry*, int>;
-    std::optional<EntryWithIndex>  getEntryForEnumValue(int enumValue)
-    {
-        for (int i = 0; i < entries.size(); ++i)
-        {
-            if (entries[i].enumValue == enumValue) return EntryWithIndex{&entries[i], i};
-        }
-        return {};
-    }
+    std::optional<EntryWithIndex>  getEntryForEnumValue(int enumValue) const;
+
+    const bool operator==(const Enum& other) const;
+
+    static QJsonValue toJSON(const Enum &e);
+    static std::optional<Enum> fromJSON(const QJsonValue &jsonValue);
 
 private:
     std::vector<EnumEntry> entries;
     int currentIndex = 0;
+};
+SV_DECL_ALIASES(Enum);
+
+using EnumVec = std::vector<Enum>;
+SV_DECL_ALIASES(EnumVec);
+
+template <>
+class Serializer<Enum>
+{
+public:
+    QJsonValue toJson(const Enum& value)
+    {
+        return Enum::toJSON(value);
+    }
+    
+    std::optional<Enum> fromJson(const QJsonValue& json)
+    {
+        return Enum::fromJSON(json);
+    }
 };

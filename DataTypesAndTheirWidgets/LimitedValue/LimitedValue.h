@@ -4,7 +4,6 @@
 #include "WidgetLogic/WidgetDefs.h"
 #include "SerializationLogic/SerializerInterface.h"
 #include "Interpolation/InterpolationInterface.h"
-#include "WidgetLogic/WidgetDefs.h"
 
 //todo rewrite for if float, if integer, not type names
 
