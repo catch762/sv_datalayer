@@ -13,5 +13,19 @@ public:
         DefaultWidgetMakers::RegisterEverything();
         DefaultInterpolators::registerEverything();
         DefaultComparators::registerEverything();
+
+        everythingRegisteredFlagRef() = true;
+    }
+
+    static bool everythingWasRegistered()
+    {
+        return everythingRegisteredFlagRef();
+    }
+
+private:
+    static bool& everythingRegisteredFlagRef()
+    {
+        static bool flag = false;
+        return flag;
     }
 };

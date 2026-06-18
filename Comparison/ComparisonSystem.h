@@ -35,6 +35,23 @@ public:
         );
     }
 
+    template<typename T, typename FuncT>
+    requires std::invocable<FuncT, const T&, const T&> && 
+             std::same_as<bool, std::invoke_result_t<FuncT, const T&, const T&>>
+    static void registerEqualsFuncForType(FuncT func)
+    {
+        SV_ASSERT(!instance().comparators.entryExists(qtTypeId<T>()));
+
+        instance().comparators.addEntryForType<T>(
+            [func](const QVariant& a, const QVariant& b)
+            {
+                if (!holdsType<T>(a) || !holdsType<T>(b)) return false;
+
+                return func(a.value<T>(), b.value<T>());
+            }
+        );
+    }
+
     static bool equals(const QVariant& a, const QVariant& b)
     {
         if (a.typeId() != b.typeId())

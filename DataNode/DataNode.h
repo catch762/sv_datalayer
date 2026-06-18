@@ -260,6 +260,13 @@ public:
         else return false;
     }
 
+    template<typename T>
+    std::optional<T> tryGetLeafValueContent()
+    {
+        if (!isLeafWithType<T>()) return {};
+        return tryGetLeafvalue()->value<T>();
+    }
+
     //visitor is called on this and all inner subnodes
     static void iterateRecoursively(const DataNodeShared& node, const std::function<void(const DataNodeShared& node)>& visitor)
     {
