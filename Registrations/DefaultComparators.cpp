@@ -9,6 +9,8 @@ void DefaultComparators::registerEverything()
     ComparisonSystem::registerEqualsFuncForType<float>(arithmeticEquals<float, float>);
 
     ComparisonSystem::registerDefaultEqualsForType<bool>();
+    ComparisonSystem::registerDefaultEqualsForType<int>();
+    ComparisonSystem::registerDefaultEqualsForType<QString>();
     ComparisonSystem::registerDefaultEqualsForType<BoolVec>();
     ComparisonSystem::registerDefaultEqualsForType<LimitedInt>();
     ComparisonSystem::registerDefaultEqualsForType<LimitedIntVec>();

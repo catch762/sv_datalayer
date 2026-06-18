@@ -21,7 +21,7 @@ CPMAddPackage(
 
 file(GLOB_RECURSE SV_DATALAYER_SOURCES "*.cpp" "*.h")
 
-add_library(sv_datalayer STATIC ${SV_DATALAYER_SOURCES})
+add_library(sv_datalayer OBJECT ${SV_DATALAYER_SOURCES})
 
 target_include_directories(sv_datalayer PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
