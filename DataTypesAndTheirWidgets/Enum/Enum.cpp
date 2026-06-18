@@ -108,7 +108,7 @@ std::optional<Enum::EntryWithIndex>  Enum::getEntryForEnumValue(int enumValue) c
 
 const bool Enum::operator==(const Enum& other) const
 {
-    return currentIndex == other.currentIndex && vectorContentEquals(entries, other.entries);
+    return currentIndex == other.currentIndex && entries == other.entries;
 }
 
 QJsonValue Enum::toJSON(const Enum &e)

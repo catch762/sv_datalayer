@@ -46,7 +46,7 @@ public:
 		DefaultValueFunc 	defaultValueMaker; //todo delete it ?
 	};
 
-	using SerializerMap = DataForTypeMap<SerializerEntry>;
+	//using SerializerMap = DataForTypeMap<SerializerEntry>;
 
 	
 	//If has defined Serializer<T>, just call this

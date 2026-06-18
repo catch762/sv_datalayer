@@ -25,6 +25,12 @@ public:
     // If both keys CLEARLY dont identify same value, will do nothing and LOG_ERROR.
     void addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry&& entry);
 
+    template<typename T>
+    void addEntryForType(DataEntry&& entry)
+    {
+        addEntryForType(qtTypeId<T>(), qtTypeName<T>(), std::move(entry));
+    }
+
     const DataEntry* getEntry   (QtTypeIndex    typeIndex);
     const DataEntry* getEntry   (const QString& typeName);
     DataEntry*       getEntryPtr(QtTypeIndex    typeIndex);
