@@ -103,11 +103,7 @@ private:
         btn->setSizePolicy(QSizePolicy( QSizePolicy::Expanding, 
                                         QSizePolicy::Fixed ));
 
-        
-
         enumButtonsGroup->addButton(btn, buttonIndex);
-
-        
 
         return btn;
     }
@@ -159,6 +155,9 @@ private:
             }
 
             btn->setText(enumItem->name);
+
+            QString tooltipMsg = QString("%1 (int %2)").arg(enumItem->name).arg(i);
+            btn->setToolTip(tooltipMsg);
         }
 
         if(auto* btnThatShouldBeChecked = getEnumButton(enumValue.getCurrentIndex()))

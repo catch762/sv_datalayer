@@ -1,5 +1,6 @@
 #pragma once
 #include "EnumWidget.h"
+#include "DataTypesAndTheirWidgets\VectorOfAnyTypeWidgetCreator.h"
 
 class EnumVecWidget : public QWidget
 {

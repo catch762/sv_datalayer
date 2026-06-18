@@ -82,6 +82,7 @@ void DefaultWidgetMakers::RegisterEverything()
     system.registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt);
     system.registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec);
     system.registerWidgetMaker<Enum>            (widgetMakerForEnum);
+    system.registerWidgetMaker<EnumVec>         (widgetMakerForEnumVec);
 }
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
@@ -247,4 +248,24 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnum(DataNodeShared le
                                                 &EnumWidget::setValue>;
 
     return new DataNodeWrapperWidget( widget, leafWithEnum->getName(), options, updater);
+}
+
+DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnumVec(DataNodeShared leafWithEnumVec, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<EnumVec>(leafWithEnumVec))
+    {
+        return {};
+    }
+
+    auto *widget = new EnumVecWidget(leafWithEnumVec->tryGetLeafvalue()->value<EnumVec>());
+
+    auto nodeWeak = DataNodeWeak(leafWithEnumVec);
+
+    setupUpdatingNodeOnChanges<const EnumVec&>(widget, &EnumVecWidget::valueChanged, nodeWeak);
+
+    auto updater = updateWidgetFromNodeState<   EnumVec,
+                                                EnumVecWidget,
+                                                &EnumVecWidget::setValue>;
+
+    return new DataNodeWrapperWidget( widget, leafWithEnumVec->getName(), options, updater);
 }

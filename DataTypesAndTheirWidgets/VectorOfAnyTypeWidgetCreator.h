@@ -1,7 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
 
-#include "LimitedValue/LimitedValueWidget.h"
+//#include "LimitedValue/LimitedValueWidget.h"
 
 
 template<typename ElemType, typename WidgetType>
