@@ -22,4 +22,5 @@ public:
     static DataNodeWrapperWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options);
     static DataNodeWrapperWidget* widgetMakerForLimitedIntVec   (DataNodeShared leafWithLimitedIntVec,    const QJsonObjectWithWidgetOptionsOpt &options);
     
+    static DataNodeWrapperWidget* widgetMakerForEnum(DataNodeShared leafWithEnum, const QJsonObjectWithWidgetOptionsOpt &options);
 };

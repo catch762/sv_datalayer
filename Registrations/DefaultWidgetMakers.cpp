@@ -74,13 +74,14 @@ void DefaultWidgetMakers::RegisterEverything()
 {
     auto& system = WidgetMakerSystem::instance();
 
-    system.registerWidgetMaker<QString>         (widgetMakerForQString,            "std");
-    system.registerWidgetMaker<bool>            (widgetMakerForBool,               "std");
-    system.registerWidgetMaker<BoolVec>         (widgetMakerForBoolVec,            "std");
-    system.registerWidgetMaker<LimitedDouble>   (widgetMakerForLimitedDouble,      "std");
-    system.registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec,   "std");
-    system.registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt,         "std");
-    system.registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec,      "std");
+    system.registerWidgetMaker<QString>         (widgetMakerForQString);
+    system.registerWidgetMaker<bool>            (widgetMakerForBool);
+    system.registerWidgetMaker<BoolVec>         (widgetMakerForBoolVec);
+    system.registerWidgetMaker<LimitedDouble>   (widgetMakerForLimitedDouble);
+    system.registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec);
+    system.registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt);
+    system.registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec);
+    system.registerWidgetMaker<Enum>            (widgetMakerForEnum);
 }
 
 DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
@@ -225,4 +226,25 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedIntVec(DataNode
     auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedIntVec->getName(), options, updater);
     widget->setupButtonsOnWrapperParent(wrapper, options);
     return wrapper;
+}
+
+DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnum(DataNodeShared leafWithEnum, const QJsonObjectWithWidgetOptionsOpt &options)
+{
+    if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<Enum>(leafWithEnum))
+    {
+        return {};
+    }
+
+    auto *widget = new EnumWidget();
+    widget->setValue(leafWithEnum->tryGetLeafvalue()->value<Enum>());
+
+    auto nodeWeak = DataNodeWeak(leafWithEnum);
+
+    setupUpdatingNodeOnChanges<const Enum&>(widget, &EnumWidget::valueChanged, nodeWeak);
+
+    auto updater = updateWidgetFromNodeState<   Enum,
+                                                EnumWidget,
+                                                &EnumWidget::setValue>;
+
+    return new DataNodeWrapperWidget( widget, leafWithEnum->getName(), options, updater);
 }

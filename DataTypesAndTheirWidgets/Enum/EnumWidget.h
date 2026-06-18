@@ -15,7 +15,8 @@ public:
         //scrollArea->setFixedHeight(30);
         scrollArea->setMinimumWidth(50);
 
-        
+        //SV_WARN("sH = " + std::to_string(scrollArea->height()) + " H= " + std::to_string(height()));
+        setFixedHeight(scrollArea->height());
 
         layout->addWidget(scrollArea);
 
@@ -23,12 +24,18 @@ public:
         enumButtonsGroup->setExclusive(true);
         connect(enumButtonsGroup, &QButtonGroup::idClicked, [this](int btnIndex)
         {
+            //SV_WARN("sH = " + std::to_string(scrollArea->height()) + " H= " + std::to_string(height()));
             enumValue.setCurrentIndex(btnIndex);
             emit valueChanged(enumValue);
             //SV_LOG("BUTTON CLICKED " + std::to_string(btnIndex)); 
         });
 
         setMinimumWidth(50);
+    }
+
+    EnumWidget(Enum initialValue, QWidget *parent = nullptr) : EnumWidget(parent)
+    {
+        setValue(std::move(initialValue));
     }
 
     void setValue(Enum newValue)
@@ -41,6 +48,11 @@ public:
 
         //SV_LOG("OKKKK");
         emit valueChanged(enumValue);
+    }
+
+    const Enum& getValue() const
+    {
+        return enumValue;
     }
 
 signals:

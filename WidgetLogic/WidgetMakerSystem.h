@@ -84,7 +84,7 @@ public:
     QVariantHoldingWidget createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});      
 
     template<class T>
-    void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName);
+    void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName = "");
 
 public:    
     // Checks that node is a leaf containing fully registered type T,
