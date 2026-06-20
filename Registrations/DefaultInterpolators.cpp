@@ -5,7 +5,7 @@
 
 void DefaultInterpolators::registerEverything()
 {
-    InterpolationSystem::registerTypeInterpolator<double>();
+    //InterpolationSystem::registerTypeInterpolator<double>();
 
     InterpolationSystem::registerTypeInterpolator<LimitedInt>();
     InterpolationSystem::registerTypeInterpolator<LimitedDouble>();

@@ -19,8 +19,9 @@ inline DataNodeShared makeTreeWithAllDefaultTypes()
                 }),
                 dncomp("vectypes", {
                     dnleaf("limiteddoublevec",  LimitedDoubleVec{LimitedDouble{6, 5, 7}, LimitedDouble{0,0,1}} ),
-                    dnleaf("limitedint",        LimitedIntVec{LimitedInt{10, 9, 11}, LimitedInt{0,0,1}}),
-                    dnleaf("boolvec",           BoolVec{true,false,true})
+                    dnleaf("limitedintvec",     LimitedIntVec{LimitedInt{10, 9, 11}, LimitedInt{0,0,1}}),
+                    dnleaf("boolvec",           BoolVec{true,false,true}),
+                    dnleaf("enumvec",           EnumVec{Enum({{10, "ten"}, {20, "twenty"}, {100, "hundred"}}, 1)})
                 }),
             });
 }

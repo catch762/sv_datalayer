@@ -1,6 +1,10 @@
 #include "InterpolationSystem.h"
 
-bool InterpolationSystem::interpolate(const QVariant &A, const QVariant &B, QVariant &Result, double ratioAToB01)
+bool InterpolationSystem::interpolate(  const QVariant &A, 
+                                        const QVariant &B, 
+                                        QVariant &Result, 
+                                        double ratioAToB01,
+                                        DefaultMixingStrategy defaultStrat )
 {
     QtTypeIndex aType       = A.typeId();
     QtTypeIndex bType       = B.typeId();
@@ -22,15 +26,32 @@ bool InterpolationSystem::interpolate(const QVariant &A, const QVariant &B, QVar
     }
     else
     {
-        //its fine, dont even need to log error.
+        if (defaultStrat == DefaultMixingStrategy::DoNothing)
+        {
+        }
+        else if(defaultStrat == DefaultMixingStrategy::TakeA)
+        {
+            Result = A;
+        }
+        else if(defaultStrat == DefaultMixingStrategy::TakeB)
+        {
+            Result = B;
+        }
+        else SV_UNREACHABLE();
+
+        //Regardless, we return false because didnt use real interpolator.
         return false;
     }
 }
 
-bool InterpolationSystem::interpolateTwoTreesToThird(const DataNode &treeA, const DataNode &treeB, DataNode &treeResult, double ratioAToB01)
+bool InterpolationSystem::interpolateTwoTreesToThird(   const DataNode &treeA, 
+                                                        const DataNode &treeB, 
+                                                        DataNode &treeResult, 
+                                                        double ratioAToB01,
+                                                        DefaultMixingStrategy defaultStrat)
 {
     return visitThreeStructurallyEqualTrees_withMismatchLog(treeA, treeB, treeResult, 
-        [ratioAToB01](const DataNode &nodeA, const DataNode &nodeB, DataNode &nodeResult)
+        [ratioAToB01, defaultStrat](const DataNode &nodeA, const DataNode &nodeB, DataNode &nodeResult)
         {
             // One check is enough, we only arrive here when all nodes same type etc,
             // all leaf or all composite.
@@ -40,7 +61,8 @@ bool InterpolationSystem::interpolateTwoTreesToThird(const DataNode &treeA, cons
                 bool actuallyInterpolated = InterpolationSystem::interpolate(*nodeA.tryGetLeafvalue(),
                                                                              *nodeB.tryGetLeafvalue(),
                                                                              *nodeResult.tryGetLeafvalue(),
-                                                                             ratioAToB01);
+                                                                             ratioAToB01,
+                                                                             defaultStrat);
                 //SV_LOG(std::format("[{}] interp for type {}", actuallyInterpolated, nodeA));
             }
         });

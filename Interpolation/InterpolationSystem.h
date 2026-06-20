@@ -5,18 +5,37 @@
 class InterpolationSystem
 {
 public:
-    using InterpolatorFunc = std::function<void(const QVariant &A, const QVariant &B, QVariant &Result, double ratioAToB01)>;
+    //used if no interpolator is registered
+    enum class DefaultMixingStrategy
+    {
+        DoNothing,
+        TakeA,
+        TakeB
+    };
 
-    // Returns success.
+    using InterpolatorFunc = std::function<void(const QVariant &A,
+                                                const QVariant &B,
+                                                QVariant &Result,
+                                                double ratioAToB01)>;
+
     // Will return 'false' in case of types mismatch or if no interpolator registered for this type.
+    // If no interpolator registered for this type, will execute 'defaultStrat'.
     // The latter situation is perfectly fine, not all types need interpolation.
-    static bool interpolate(const QVariant &A, const QVariant &B, QVariant &Result, double ratioAToB01);
+    static bool interpolate(const QVariant &A,
+                            const QVariant &B,
+                            QVariant &Result,
+                            double ratioAToB01,
+                            DefaultMixingStrategy defaultStrat = DefaultMixingStrategy::DoNothing);
 
     template<typename T>
     static void registerTypeInterpolator();
 
     //returns success; will return false if all 3 trees are not structurally equal
-    static bool interpolateTwoTreesToThird(const DataNode& treeA, const DataNode& treeB, DataNode& treeResult, double ratioAToB01);
+    static bool interpolateTwoTreesToThird( const DataNode& treeA, 
+                                            const DataNode& treeB, 
+                                            DataNode& treeResult, 
+                                            double ratioAToB01,
+                                            DefaultMixingStrategy defaultStrat = DefaultMixingStrategy::DoNothing );
 
 private:
     InterpolationSystem() = default;
