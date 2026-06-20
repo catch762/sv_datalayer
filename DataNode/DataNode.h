@@ -313,3 +313,17 @@ private:
 SV_DECL_STD_FORMATTER(DataNode,          obj.stdBasicInfo());
 SV_DECL_STD_FORMATTER(DataNodeShared,    obj        ? obj->stdBasicInfo()        : "DataNode{nullptr}");
 SV_DECL_STD_FORMATTER(ConstDataNodeWeak, obj.lock() ? obj.lock()->stdBasicInfo() : "DataNode{nullptr}");
+
+namespace datanode_helpers
+{
+template<typename LeafValueT>
+DataNodeShared dnleaf(const QString& name, const LeafValueT& val)
+{
+    return DataNode::makeLeaf(name, val);
+}
+inline DataNodeShared dncomp(const QString &name, std::vector<DataNodeShared>&& children)
+{
+    return DataNode::makeComposite(name, std::move(children));
+}
+
+};

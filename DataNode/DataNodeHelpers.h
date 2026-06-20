@@ -54,11 +54,11 @@ bool visitStructurallyEqualTrees(const Visitor&     siblingVisitor,
                                  DataNode&          nodeFirst,
                                  OtherDataNodes&... nodesRest);
 
+bool leafValuesEqual(const QVariant& a, const QVariant& b);
 //**************************************
 // ACTUAL HELPER METHODS YOU SHOULD USE:
 //**************************************
 
-bool leafValuesEqual(const QVariant& a, const QVariant& b);
 
 //When all you need is to check if trees are structurally equal.
 //Two variants, one logs mismatch.

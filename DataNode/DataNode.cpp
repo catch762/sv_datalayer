@@ -8,7 +8,7 @@ QJsonObjectOpt DataNode::toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction,
 
     if (auto *leafValue = tryGetLeafvalue())
     {
-        obj[valueKey] = SerializationSystem::instance().qVariantToJson(*leafValue);
+        obj[valueKey] = SerializationSystem::instance().qVariantToJson(*leafValue, true);
     }
     else if(auto compData = tryGetCompositeData())
     {

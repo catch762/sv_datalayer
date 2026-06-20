@@ -21,6 +21,9 @@ void DefaultSerializers::RegisterEverything()
     system.registerSerialization<LimitedInt>();
     system.registerSerialization<LimitedIntVec>();
 
+    system.registerSerialization<Enum>();
+    system.registerSerialization<EnumVec>();
+
     system.registerSerialization<DataNodeWrapperWidget*>();
     system.registerSerialization<LimitedValueVecWidget*>();
     

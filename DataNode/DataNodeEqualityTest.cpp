@@ -1,11 +1,6 @@
 #include "DataNodeHelpers.h"
 #include "doctest.h"
 
-void hello()
-{
-    SV_LOG("hi");
-}
-
 TEST_CASE("All DataNode tree equality functions")
 {
     auto makeBaseTree = []()

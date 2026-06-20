@@ -14,6 +14,8 @@
 // Then we can call: ComparisonSystem::equals(QVariant(a), QVariant(b))
 //**********************************************************************************
 
+//Note: tests that test this system are in DataNode/DataNodeEqualityTest.cpp
+
 class ComparisonSystem
 {
 public:
