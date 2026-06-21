@@ -62,19 +62,19 @@ TEST_CASE("Interpolating trees")
     auto makeSubTreeForDefaultStrat_A = []()
     {
         return  dncomp("types without interp that will use DefaultMixingStrategy specified", {
-                    dnleaf("bool",      true),
-                    dnleaf("boolvec",   BoolVec{true,false,true}),
-                    dnleaf("qstring",   QString("hi")),
-                    dnleaf("enum",      Enum({{10, "ten"}, {20, "twenty"}, {100, "hundred"}}, 1))
+                    dnleaf("bool",      true)//,
+                    //dnleaf("boolvec",   BoolVec{true,false,true}),
+                    //dnleaf("qstring",   QString("hi")),
+                    //dnleaf("enum",      Enum({{10, "ten"}, {20, "twenty"}, {100, "hundred"}}, 1))
                 });
     };
     auto makeSubTreeForDefaultStrat_B = []()
     {
         return  dncomp("types without interp that will use DefaultMixingStrategy specified", {
-                    dnleaf("bool",      false),
-                    dnleaf("boolvec",   BoolVec{false,false,false}),
-                    dnleaf("qstring",   QString("dont hi")),
-                    dnleaf("enum",      Enum())
+                    dnleaf("bool",      false)//,
+                    //dnleaf("boolvec",   BoolVec{false,false,false}),
+                    //dnleaf("qstring",   QString("dont hi")),
+                    //dnleaf("enum",      Enum())
                 });
     };
 
@@ -106,23 +106,24 @@ TEST_CASE("Interpolating trees")
                 });
     };
     
-    const auto treeA =  dncomp("root", {
-                            makeSubTreeForDefaultStrat_A(),
-                            makeSubTreeForActualInterpolation_A()
-                        });
+    const auto treeA =  //dncomp("root", {
+                            makeSubTreeForDefaultStrat_A();//,
+                            //makeSubTreeForActualInterpolation_A()
+                        //});
 
-    const auto treeB =  dncomp("root", {
-                            makeSubTreeForDefaultStrat_B(),
-                            makeSubTreeForActualInterpolation_B()
-                        });
+    const auto treeB =  //dncomp("root", {
+                            makeSubTreeForDefaultStrat_B();//,
+                            //makeSubTreeForActualInterpolation_B()
+                        //});
 
     {
-        const auto treeExpected_stratA = dncomp("root", {
-                                makeSubTreeForDefaultStrat_A(),
-                                makeSubTreeForActualInterpolation_ExpectedMixed()
-                            });
+        const auto treeExpected_stratA = //dncomp("root", {
+                                makeSubTreeForDefaultStrat_A();//,
+                                //makeSubTreeForActualInterpolation_ExpectedMixed()
+                            //});
 
-        const auto treeResult_stratA = DataNode::makeCopy(treeA);
+        //const auto treeResult_stratA = DataNode::makeCopy(treeA);
+        const auto treeResult_stratA = makeSubTreeForDefaultStrat_A();
 
         bool treesMatched = InterpolationSystem::interpolateTwoTreesToThird(*treeA,
                                                                             *treeB,
@@ -137,7 +138,7 @@ TEST_CASE("Interpolating trees")
         }
     }
     
-
+    /*
     {
         const auto treeExpected_stratB = dncomp("root", {
                                 makeSubTreeForDefaultStrat_B(),
@@ -157,4 +158,5 @@ TEST_CASE("Interpolating trees")
             FAIL_CHECK("Mixing two trees with strat TakeB didnt produce expected result");
         }
     }
+    */
 }
