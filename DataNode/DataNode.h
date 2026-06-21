@@ -283,6 +283,28 @@ public:
         }
     }
 
+    static DataNodeShared makeCopy(const DataNodeShared& node)
+    {
+        SV_ASSERT(node);
+        if (node->isLeaf())
+        {
+            return DataNode::makeLeaf(node->getName(), *node->tryGetLeafvalue());
+        }
+        else if (auto *compdata = node->tryGetCompositeData())
+        {
+            std::vector<DataNodeShared> childrenCopies;
+            childrenCopies.reserve(compdata->childrenCount());
+
+            for (const auto& child : compdata->children)
+            {
+                childrenCopies.push_back(DataNode::makeCopy(child));
+            }
+
+            return DataNode::makeComposite(node->getName(), std::move(childrenCopies));
+        }
+        else SV_UNREACHABLE();
+    }
+
 private:
     void initPayload(NodeType nodeType)
     {

@@ -59,7 +59,6 @@ TEST_CASE("Interpolating trees")
     checkVarsMixing(limdvec_A,  limdvec_B,  limdvec_ExpectedMixed);
     checkVarsMixing(limivec_A,  limivec_B,  limivec_ExpectedMixed);
 
-    /*
     auto makeSubTreeForDefaultStrat_A = []()
     {
         return  dncomp("types without interp that will use DefaultMixingStrategy specified", {
@@ -106,5 +105,56 @@ TEST_CASE("Interpolating trees")
                     dnleaf("limitedintvec",     limivec_ExpectedMixed)
                 });
     };
-    */
+    
+    const auto treeA =  dncomp("root", {
+                            makeSubTreeForDefaultStrat_A(),
+                            makeSubTreeForActualInterpolation_A()
+                        });
+
+    const auto treeB =  dncomp("root", {
+                            makeSubTreeForDefaultStrat_B(),
+                            makeSubTreeForActualInterpolation_B()
+                        });
+
+    {
+        const auto treeExpected_stratA = dncomp("root", {
+                                makeSubTreeForDefaultStrat_A(),
+                                makeSubTreeForActualInterpolation_ExpectedMixed()
+                            });
+
+        const auto treeResult_stratA = DataNode::makeCopy(treeA);
+
+        bool treesMatched = InterpolationSystem::interpolateTwoTreesToThird(*treeA,
+                                                                            *treeB,
+                                                                            *treeResult_stratA,
+                                                                            MixRatio,
+                                                                            InterpolationSystem::DefaultMixingStrategy::TakeA);
+        REQUIRE(treesMatched);
+
+        if(!treesAreCompletelyEqual_withMismatchLog(*treeExpected_stratA, *treeResult_stratA))
+        {
+            FAIL_CHECK("Mixing two trees with strat TakeA didnt produce expected result");
+        }
+    }
+    
+
+    {
+        const auto treeExpected_stratB = dncomp("root", {
+                                makeSubTreeForDefaultStrat_B(),
+                                makeSubTreeForActualInterpolation_ExpectedMixed()
+                            });
+        const auto treeResult_stratB = DataNode::makeCopy(treeA);
+
+        bool treesMatched = InterpolationSystem::interpolateTwoTreesToThird(*treeA,
+                                                                            *treeB,
+                                                                            *treeResult_stratB,
+                                                                            MixRatio,
+                                                                            InterpolationSystem::DefaultMixingStrategy::TakeB);
+        REQUIRE(treesMatched);
+
+        if(!treesAreCompletelyEqual_withMismatchLog(*treeExpected_stratB, *treeResult_stratB))
+        {
+            FAIL_CHECK("Mixing two trees with strat TakeB didnt produce expected result");
+        }
+    }
 }

@@ -55,6 +55,8 @@ bool InterpolationSystem::interpolateTwoTreesToThird(   const DataNode &treeA,
             // all leaf or all composite.
             if (nodeA.isLeaf())
             {
+                SV_ASSERT(nodeB.isLeaf() && nodeResult.isLeaf());
+
                 //its fine if we didnt. not all leaf types should be interpolated.
                 bool actuallyInterpolated = InterpolationSystem::interpolate(*nodeA.tryGetLeafvalue(),
                                                                              *nodeB.tryGetLeafvalue(),
