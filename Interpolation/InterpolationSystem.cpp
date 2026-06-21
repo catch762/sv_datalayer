@@ -22,7 +22,6 @@ bool InterpolationSystem::interpolate(  const QVariant &A,
     if (auto* interpolator = getInterpolator(aType))
     {
         (*interpolator)(A, B, Result, ratioAToB01);
-        return true;
     }
     else
     {
@@ -38,10 +37,9 @@ bool InterpolationSystem::interpolate(  const QVariant &A,
             Result = B;
         }
         else SV_UNREACHABLE();
-
-        //Regardless, we return false because didnt use real interpolator.
-        return false;
     }
+
+    return true;
 }
 
 bool InterpolationSystem::interpolateTwoTreesToThird(   const DataNode &treeA, 

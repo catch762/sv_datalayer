@@ -9,30 +9,57 @@ using namespace datanode_helpers;
 
 TEST_CASE("Interpolating trees")
 {
-    //all the mixing at this testcase will be at 50% 
-    SV_WARN("interrr");
+    //all the mixing at this testcase will be at 50%:
+    const double MixRatio = 0.5;
 
-    auto limd_A                 = LimitedDouble{60, 50, 70};
-    auto limd_B                 = LimitedDouble{120, 100, 140};
-    auto limd_ExpectedMixed     = LimitedDouble{90, 75, 105};
+    auto checkVarsMixing = [MixRatio](const auto &a, const auto &b, const auto& expectedMixResult)
+    {
+        using ValueType = std::remove_cvref_t<decltype(a)>;
 
-    auto limint_A               = LimitedInt{50,0,100};
-    auto limint_B               = LimitedInt{150,0,300};
-    auto limint_ExpectedMixed   = LimitedInt{100,0,200};
+        auto varA               = QVariant::fromValue(a);
+        auto varB               = QVariant::fromValue(b);
+        auto actualMixResult    = QVariant::fromValue(a); // assigning 'a' just so it has same type
+        auto success            = InterpolationSystem::interpolate( varA,
+                                                                    varB,
+                                                                    actualMixResult,
+                                                                    MixRatio );
+        if (!success)
+        {
+            FAIL_CHECK(std::format("{}: failed to interpolate, prob type mismatch, variants were A={} B={} RES={}",
+                                   qtTypeName<ValueType>(), varA, varB, actualMixResult));
+        }
+        
+        REQUIRE(holdsType<ValueType>(actualMixResult)); //just in case
 
-    auto limdvec_A              = LimitedDoubleVec{LimitedDouble{10, 10, 50}, LimitedDouble{-10,100,-100}};
-    auto limdvec_B              = LimitedDoubleVec{LimitedDouble{20, 20, 100}, LimitedDouble{-20,200,-200}};
-    auto limdvec_ExpectedMixed  = LimitedDoubleVec{LimitedDouble{20, 20, 100}, LimitedDouble{-20,200,-200}};
+        if(!ComparisonSystem::equals(QVariant::fromValue(expectedMixResult), actualMixResult))
+        {
+            FAIL_CHECK(std::format("{}: interpolation result doesnt match expected: \nA  ={} \nB  ={} \nEXP={} \nRES={}",
+                                   qtTypeName<ValueType>(), a, b, expectedMixResult, actualMixResult.template value<ValueType>()));
+        }
+    };
 
-    auto limivec_A              = LimitedIntVec   {LimitedInt{10, 0, 20},     LimitedInt{-10,0,-20}};
-    auto limivec_B              = LimitedIntVec   {LimitedInt{-100, 0, -200}, LimitedInt{-100,0,-200}};
-    auto limivec_ExpectedMixed  = LimitedIntVec   {LimitedInt{-100, 0, -200}, LimitedInt{-100,0,-200}};
+    const auto limd_A                 = LimitedDouble{60, 50, 70};
+    const auto limd_B                 = LimitedDouble{120, 100, 140};
+    const auto limd_ExpectedMixed     = LimitedDouble{90, 75, 105};
 
-    auto limd_ActualMixed = QVariant::fromValue(LimitedDouble{});
-    auto opRes = InterpolationSystem::interpolate(QVariant::fromValue(limd_A), QVariant::fromValue(limd_A), limd_ActualMixed, 0.5);
-    CHECK(opRes);
-    CHECK(ComparisonSystem::equals(QVariant::fromValue(limd_ExpectedMixed), limd_ActualMixed));
+    const auto limint_A               = LimitedInt{50,0,100};
+    const auto limint_B               = LimitedInt{150,-10,300};
+    const auto limint_ExpectedMixed   = LimitedInt{100,-5,200};
 
+    const auto limdvec_A              = LimitedDoubleVec{LimitedDouble{10, 10, 50},     LimitedDouble{-10,100,-100}};
+    const auto limdvec_B              = LimitedDoubleVec{LimitedDouble{20, 20, 100},    LimitedDouble{-20,200,-200}};
+    const auto limdvec_ExpectedMixed  = LimitedDoubleVec{LimitedDouble{15, 15, 75},     LimitedDouble{-15,150,-150}};
+
+    const auto limivec_A              = LimitedIntVec   {LimitedInt{10,   0, 20},   LimitedInt{-10, 0,-20}};
+    const auto limivec_B              = LimitedIntVec   {LimitedInt{-100, 0, -200}, LimitedInt{-100,0,-200}};
+    const auto limivec_ExpectedMixed  = LimitedIntVec   {LimitedInt{-45,  0, -90},  LimitedInt{-55, 0,-110}};
+
+    checkVarsMixing(limd_A,     limd_B,     limd_ExpectedMixed);
+    checkVarsMixing(limint_A,   limint_B,   limint_ExpectedMixed);
+    checkVarsMixing(limdvec_A,  limdvec_B,  limdvec_ExpectedMixed);
+    checkVarsMixing(limivec_A,  limivec_B,  limivec_ExpectedMixed);
+
+    /*
     auto makeSubTreeForDefaultStrat_A = []()
     {
         return  dncomp("types without interp that will use DefaultMixingStrategy specified", {
@@ -79,4 +106,5 @@ TEST_CASE("Interpolating trees")
                     dnleaf("limitedintvec",     limivec_ExpectedMixed)
                 });
     };
+    */
 }

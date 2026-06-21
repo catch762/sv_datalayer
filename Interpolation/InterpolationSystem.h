@@ -8,7 +8,7 @@ public:
     //used if no interpolator is registered
     enum class DefaultMixingStrategy
     {
-        DoNothing,
+        DoNothing, //will not change 'Result' value at all
         TakeA,
         TakeB
     };
@@ -18,9 +18,11 @@ public:
                                                 QVariant &Result,
                                                 double ratioAToB01)>;
 
-    // Will return 'false' in case of types mismatch or if no interpolator registered for this type.
+    // All QVariant's must be same type, ofcourse.
+    // Will only return 'false' in case of types mismatch.
+    //
     // If no interpolator registered for this type, will execute 'defaultStrat'.
-    // The latter situation is perfectly fine, not all types need interpolation.
+    // The situation is perfectly fine, not all types need interpolation.
     static bool interpolate(const QVariant &A,
                             const QVariant &B,
                             QVariant &Result,
