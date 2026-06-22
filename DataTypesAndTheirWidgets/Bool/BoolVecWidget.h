@@ -44,5 +44,5 @@ signals:
                                 [](const QCheckBox* w)->bool{ return w->isChecked(); },
                                 GetValReturnType::Value,
                                 [](QCheckBox* w, const bool& v){ w->setChecked(v); },
-                                QCheckBox::checkStateChanged )
+                                &QCheckBox::checkStateChanged )
 };

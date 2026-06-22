@@ -16,5 +16,5 @@ signals:
                                 [](const EnumWidget* w)->const Enum&{ return w->getValue(); },
                                 GetValReturnType::ConstRef,
                                 [](EnumWidget* w, const Enum& v){ w->setValue(v); },
-                                EnumWidget::valueChanged )
+                                &EnumWidget::valueChanged )
 };

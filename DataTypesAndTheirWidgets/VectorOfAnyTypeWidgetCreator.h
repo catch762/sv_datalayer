@@ -189,7 +189,7 @@ public:                                                                         
     :   QWidget(parent),                                                                \
         helper( this,                                                                   \
                 CREATE_WIDGET_FUNC,                                                     \
-                std::bind(setupElementWidget, this, std::placeholders::_1),             \
+                std::bind(&CLASS_NAME::setupElementWidget, this, std::placeholders::_1),             \
                 VectorWidgetHelperType::GetWidgetValueFuncVariant(std::in_place_index<int(GETVAL_RETURN_TYPE)>, GETVAL_WIDGET_FUNC), \
                 SETVAL_WIDGET_FUNC,                                                     \
                 initialValue) {}                                                        \
@@ -209,7 +209,7 @@ private:                                                                        
     }                                                                                   \
                                                                                         \
     void setupElementWidget(ELEM_WIDGET* widget){                                       \
-        connect(widget, &WIDGET_VALCHANGED_SIGNAL, this, onElementWidgetValueChanged);  \
+        connect(widget, WIDGET_VALCHANGED_SIGNAL, this, &CLASS_NAME::onElementWidgetValueChanged);  \
     }                                                                                   \
 private:                                                                                \
     VectorWidgetHelperType helper;

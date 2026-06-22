@@ -5,10 +5,10 @@
 
 
 
-template<typename T>
-void checkSerializeAndDeserialize(T val, std::function<QString(const T&)> valToString)
+template<typename T, typename Func>
+void checkSerializeAndDeserialize(T val, Func valToString)
 {
-    SV_LOG( format("****** Testing type <{}>", qtTypeName<T>().toStdString()) );
+    SV_LOG( std::format("****** Testing type <{}>", qtTypeName<T>().toStdString()) );
 
     SV_LOG(std::format("Input: {}", val));
 
