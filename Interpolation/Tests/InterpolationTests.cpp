@@ -106,24 +106,24 @@ TEST_CASE("Interpolating trees")
                 });
     };
     
-    const auto treeA =  //dncomp("root", {
-                            makeSubTreeForDefaultStrat_A();//,
-                            //makeSubTreeForActualInterpolation_A()
-                        //});
+    const auto treeA =  dncomp("root", {
+                            makeSubTreeForDefaultStrat_A(),
+                            makeSubTreeForActualInterpolation_A()
+                        });
 
-    const auto treeB =  //dncomp("root", {
-                            makeSubTreeForDefaultStrat_B();//,
-                            //makeSubTreeForActualInterpolation_B()
-                        //});
+    const auto treeB =  dncomp("root", {
+                            makeSubTreeForDefaultStrat_B(),
+                            makeSubTreeForActualInterpolation_B()
+                        });
 
     {
-        const auto treeExpected_stratA = //dncomp("root", {
-                                makeSubTreeForDefaultStrat_A();//,
-                                //makeSubTreeForActualInterpolation_ExpectedMixed()
-                            //});
+        const auto treeExpected_stratA = dncomp("root", {
+                                makeSubTreeForDefaultStrat_A(),
+                                makeSubTreeForActualInterpolation_ExpectedMixed()
+                            });
 
-        //const auto treeResult_stratA = DataNode::makeCopy(treeA);
-        const auto treeResult_stratA = makeSubTreeForDefaultStrat_A();
+        const auto treeResult_stratA = DataNode::makeCopy(treeA);
+        //const auto treeResult_stratA = makeSubTreeForDefaultStrat_A();
 
         bool treesMatched = InterpolationSystem::interpolateTwoTreesToThird(*treeA,
                                                                             *treeB,
@@ -138,7 +138,7 @@ TEST_CASE("Interpolating trees")
         }
     }
     
-    /*
+    
     {
         const auto treeExpected_stratB = dncomp("root", {
                                 makeSubTreeForDefaultStrat_B(),
@@ -158,5 +158,5 @@ TEST_CASE("Interpolating trees")
             FAIL_CHECK("Mixing two trees with strat TakeB didnt produce expected result");
         }
     }
-    */
+    
 }
