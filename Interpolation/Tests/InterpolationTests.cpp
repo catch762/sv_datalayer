@@ -2,7 +2,7 @@
 #include "Comparison/ComparisonSystem.h"
 #include "DataNode/DataNodeHeader.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 using namespace datanode_helpers;
 

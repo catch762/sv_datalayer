@@ -1,6 +1,6 @@
 #include "DataNodeHelpers.h"
 #include "Comparison/ComparisonSystem.h"
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 bool leafValuesEqual(const QVariant &a, const QVariant &b)
 {

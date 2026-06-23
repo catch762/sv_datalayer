@@ -1,23 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(sv_datalayer LANGUAGES CXX)
 
-include(cmake/CPM.cmake)
+#include(cmake/CPM.cmake)
 
-CPMAddPackage(
-    NAME ordered-map
-    GIT_REPOSITORY git@github.com:Tessil/ordered-map.git
-    GIT_TAG master
-)
-
-CPMAddPackage(
-  NAME Boost
-  VERSION 1.89.0
-  URL https://github.com/boostorg/boost/releases/download/boost-1.89.0/boost-1.89.0-cmake.tar.xz
-  OPTIONS
-    "BOOST_ENABLE_CMAKE ON"
-    "BUILD_SHARED_LIBS OFF"
-    "BOOST_INCLUDE_LIBRARIES bimap"
-)
 
 file(GLOB_RECURSE SV_DATALAYER_SOURCES "*.cpp" "*.h")
 

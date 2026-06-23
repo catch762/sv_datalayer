@@ -1,5 +1,5 @@
 #include "TestUtils.h"
-#include "doctest.h"
+#include "doctest/doctest.h"
 #include "Registrations/Registrations.h"
 
 TEST_CASE("Tree with all types roundtrip to json and back")

@@ -1,6 +1,6 @@
 #include "Enum.h"
 #include "WidgetLogic/WidgetDefs.h"
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 namespace
 {

@@ -1,5 +1,5 @@
 #include "DataNodeHelpers.h"
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 TEST_CASE("All DataNode tree equality functions")
 {
