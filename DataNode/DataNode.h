@@ -12,7 +12,7 @@
 
 #include <QPointer>
 
-class DataNodeWrapperWidget;
+class WidgetWrapper;
 
 class DataNode;
 SV_DECL_ALIASES(DataNode);

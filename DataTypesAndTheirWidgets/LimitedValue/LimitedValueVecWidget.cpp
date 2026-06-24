@@ -77,7 +77,7 @@ QJsonObjectWithWidgetOptionsOpt LimitedValueVecWidget::makeOptions() const
     return options;
 }
 
-void LimitedValueVecWidget::setupButtonsOnWrapperParent(DataNodeWrapperWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
+void LimitedValueVecWidget::setupButtonsOnWrapperParent(WidgetWrapper *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
 {
     viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::MediaPlaybackStop,
                                                                      QIcon::ThemeIcon::FormatJustifyLeft);

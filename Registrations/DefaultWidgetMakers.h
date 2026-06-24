@@ -4,24 +4,24 @@
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include "WidgetLogic/WidgetDefs.h"
 
-class DataNodeWrapperWidget;
+class WidgetWrapper;
 
 class DefaultWidgetMakers
 {
 public:
     static void RegisterEverything();
 
-    static DataNodeWrapperWidget* widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options);
 
-    static DataNodeWrapperWidget* widgetMakerForBool    (DataNodeShared leafWithBool,    const QJsonObjectWithWidgetOptionsOpt &options);
-    static DataNodeWrapperWidget* widgetMakerForBoolVec (DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForBool    (DataNodeShared leafWithBool,    const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForBoolVec (DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt &options);
 
-    static DataNodeWrapperWidget* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options);
-    static DataNodeWrapperWidget* widgetMakerForLimitedInt   (DataNodeShared leafWithLimitedInt,    const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForLimitedInt   (DataNodeShared leafWithLimitedInt,    const QJsonObjectWithWidgetOptionsOpt &options);
 
-    static DataNodeWrapperWidget* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options);
-    static DataNodeWrapperWidget* widgetMakerForLimitedIntVec   (DataNodeShared leafWithLimitedIntVec,    const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForLimitedIntVec   (DataNodeShared leafWithLimitedIntVec,    const QJsonObjectWithWidgetOptionsOpt &options);
     
-    static DataNodeWrapperWidget* widgetMakerForEnum(DataNodeShared leafWithEnum, const QJsonObjectWithWidgetOptionsOpt &options);
-    static DataNodeWrapperWidget* widgetMakerForEnumVec(DataNodeShared leafWithEnumVec, const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForEnum(DataNodeShared leafWithEnum, const QJsonObjectWithWidgetOptionsOpt &options);
+    static WidgetWrapper* widgetMakerForEnumVec(DataNodeShared leafWithEnumVec, const QJsonObjectWithWidgetOptionsOpt &options);
 };

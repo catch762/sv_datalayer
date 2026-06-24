@@ -85,7 +85,7 @@ void DefaultWidgetMakers::RegisterEverything()
     system.registerWidgetMaker<EnumVec>         (widgetMakerForEnumVec);
 }
 
-DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared leafWithQString, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<QString>(leafWithQString))
     {
@@ -102,10 +102,10 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForQString(DataNodeShared
                                                 QLineEdit,
                                                 &QLineEdit::setText>;
 
-    return new DataNodeWrapperWidget( widget, leafWithQString->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithQString->getName(), options, updater);
 }
 
-DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForBool(DataNodeShared leafWithBool, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper *DefaultWidgetMakers::widgetMakerForBool(DataNodeShared leafWithBool, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<bool>(leafWithBool))
     {
@@ -122,10 +122,10 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForBool(DataNodeShared le
                                                 QCheckBox,
                                                 &QCheckBox::setChecked>;
 
-    return new DataNodeWrapperWidget( widget, leafWithBool->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithBool->getName(), options, updater);
 }
 
-DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForBoolVec(DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper *DefaultWidgetMakers::widgetMakerForBoolVec(DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<BoolVec>(leafWithBoolVec))
     {
@@ -142,10 +142,10 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForBoolVec(DataNodeShared
                                                 BoolVecWidget,
                                                 &BoolVecWidget::setValue>;
 
-    return new DataNodeWrapperWidget( widget, leafWithBoolVec->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithBoolVec->getName(), options, updater);
 }
 
-DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNodeShared leafWithLimitedDouble, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDouble>(leafWithLimitedDouble))
     {
@@ -162,10 +162,10 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDouble(DataNode
                                                 LimitedValueWidget,
                                                 &LimitedValueWidget::setValue>;
 
-    return new DataNodeWrapperWidget( widget, leafWithLimitedDouble->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithLimitedDouble->getName(), options, updater);
 }
 
-DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedInt(DataNodeShared leafWithLimitedInt, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper *DefaultWidgetMakers::widgetMakerForLimitedInt(DataNodeShared leafWithLimitedInt, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedInt>(leafWithLimitedInt))
     {
@@ -182,10 +182,10 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedInt(DataNodeSha
                                                 LimitedValueWidget,
                                                 &LimitedValueWidget::setValue>;
 
-    return new DataNodeWrapperWidget( widget, leafWithLimitedInt->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithLimitedInt->getName(), options, updater);
 }
 
-DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataNodeShared leafWithLimitedDoubleVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedDoubleVec>(leafWithLimitedDoubleVec))
     {
@@ -202,12 +202,12 @@ DataNodeWrapperWidget* DefaultWidgetMakers::widgetMakerForLimitedDoubleVec(DataN
                                                 LimitedValueVecWidget,
                                                 &LimitedValueVecWidget::setValue>;
 
-    auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedDoubleVec->getName(), options, updater);
+    auto *wrapper = new WidgetWrapper( widget, leafWithLimitedDoubleVec->getName(), options, updater);
     widget->setupButtonsOnWrapperParent(wrapper, options);
     return wrapper;
 }
 
-DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedIntVec(DataNodeShared leafWithLimitedIntVec, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper *DefaultWidgetMakers::widgetMakerForLimitedIntVec(DataNodeShared leafWithLimitedIntVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<LimitedIntVec>(leafWithLimitedIntVec))
     {
@@ -224,12 +224,12 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForLimitedIntVec(DataNode
                                                 LimitedValueVecWidget,
                                                 &LimitedValueVecWidget::setValue>;
 
-    auto *wrapper = new DataNodeWrapperWidget( widget, leafWithLimitedIntVec->getName(), options, updater);
+    auto *wrapper = new WidgetWrapper( widget, leafWithLimitedIntVec->getName(), options, updater);
     widget->setupButtonsOnWrapperParent(wrapper, options);
     return wrapper;
 }
 
-DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnum(DataNodeShared leafWithEnum, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper *DefaultWidgetMakers::widgetMakerForEnum(DataNodeShared leafWithEnum, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<Enum>(leafWithEnum))
     {
@@ -247,10 +247,10 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnum(DataNodeShared le
                                                 EnumWidget,
                                                 &EnumWidget::setValue>;
 
-    return new DataNodeWrapperWidget( widget, leafWithEnum->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithEnum->getName(), options, updater);
 }
 
-DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnumVec(DataNodeShared leafWithEnumVec, const QJsonObjectWithWidgetOptionsOpt &options)
+WidgetWrapper *DefaultWidgetMakers::widgetMakerForEnumVec(DataNodeShared leafWithEnumVec, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<EnumVec>(leafWithEnumVec))
     {
@@ -267,5 +267,5 @@ DataNodeWrapperWidget *DefaultWidgetMakers::widgetMakerForEnumVec(DataNodeShared
                                                 EnumVecWidget,
                                                 &EnumVecWidget::setValue>;
 
-    return new DataNodeWrapperWidget( widget, leafWithEnumVec->getName(), options, updater);
+    return new WidgetWrapper( widget, leafWithEnumVec->getName(), options, updater);
 }

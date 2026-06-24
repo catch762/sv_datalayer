@@ -8,7 +8,7 @@ namespace
     const int VerticalLineWidth = 16;
 }
 
-DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets,
+WidgetWrapper::WidgetWrapper(const std::vector<QVariantHoldingWidget> &theContentWidgets,
                                              bool _isForCompositeNode,
                                              const QString &name,
                                              const QJsonObjectWithWidgetOptionsOpt& options,
@@ -88,12 +88,12 @@ DataNodeWrapperWidget::DataNodeWrapperWidget(const std::vector<QVariantHoldingWi
     }
 }
 
-void DataNodeWrapperWidget::setExpanded(bool expanded)
+void WidgetWrapper::setExpanded(bool expanded)
 {
     stripeShowHideContentButton->setChecked(expanded);
 }
 
-QHBoxLayout *DataNodeWrapperWidget::getStripeButtonsLayout()
+QHBoxLayout *WidgetWrapper::getStripeButtonsLayout()
 {
     return stripeButtonsLayout;
 }
@@ -140,7 +140,7 @@ QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIco
     return button;
 }
 
-void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
+void WidgetWrapper::createAndInitTopStripe(const QString &name)
 {
     topStripe = new QWidget(this);
     topStripe->setObjectName("topStripe");
@@ -197,7 +197,7 @@ void DataNodeWrapperWidget::createAndInitTopStripe(const QString &name)
     }
 }
 
-void DataNodeWrapperWidget::iterateContentWidgets(std::function<void(QWidget *)> visitor)
+void WidgetWrapper::iterateContentWidgets(std::function<void(QWidget *)> visitor)
 {
     for (int i = 0; i < contentLayout->count(); ++i)
     {
@@ -211,7 +211,7 @@ void DataNodeWrapperWidget::iterateContentWidgets(std::function<void(QWidget *)>
     }
 }
 
-void DataNodeWrapperWidget::setContentWidgetsVisibleStatus(bool visible)
+void WidgetWrapper::setContentWidgetsVisibleStatus(bool visible)
 {
     if(frameVerticalLine)
     {
@@ -235,7 +235,7 @@ void DataNodeWrapperWidget::setContentWidgetsVisibleStatus(bool visible)
     }
 }
 
-QJsonObjectWithWidgetOptions DataNodeWrapperWidget::makeOptions() const
+QJsonObjectWithWidgetOptions WidgetWrapper::makeOptions() const
 {
     QJsonObjectWithWidgetOptions obj;
     
@@ -256,13 +256,13 @@ QJsonObjectWithWidgetOptions DataNodeWrapperWidget::makeOptions() const
     return obj;
 }
 
-void DataNodeWrapperWidget::updateContentWidgetsFromDataNode(ConstDataNodeWeak weakNode)
+void WidgetWrapper::updateContentWidgetsFromDataNode(ConstDataNodeWeak weakNode)
 {
     if (!contentUpdater)
     {
         if (!isForCompositeNode)
         {
-            SV_WARN(std::format("DataNodeWrapperWidget::updateContentWidgetsFromDataNode "
+            SV_WARN(std::format("WidgetWrapper::updateContentWidgetsFromDataNode "
                 "called on leaf node widget, but it doesnt have updater. Node is {}", weakNode));
         }
         return;

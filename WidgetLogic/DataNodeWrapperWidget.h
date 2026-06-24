@@ -12,14 +12,15 @@
 //      - Leaf DataNode with single content widget,
 //      - Leaf DataNode with multiple content widgets (if the type is vector<Something>, for example) 
 //      - Composite DataNode with multiple content widgets for each DataNode child --
-//   all these content widgets are used uniformly, and simply inserted into layout.
+// 
+//   -- all these content widgets are used uniformly, and simply inserted into layout.
 //
 //*****************************************************************************************************
 
 //todo write abt it
 
 
-class DataNodeWrapperWidget : public QWidget
+class WidgetWrapper : public QWidget
 {
     Q_OBJECT
 public:
@@ -33,19 +34,19 @@ public:
     // widgets should account for. At the moment. So its only passed in constructor taking single widget.)
     using UpdateContentWidgetFromNodeFunc = std::function<void(QWidget*, ConstDataNodeWeak)>;
 
-    DataNodeWrapperWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets,
+    WidgetWrapper(  const std::vector<QVariantHoldingWidget>& contentWidgets,
                             bool                                      isForCompositeNode,
                             const QString&                            name           = {},
                             const QJsonObjectWithWidgetOptionsOpt&    options        = {},
                             QWidget*                                  parent         = nullptr );
 
     template<class WidgetType>                        
-    DataNodeWrapperWidget(  WidgetType*                             widget,
+    WidgetWrapper(  WidgetType*                             widget,
                             const QString&                          name    = {},
                             const QJsonObjectWithWidgetOptionsOpt&  options = {},
                             UpdateContentWidgetFromNodeFunc         theContentUpdater = nullptr,
                             QWidget*                                parent  = nullptr )
-        : DataNodeWrapperWidget({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
+        : WidgetWrapper({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
     {
         contentUpdater = std::move(theContentUpdater);
     }
@@ -88,10 +89,10 @@ private:
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
 
 template<>
-class Serializer< DataNodeWrapperWidget* >
+class Serializer< WidgetWrapper* >
 {
 public:
-    using WidgetPtr = DataNodeWrapperWidget*;
+    using WidgetPtr = WidgetWrapper*;
 
     QJsonValue toJson(const WidgetPtr& value)
     {

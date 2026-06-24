@@ -34,7 +34,7 @@
 //
 //************************************************************************************************
 
-class DataNodeWrapperWidget;
+class WidgetWrapper;
 
 class WidgetMakerSystem
 {
@@ -57,7 +57,7 @@ public:
     //    You may see examples in
     //  
     //************************************************************************************************
-    using WidgetMakerForTypeT = std::function<DataNodeWrapperWidget*(DataNodeShared leafNodeContainingValueOfTypeT,
+    using WidgetMakerForTypeT = std::function<WidgetWrapper*(DataNodeShared leafNodeContainingValueOfTypeT,
                                                                     const QJsonObjectWithWidgetOptionsOpt &options)>;
 
     struct WidgetMakerCollection
