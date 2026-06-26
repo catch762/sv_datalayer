@@ -1,7 +1,7 @@
 #include "LimitedValueVecWidget.h"
 #include "Internal/LimitedValueVecSlidersWidget.h"
 #include "Internal/XYPadWithPresetsWidget.h"
-#include "WidgetLogic/DataNodeWrapperWidget.h"
+#include "WidgetLogic/NodeWidget.h"
 #include <QToolButton>
 
 
@@ -77,7 +77,7 @@ QJsonObjectWithWidgetOptionsOpt LimitedValueVecWidget::makeOptions() const
     return options;
 }
 
-void LimitedValueVecWidget::setupButtonsOnWrapperParent(WidgetWrapper *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
+void LimitedValueVecWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
 {
     viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::MediaPlaybackStop,
                                                                      QIcon::ThemeIcon::FormatJustifyLeft);

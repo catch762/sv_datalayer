@@ -4,7 +4,7 @@
 #include "WidgetLogic/WidgetsForNodeManager.h"
 #include "SerializationLogic/SerializationSystem.h"
 #include "WidgetLogic/WidgetMakerSystem.h"
-#include "WidgetLogic/DataNodeWrapperWidget.h"
+#include "WidgetLogic/NodeWidget.h"
 
 bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level)
 {

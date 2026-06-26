@@ -6,7 +6,7 @@
 
 class LimitedValueVecSlidersWidget;
 class XYPadWithPresetsWidget;
-class WidgetWrapper;
+class NodeWidget;
 
 //todo on value change check validation
 
@@ -30,7 +30,7 @@ public:
     void setValue(const LimitedIntOrDoubleVec& newValue);
 
     QJsonObjectWithWidgetOptionsOpt makeOptions() const;
-    void setupButtonsOnWrapperParent(WidgetWrapper* wrapper, const QJsonObjectWithWidgetOptionsOpt& options = {} );
+    void setupButtonsOnWrapperParent(NodeWidget* wrapper, const QJsonObjectWithWidgetOptionsOpt& options = {} );
 
 signals:
     void valueChanged(const LimitedIntOrDoubleVec &val);
@@ -49,7 +49,7 @@ private:
     LimitedValueVecSlidersWidget*       slidersView = nullptr;
     XYPadWithPresetsWidget*     xyPadView   = nullptr;
 
-    // Button to select views, it will be created on a WidgetWrapper, but stored here.
+    // Button to select views, it will be created on a NodeWidget, but stored here.
     // default state: 'checked = false' which means slidersView is visible
     QPointer<QPushButton> viewSelectorWrapperButton;
 

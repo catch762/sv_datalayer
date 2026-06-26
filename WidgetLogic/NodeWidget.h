@@ -5,7 +5,7 @@
 
 //*****************************************************************************************************
 //
-// Widget that wraps content widget(s) for DataNode of any type.
+// Widget that wraps content widget(s) for any DataNode (leaf or composite).
 // If you press "+/-" on the top stripe, it will show/hide all content widget(s).
 //
 // Whether its:
@@ -20,7 +20,7 @@
 //todo write abt it
 
 
-class WidgetWrapper : public QWidget
+class NodeWidget : public QWidget
 {
     Q_OBJECT
 public:
@@ -34,22 +34,37 @@ public:
     // widgets should account for. At the moment. So its only passed in constructor taking single widget.)
     using UpdateContentWidgetFromNodeFunc = std::function<void(QWidget*, ConstDataNodeWeak)>;
 
-    WidgetWrapper(  const std::vector<QVariantHoldingWidget>& contentWidgets,
+    NodeWidget(  const std::vector<QVariantHoldingWidget>& contentWidgets,
                             bool                                      isForCompositeNode,
                             const QString&                            name           = {},
                             const QJsonObjectWithWidgetOptionsOpt&    options        = {},
                             QWidget*                                  parent         = nullptr );
 
     template<class WidgetType>                        
-    WidgetWrapper(  WidgetType*                             widget,
+    NodeWidget(  WidgetType*                             widget,
                             const QString&                          name    = {},
                             const QJsonObjectWithWidgetOptionsOpt&  options = {},
                             UpdateContentWidgetFromNodeFunc         theContentUpdater = nullptr,
                             QWidget*                                parent  = nullptr )
-        : WidgetWrapper({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
+        : NodeWidget({QVariantHoldingWidget::fromValue(widget)}, false, name, options, parent)
     {
         contentUpdater = std::move(theContentUpdater);
     }
+
+/////////////////////////////////////////////////////////////////
+    //new constructor, soon the only one
+    NodeWidget(  bool isForCompositeNode,
+                    const QString& name = {},
+                    const QJsonObjectWithWidgetOptionsOpt& options = {},
+                    QWidget* parent = nullptr)
+        : NodeWidget({  }, isForCompositeNode, name, options, parent)
+    {
+        
+    }
+
+    //virtual void createAndInitContentWidgets(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt& options = {});
+
+///////////////////////////////////////////////////////////////
 
     void setExpanded(bool expanded);
     
@@ -89,10 +104,10 @@ private:
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
 
 template<>
-class Serializer< WidgetWrapper* >
+class Serializer< NodeWidget* >
 {
 public:
-    using WidgetPtr = WidgetWrapper*;
+    using WidgetPtr = NodeWidget*;
 
     QJsonValue toJson(const WidgetPtr& value)
     {

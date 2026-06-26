@@ -1,5 +1,5 @@
 #include "WidgetsForNodeManager.h"
-#include "DataNodeWrapperWidget.h"
+#include "NodeWidget.h"
 
 void WidgetsForNodeManager::updateAllWidgetsFromNodeState(ConstDataNodeWeak node)
 {
@@ -9,11 +9,11 @@ void WidgetsForNodeManager::updateAllWidgetsFromNodeState(ConstDataNodeWeak node
         {
             if (widgetEntry.stillAlive())
             {
-                if (auto* wrapperWidget = qobject_cast<WidgetWrapper*>(widgetEntry.qPointer.data()))
+                if (auto* wrapperWidget = qobject_cast<NodeWidget*>(widgetEntry.qPointer.data()))
                 {
                     wrapperWidget->updateContentWidgetsFromDataNode(node);
                 }
-                else SV_WARN(std::format("WidgetsForNodeManager: couldnt cast widget to WidgetWrapper "
+                else SV_WARN(std::format("WidgetsForNodeManager: couldnt cast widget to NodeWidget "
                                             "to update it from node {}", node));
             }
         }

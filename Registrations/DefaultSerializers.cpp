@@ -2,7 +2,7 @@
 #include "SerializationLogic/SerializationSystem.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include "Utils/ContainerSerializers.h"
-#include "WidgetLogic/DataNodeWrapperWidget.h"
+#include "WidgetLogic/NodeWidget.h"
 
 
 void DefaultSerializers::RegisterEverything()
@@ -24,7 +24,7 @@ void DefaultSerializers::RegisterEverything()
     system.registerSerialization<Enum>();
     system.registerSerialization<EnumVec>();
 
-    system.registerSerialization<WidgetWrapper*>();
+    system.registerSerialization<NodeWidget*>();
     system.registerSerialization<LimitedValueVecWidget*>();
     
 }

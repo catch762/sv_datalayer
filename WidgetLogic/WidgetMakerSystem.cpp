@@ -1,5 +1,5 @@
 #include "WidgetLogic/WidgetMakerSystem.h"
-#include "WidgetLogic/DataNodeWrapperWidget.h"
+#include "WidgetLogic/NodeWidget.h"
 
 #include "WidgetLogic/WidgetsForNodeManager.h"
 
@@ -132,7 +132,7 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetisForCompositeNode(DataNode
         return {};
     }
 
-    auto *wrapper = new WidgetWrapper(widgetsOfChildren, true, node->getName(), options);
+    auto *wrapper = new NodeWidget(widgetsOfChildren, true, node->getName(), options);
     return QVariant::fromValue( wrapper );
 }
 
