@@ -53,17 +53,46 @@ public:
 
 /////////////////////////////////////////////////////////////////
     //new constructor, soon the only one
-    NodeWidget(  bool isForCompositeNode,
+    NodeWidget(     DataNodeShared node,
+                    bool isForCompositeNode,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {},
                     QWidget* parent = nullptr)
-        : NodeWidget({  }, isForCompositeNode, name, options, parent)
+        : NodeWidget(std::vector<QVariantHoldingWidget>{  }, isForCompositeNode, name, options, parent)
     {
-        
+        weakNode = node;
+
+        //note: derived not constructed yet, make sure its not get called yet
+        connect(this, &NodeWidget::valueChanged, this, &NodeWidget::setNodeValueFromWidgetValue);
     }
 
-    //virtual void createAndInitContentWidgets(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt& options = {});
+    //any real reason this is separate func? no.
+    virtual void createAndInitContentWidgets(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt& options = {})
+    {
+        SV_ASSERT(false);
+    }
 
+    virtual bool setNodeValueFromWidgetValue()
+    {
+        SV_ASSERT(false);
+        return false;
+    }
+
+    virtual bool setWidgetValueFromNodeValue()
+    {
+        SV_ASSERT(false);
+        return false;
+    }
+
+    DataNodeWeak getNode()
+    {
+        return weakNode;
+    }
+
+signals:
+    void valueChanged();
+
+public:
 ///////////////////////////////////////////////////////////////
 
     void setExpanded(bool expanded);
@@ -99,6 +128,9 @@ private:
 
     bool isForCompositeNode = false;
     UpdateContentWidgetFromNodeFunc contentUpdater;
+
+private:
+    DataNodeWeak weakNode;
 };
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
