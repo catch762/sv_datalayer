@@ -67,10 +67,11 @@ public:
     }
 
     //any real reason this is separate func? no.
-    virtual void createAndInitContentWidgets(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt& options = {})
+    /*virtual bool createAndInitContentWidgets(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt& options = {})
     {
         SV_ASSERT(false);
-    }
+        return false;
+    }*/
 
     virtual bool setNodeValueFromWidgetValue()
     {
@@ -87,6 +88,18 @@ public:
     DataNodeWeak getNode()
     {
         return weakNode;
+    }
+
+    template<typename T>
+    bool nodeSuitableForWidgetOfType(DataNodeShared node)
+    {
+        return WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<bool>(node);
+    }
+
+    template<typename WidgetT, typename WidgetValueChangedSignal>
+    void trackValueChanges(const WidgetT* widget, WidgetValueChangedSignal valChangedSignal)
+    {
+        connect(widget, valChangedSignal, this, &NodeWidget::valueChanged);
     }
 
 signals:
