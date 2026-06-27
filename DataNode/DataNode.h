@@ -251,7 +251,7 @@ public:
     }
 
     template<typename T>
-    bool isLeafWithType()
+    bool isLeafWithType() const
     {
         if (auto leafValue = tryGetLeafvalue())
         {
@@ -261,7 +261,7 @@ public:
     }
 
     template<typename T>
-    std::optional<T> tryGetLeafValueContent()
+    std::optional<T> tryGetLeafValueContent() const
     {
         if (!isLeafWithType<T>()) return {};
         return tryGetLeafvalue()->value<T>();
@@ -332,9 +332,10 @@ private:
     static inline const std::string logCategory = "DataNode";
 };
 
-SV_DECL_STD_FORMATTER(DataNode,          obj.stdBasicInfo());
-SV_DECL_STD_FORMATTER(DataNodeShared,    obj        ? obj->stdBasicInfo()        : "DataNode{nullptr}");
-SV_DECL_STD_FORMATTER(ConstDataNodeWeak, obj.lock() ? obj.lock()->stdBasicInfo() : "DataNode{nullptr}");
+SV_DECL_STD_FORMATTER(DataNode,             obj.stdBasicInfo());
+SV_DECL_STD_FORMATTER(DataNodeShared,       obj             ? obj->stdBasicInfo()        : "DataNode{nullptr}");
+SV_DECL_STD_FORMATTER(ConstDataNodeShared,  obj             ? obj->stdBasicInfo()        : "DataNode{nullptr}");
+SV_DECL_STD_FORMATTER(ConstDataNodeWeak,    !obj.expired()  ? obj.lock()->stdBasicInfo() : "DataNode{nullptr}");
 
 namespace datanode_helpers
 {

@@ -8,14 +8,16 @@ namespace
     const int VerticalLineWidth = 16;
 }
 
-NodeWidget::NodeWidget(const std::vector<QVariantHoldingWidget> &theContentWidgets,
-                                             bool _isForCompositeNode,
-                                             const QString &name,
-                                             const QJsonObjectWithWidgetOptionsOpt& options,
-                                             QWidget *parent)
+NodeWidget::NodeWidget(DataNodeShared node,
+                        const QString &name,
+                        const QJsonObjectWithWidgetOptionsOpt& options,
+                        QWidget *parent)
  : QWidget(parent)
 {
-    isForCompositeNode = _isForCompositeNode;
+    SV_ASSERT(node);
+    weakNode = node;
+
+    isForCompositeNode = node->isComposite();
     layout = new QVBoxLayout(this);
     initLayoutSpacing(layout);
     layout->setAlignment(Qt::AlignTop);
@@ -62,18 +64,6 @@ NodeWidget::NodeWidget(const std::vector<QVariantHoldingWidget> &theContentWidge
             contentLayout->setContentsMargins(0,0,0,0);
             contentLayout->setAlignment(Qt::AlignTop);
             frameAndContentLayout->addLayout(contentLayout);
-
-            //Items [0 - N] in contentLayout
-            {
-                contentWidgets = theContentWidgets;
-                for (auto contentWidget : contentWidgets)
-                {
-                    SV_ASSERT(contentWidget.canConvert<QWidget*>());
-                    QWidget* contentAsQWidget = contentWidget.value<QWidget*>();
-                    
-                    contentLayout->addWidget(contentAsQWidget);
-                }
-            }
         }
     }
 
@@ -86,6 +76,9 @@ NodeWidget::NodeWidget(const std::vector<QVariantHoldingWidget> &theContentWidge
             setExpanded(*isExpandedOpt);
         }
     }
+
+    //note: derived not constructed yet, make sure its not get called yet
+    connect(this, &NodeWidget::valueChanged, this, &NodeWidget::setNodeValueFromWidgetValue);
 }
 
 void NodeWidget::setExpanded(bool expanded)
@@ -203,10 +196,11 @@ void NodeWidget::iterateContentWidgets(std::function<void(QWidget *)> visitor)
     {
         if(auto *item = contentLayout->itemAt(i))
         {
-            if (auto *widget = item->widget())
+            if (auto* widget = item->widget())
             {
                 visitor(widget);
             }
+            else SV_ASSERT(false); //so far i expect nothing else can be there
         }
     }
 }
@@ -237,12 +231,13 @@ void NodeWidget::setContentWidgetsVisibleStatus(bool visible)
 
 QJsonObjectWithWidgetOptions NodeWidget::makeOptions() const
 {
-    QJsonObjectWithWidgetOptions obj;
+    QJsonObjectWithWidgetOptions obj = makeContentWidgetOptions().value_or(QJsonObjectWithWidgetOptions());
     
     //todo add widget name...
 
     //then this widget is for leaf node; and if its for comp node, we dont save anything else
-    if (contentWidgets.size() == 1) 
+    /*
+    if (contentWidgets.size() == 1)
     {
         //its perfectly ok to receive no value here - simply means content widget doesnt save anything
         if (auto contentOptions = convertJson<QJsonObject>( SerializationSystem::instance().qVariantToJson(contentWidgets.front()) ))
@@ -250,26 +245,9 @@ QJsonObjectWithWidgetOptions NodeWidget::makeOptions() const
             obj = *contentOptions;
         }
     }
+    */
 
     obj[isExpandedKey] = stripeShowHideContentButton->isChecked();
 
     return obj;
-}
-
-void NodeWidget::updateContentWidgetsFromDataNode(ConstDataNodeWeak weakNode)
-{
-    if (!contentUpdater)
-    {
-        if (!isForCompositeNode)
-        {
-            SV_WARN(std::format("NodeWidget::updateContentWidgetsFromDataNode "
-                "called on leaf node widget, but it doesnt have updater. Node is {}", weakNode));
-        }
-        return;
-    }
-
-    iterateContentWidgets([this, weakNode](QWidget *widget)
-    {
-        contentUpdater(widget, weakNode);
-    });
 }

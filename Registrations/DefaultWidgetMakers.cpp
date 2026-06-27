@@ -36,8 +36,8 @@ bool setNodeValue(DataNodeWeak weakNode, ValueType value)
 
 //returns success
 //todo requires
-template<typename LeafValueType, typename WidgetSetValueMethod, typename Widget>
-bool setWidgetValueFromNode(Widget* widgetPtr, ConstDataNodeWeak weakNode)
+template<typename LeafValueType, auto WidgetSetValueMethod, typename Widget>
+bool setWidgetValueFromNode(Widget* widget, ConstDataNodeWeak weakNode)
 {
     auto nodeShared = weakNode.lock();
     if (!nodeShared)
@@ -88,15 +88,14 @@ class BoolNodeWidget : public NodeWidget
 {
 public:
     BoolNodeWidget( DataNodeShared node,
-                    bool isForCompositeNode,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {}, 
                     QWidget* parent = nullptr )
-        : NodeWidget(node, isForCompositeNode, name, options, parent)
+        : NodeWidget(node, name, options, parent)
     {
         if (!nodeSuitableForWidgetOfType<bool>(node)) return;
 
-        widget = new QCheckBox();
+        widget = new QCheckBox(this);
         setWidgetValueFromNodeValue();
 
         trackValueChanges(widget, &QCheckBox::stateChanged);
@@ -112,11 +111,13 @@ public:
         return setWidgetValueFromNode<bool, &QCheckBox::setChecked>(widget, getNode());
     }
 
+    //virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const;
+
 private:
     QCheckBox* widget = nullptr;
 };
 
-class BoolVecNodeWidget : public NodeWidget
+/*class BoolVecNodeWidget : public NodeWidget
 {
 public:
     BoolVecNodeWidget( DataNodeShared node,
@@ -147,6 +148,7 @@ public:
 private:
     QCheckBox* widget = nullptr;
 };
+*/
 
 /*class BoolVecNodeWidget : public NodeWidget
 {
@@ -188,7 +190,7 @@ private:
 template <class DerivedNodeWidgetType>
 NodeWidget* widgetMaker(DataNodeShared leaf, const QJsonObjectWithWidgetOptionsOpt& options)
 {
-    return new DerivedNodeWidgetType(leaf, false, leaf->getName(), options);
+    return new DerivedNodeWidgetType(leaf, leaf->getName(), options, nullptr);
 }
 
 template <typename Type, class DerivedNodeWidgetType>
