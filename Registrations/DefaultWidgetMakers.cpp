@@ -6,7 +6,7 @@
 
 //Returns success
 template<typename ValueType>
-bool setNodeValue(DataNodeWeak weakNode, ValueType value)
+bool setNodeValue(DataNodeWeak weakNode, const ValueType& value)
 {
     auto nodeShared = weakNode.lock();
     if (!nodeShared)
@@ -86,6 +86,7 @@ public:
 
 class BoolNodeWidget : public NodeWidget
 {
+    using ValueT = bool;
 public:
     BoolNodeWidget( DataNodeShared node,
                     const QString& name = {},
@@ -93,7 +94,7 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent)
     {
-        if (!nodeSuitableForWidgetOfType<bool>(node)) return;
+        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
 
         widget = new QCheckBox(this);
         setWidgetValueFromNodeValue();
@@ -108,83 +109,53 @@ public:
 
     bool setWidgetValueFromNodeValue() override
     {
-        return setWidgetValueFromNode<bool, &QCheckBox::setChecked>(widget, getNode());
+        return setWidgetValueFromNode<ValueT, &QCheckBox::setChecked>(widget, getNode());
     }
-
-    //virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const;
 
 private:
     QCheckBox* widget = nullptr;
 };
 
-/*class BoolVecNodeWidget : public NodeWidget
+class BoolVecNodeWidget : public NodeWidget
 {
+    using ValueT = BoolVec;
 public:
     BoolVecNodeWidget( DataNodeShared node,
-                    bool isForCompositeNode,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {}, 
                     QWidget* parent = nullptr )
-        : NodeWidget(node, isForCompositeNode, name, options, parent)
+        : NodeWidget(node, name, options, parent)
     {
-        if (!nodeSuitableForWidgetOfType<BoolVec>(node)) return;
+        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
 
-        widget = new BoolVecWidget(node->tryGetLeafValueContent<BoolVec>().value());
-        setWidgetValueFromNodeValue();
+        widget = new BoolVecWidget(node->tryGetLeafValueContent<ValueT>().value(), this);
+        //setWidgetValueFromNodeValue();
 
-        trackValueChanges(widget, &QCheckBox::stateChanged);
+        trackValueChanges(widget, &BoolVecWidget::valueChanged);
     }
 
     bool setNodeValueFromWidgetValue() override
     {
-        return setNodeValue(getNode(), widget->isChecked());
+        return setNodeValue(getNode(), widget->getValue());
     }
 
     bool setWidgetValueFromNodeValue() override
     {
-        return setWidgetValueFromNode<bool, &QCheckBox::setChecked>(widget, getNode());
+        return setWidgetValueFromNode<ValueT, &BoolVecWidget::setValue>(widget, getNode());
     }
 
 private:
-    QCheckBox* widget = nullptr;
+    BoolVecWidget* widget = nullptr;
 };
-*/
 
-/*class BoolVecNodeWidget : public NodeWidget
-{
-public:
-    bool createAndInitContentWidgets(DataNodeShared leafWithBoolVec, const QJsonObjectWithWidgetOptionsOpt& options = {}) override
-    {
-        if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<BoolVec>(leafWithBoolVec))
-        {
-            return false;
-        }
 
-        widget = new QCheckBox();
 
-        if (!setWidgetValueFromNodeValue())
-        {
-            return false;
-        }
 
-        connect(widget, &QCheckBox::stateChanged, this, &NodeWidget::valueChanged);
 
-        return true;
-    }
 
-    bool setNodeValueFromWidgetValue() override
-    {
-        return setNodeValue(getNode(), widget->isChecked());
-    }
 
-    bool setWidgetValueFromNodeValue() override
-    {
-        return setWidgetValueFromNode<bool, &QCheckBox::setChecked>(widget, getNode());
-    }
 
-private:
-    QCheckBox* widget = nullptr;
-};*/
+
 
 
 template <class DerivedNodeWidgetType>
@@ -203,7 +174,8 @@ void registerWidgetMakerForType()
 
 void DefaultWidgetMakers::RegisterEverything()
 {
-    registerWidgetMakerForType<bool, BoolNodeWidget>();
+    registerWidgetMakerForType<bool,    BoolNodeWidget>();
+    registerWidgetMakerForType<BoolVec, BoolVecNodeWidget>();
 
     /*
     auto& system = WidgetMakerSystem::instance();
