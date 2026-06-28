@@ -148,6 +148,80 @@ private:
     BoolVecWidget* widget = nullptr;
 };
 
+class QStringNodeWidget : public NodeWidget
+{
+    using ValueT = QString;
+public:
+    QStringNodeWidget( DataNodeShared node,
+                    const QString& name = {},
+                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    QWidget* parent = nullptr )
+        : NodeWidget(node, name, options, parent)
+    {
+        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
+
+        widget = new QLineEdit(node->tryGetLeafValueContent<ValueT>().value(), this);
+        //setWidgetValueFromNodeValue();
+
+        trackValueChanges(widget, &QLineEdit::textChanged);
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        return setNodeValue(getNode(), widget->text());
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return setWidgetValueFromNode<ValueT, &QLineEdit::setText>(widget, getNode());
+    }
+
+private:
+    QLineEdit* widget = nullptr;
+};
+
+class LimitedIntNodeWidget : public NodeWidget
+{
+    using ValueT    = LimitedInt;
+    using WidgetT   = LimitedValueWidget;
+
+public:
+    LimitedIntNodeWidget( DataNodeShared node,
+                    const QString& name = {},
+                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    QWidget* parent = nullptr )
+        : NodeWidget(node, name, options, parent)
+    {
+        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
+
+        widget = new WidgetT(node->tryGetLeafValueContent<ValueT>().value(), this);
+        //setWidgetValueFromNodeValue();
+
+        trackValueChanges(widget, &WidgetT::valueChanged);
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        if (auto* intValue = std::get_if<ValueT>(&widget->getValue()))
+        {
+            return setNodeValue(getNode(), *intValue);
+        }
+        else
+        {
+            SV_ERROR("Cant update node: LimitedIntNodeWidget didnt expect to find LimitedDouble in a widget");
+            return false;
+        }
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return setWidgetValueFromNode<ValueT, &WidgetT::setValue>(widget, getNode());
+    }
+
+private:
+    WidgetT* widget = nullptr;
+};
+
 
 
 
@@ -174,8 +248,10 @@ void registerWidgetMakerForType()
 
 void DefaultWidgetMakers::RegisterEverything()
 {
-    registerWidgetMakerForType<bool,    BoolNodeWidget>();
-    registerWidgetMakerForType<BoolVec, BoolVecNodeWidget>();
+    registerWidgetMakerForType<bool,        BoolNodeWidget>();
+    registerWidgetMakerForType<BoolVec,     BoolVecNodeWidget>();
+    registerWidgetMakerForType<QString,     QStringNodeWidget>();
+    registerWidgetMakerForType<LimitedInt,  LimitedIntNodeWidget>();
 
     /*
     auto& system = WidgetMakerSystem::instance();
