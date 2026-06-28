@@ -7,14 +7,9 @@ void WidgetsForNodeManager::updateAllWidgetsFromNodeState(ConstDataNodeWeak node
     {
         for (const auto &widgetEntry : *container)
         {
-            if (widgetEntry.stillAlive())
+            if (widgetEntry)
             {
-                if (auto* wrapperWidget = qobject_cast<NodeWidget*>(widgetEntry.qPointer.data()))
-                {
-                    wrapperWidget->setWidgetValueFromNodeValue();
-                }
-                else SV_WARN(std::format("WidgetsForNodeManager: couldnt cast widget to NodeWidget "
-                                            "to update it from node {}", node));
+                widgetEntry->setWidgetValueFromNodeValue();
             }
         }
     }

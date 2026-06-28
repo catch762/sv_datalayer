@@ -292,6 +292,11 @@ public:
         return helper.setWidgetValueFromNodeValue();
     }
 
+    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const override
+    {
+        return helper.widget->makeOptions();
+    };
+
 private:
     NodeWidgetHelper<LimitedIntVec,
                      LimitedValueVecWidget,
@@ -371,6 +376,11 @@ public:
     {
         return helper.setWidgetValueFromNodeValue();
     }
+
+    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const override
+    {
+        return helper.widget->makeOptions();
+    };
 
 private:
     NodeWidgetHelper<LimitedDoubleVec,

@@ -8,13 +8,12 @@
 
 bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level)
 {
-    auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node);
-    auto hasWidget = qVariantHasWidget(widgetVariant);
-
-    if (hasWidget)
+    //its fine if there is one, its fine if there are none
+    if (auto* nodeWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node))
     {
-        //if widget isnt supposed to save anything, we will receive empty value - its fine.
-        QJsonObjectWithWidgetOptions widgetOptions = SerializationSystem::instance().qVariantToJson(widgetVariant).toObject();
+        auto widgetOptions = nodeWidget->makeOptions();
+
+        //its never empty tho
         if (!widgetOptions.isEmpty())
         {
             SV_LOG("Did write widget data to json");
@@ -39,9 +38,9 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget
 
     auto createdWidget = WidgetMakerSystem::instance().createAndRegisterWidgetForNode(node, widgetOptionsOpt);
 
-    if (!qVariantHasWidget(createdWidget))
+    if (!createdWidget)
     {
-        SV_ERROR(std::format("restoring widget failed: Received null QVariantHoldingWidget for leaf node {}", node));
+        SV_ERROR(std::format("restoring widget failed: Received null NodeWidget for leaf node {}", node));
         return false;
     }
 
@@ -60,7 +59,7 @@ QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShare
     return value->toJSON(onJsonCreatedFromNode_saveWidgetOptions);
 }
 
-std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndItsWidget(const QJsonValue& json)
+std::tuple<DataNodeShared, NodeWidget*> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndItsWidget(const QJsonValue& json)
 {
     auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
                                             std::placeholders::_1,
@@ -72,7 +71,7 @@ std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndIt
 
     auto rootNodeWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(rootNode);
 
-    if (!qVariantHasWidget(rootNodeWidget))
+    if (!rootNodeWidget)
     {
         SV_ERROR("jsonToRootNodeAndItsWidget: didnt find widget for root");
     }
@@ -80,7 +79,7 @@ std::tuple<DataNodeShared, QVariantHoldingWidget> SerializerForDataNodeTreeAndIt
     return {rootNode, rootNodeWidget};
 }
 
-std::tuple<DataNodeShared, QVariantHoldingWidgetVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
+std::tuple<DataNodeShared, NodeWidgetVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
 {
     auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
                                             std::placeholders::_1,
@@ -90,14 +89,14 @@ std::tuple<DataNodeShared, QVariantHoldingWidgetVec> SerializerForDataNodeTreeAn
 
     if (!rootNode) return {};
 
-    QVariantHoldingWidgetVec topLevelChildrenWidgets;
+    NodeWidgetVec topLevelChildrenWidgets;
     if (rootNode->isComposite())
     {
         for (auto child : rootNode->tryGetCompositeData()->children)
         {   
             auto childWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(child);
 
-            if (!qVariantHasWidget(childWidget))
+            if (!childWidget)
             {
                 SV_ERROR(std::format("jsonToRootNodeAndTopLevelChildrenWidgets: didnt find widget for root's child {}", child));
 

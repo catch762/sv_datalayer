@@ -3,6 +3,7 @@
 #include <list>
 #include <algorithm>
 #include "WidgetDefs.h"
+#include "NodeWidget.h"
 
 //******************************************************************************************
 //
@@ -21,45 +22,24 @@
 class WidgetsForNodeManager
 {
 public:
-    
-    // Unfortunately, cant use one variable.
-    // Note: QPointer is not owning, but it will become invalid if widget gets deleted.
-    // This means, we might need to cleanup empty QPointer's (not done yet), or this
-    // class will hold them forever.
-    // I assume, if there will be multiple widgets, then most will be short-lived
-    struct WidgetEntry
+    using WidgetEntry = QPointer<NodeWidget>; //this is so we can check if widget was deleted
+
+    static std::string toString(const WidgetEntry& e)
     {
-        WidgetEntry(const QVariantHoldingWidget &widget) :
-            qVariant(widget), qPointer(getWidgetFromQVariant(widget)) {}
-
-        bool stillAlive() const {return qPointer;}
-        std::string toString() const {
-            bool variantOk = qVariantHasWidget(qVariant);
-            bool pointerOk = stillAlive();
-            if (variantOk == pointerOk)
-            {
-                return std::format("WEntry[{}]", variantOk);
-            }
-            else return std::format("WEntry[{} {} MIXED]", variantOk, pointerOk);
-        };
-
-        QVariantHoldingWidget qVariant; //e.g. QVariant holding raw pointer, like a QLineEdit* 
-        QPointer<QWidget>     qPointer; //exact same pointer wrapped in QPointer so we can check if widget is already deleted.
-    };
+        return e ? "WidgetEntry" : "nullptr";
+    }
 
     using WidgetsContainer = std::list<WidgetEntry>;
 
-    static void registerWidgetForNode(ConstDataNodeWeak node, QVariantHoldingWidget widget)
+    static void registerWidgetForNode(ConstDataNodeWeak node, NodeWidget* widget)
     {
-        if (!qVariantHasWidget(widget))
-        {
-            SV_ERROR(std::format("Cant register empty widget for {}", node));
-        }
+        SV_ASSERT(!node.expired());
+        SV_ASSERT(widget);
 
         auto *container = instance().getOrCreateContainerForNode(node);
         SV_ASSERT(container);
 
-        container->push_back(widget);
+        container->push_back(WidgetEntry(widget));
 
         SV_LOG(std::format("Registered widget (now {}) for node {}", container->size(), node));
 
@@ -78,16 +58,16 @@ public:
 
     // Figuring 'so which ones do i need to serialize when i serialize DataNode tree'
     // is undecided yet, so i ll just pick first widget.
-    static QVariantHoldingWidget getSaveablePrimaryWidgetForNode(ConstDataNodeWeak node)
+    static NodeWidget* getSaveablePrimaryWidgetForNode(ConstDataNodeWeak node)
     {
         if (auto *container = getWidgetsForNode(node))
         {
-            auto firstNotNull = std::ranges::find_if(*container, [](const auto& qVariantHoldingWidget)
+            auto firstNotNull = std::ranges::find_if(*container, [](const auto nodeWidget)
             {
-                return qVariantHoldingWidget.stillAlive();
+                return static_cast<bool>(nodeWidget);
             });
 
-            return firstNotNull != container->end() ? firstNotNull->qVariant : QVariantHoldingWidget{};
+            return firstNotNull != container->end() ? *firstNotNull : nullptr;
         }
 
         return {};
@@ -105,7 +85,7 @@ public:
 
         for (auto& [node, container] : entries)
         {
-            std::erase_if(container, [](const auto &widget){ return !widget.stillAlive(); });
+            std::erase_if(container, [](const auto &widget){ return !widget; });
         }
 
         //delete empty containers
@@ -119,7 +99,7 @@ public:
             std::string line = "{ ";
             for(const auto &e : *container)
             {
-                line += e.toString() + " ";
+                line += toString(e) + " ";
             }
             line += "}";
 

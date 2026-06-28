@@ -36,10 +36,10 @@ public:
     static QJsonValueOpt toJson(const DataNodeShared& value);
 
     //returns root node and widget for root node
-    static std::tuple<DataNodeShared, QVariantHoldingWidget> jsonToRootNodeAndItsWidget(const QJsonValue& json);
+    static std::tuple<DataNodeShared, NodeWidget*> jsonToRootNodeAndItsWidget(const QJsonValue& json);
 
     //returns root node (no widget is made for it. its an invisible root.) and list of widgets for all immediate children of root
-    static std::tuple<DataNodeShared, QVariantHoldingWidgetVec> jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue& json);
+    static std::tuple<DataNodeShared, NodeWidgetVec> jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue& json);
 
 private:
     static bool onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level);

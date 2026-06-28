@@ -81,7 +81,7 @@ public:
     //    So this function never needs to create widgets for children, because children widgets are always already created:
     //    this way, this function only creates one widget for node you pass in.  
     //    And this way, you can pass aproppriate QJsonObjectWithWidgetOptions for each node.
-    QVariantHoldingWidget createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});      
+    NodeWidget* createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName = "");
@@ -98,14 +98,14 @@ private:
     //if 'widgetMakerNameOpt' is {}, returns default widget maker for this WidgetMakerCollection
     const WidgetMakerForTypeT* getWidgetMakerForContentType(const QVariant &var, QStringOpt widgetMakerNameOpt = {});
 
-    QVariantHoldingWidget createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    NodeWidget* createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
     // If widgets for children arent already created, it creates and registers them
     // (but for all created children QJsonObjectWithWidgetOptionsOpt will be a nullopt, ofcourse - the 'options' passed
     // to the functions only concerns that single 'node' and we dont have any options for children).
-    QVariantHoldingWidget createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    NodeWidget* createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
-    QVariantHoldingWidget createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    NodeWidget* createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
     WidgetMakerSystem() = default;
 

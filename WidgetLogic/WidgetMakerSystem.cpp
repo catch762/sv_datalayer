@@ -9,16 +9,16 @@ WidgetMakerSystem& WidgetMakerSystem::instance()
     return system;
 }
 
-QVariantHoldingWidget WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     if (!node)
     {
         return {};
     }
 
-    QVariantHoldingWidget resultWidget = createWidgetForNode (node, options);
+    NodeWidget* resultWidget = createWidgetForNode (node, options);
 
-    if (qVariantHasWidget(resultWidget))
+    if (resultWidget)
     {
         WidgetsForNodeManager::registerWidgetForNode(node, resultWidget);
     }
@@ -80,15 +80,15 @@ const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerF
     return nullptr;
 }
 
-QVariantHoldingWidget WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     SV_ASSERT(node);
 
     SV_LOG(std::format("createWidgetForNode {} with options: {}", node, options ? jsonValueToString(*options) : QString("none")));
 
-    QVariantHoldingWidget res = node->isLeaf() ? createWidgetForLeafNode (node, options) :
+    NodeWidget* res = node->isLeaf() ? createWidgetForLeafNode (node, options) :
                                                  createWidgetisForCompositeNode(node, options);
-    if (!qVariantHasWidget(res))
+    if (!res)
     {
         SV_ERROR(std::format("createWidgetForNode failed for {}", node));
     }
@@ -97,26 +97,23 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForNode(DataNodeShared node
 }
 
 //todo rename
-QVariantHoldingWidget WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     SV_ASSERT(node);
     SV_ASSERT(node->isComposite())
 
-    std::vector<QVariantHoldingWidget> widgetsOfChildren;
+    std::vector<NodeWidget*> widgetsOfChildren;
 
     for (auto childNode : node->tryGetCompositeData()->children)
     {
-        auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(childNode);
-
-        if (qVariantHasWidget(widgetVariant))
+        if (auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(childNode))
         {
             widgetsOfChildren.push_back(widgetVariant);
         }
         else
         {
             //Apparently, we didnt go depth-first. So we are creating widgets now, and at the moment we dont have options for them
-            auto createdChildWidget = createAndRegisterWidgetForNode(childNode, QJsonObjectWithWidgetOptionsOpt{});
-            if (qVariantHasWidget(createdChildWidget))
+            if (auto createdChildWidget = createAndRegisterWidgetForNode(childNode, QJsonObjectWithWidgetOptionsOpt{}))
             {
                 widgetsOfChildren.push_back(createdChildWidget);
             }
@@ -133,10 +130,10 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetisForCompositeNode(DataNode
     }
 
     auto *wrapper = NodeWidget::makeNodeWidgetForCompositeNode (widgetsOfChildren, node, node->getName(), options);
-    return QVariant::fromValue( wrapper );
+    return wrapper;
 }
 
-QVariantHoldingWidget WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
 {
     SV_ASSERT(node);
     SV_ASSERT(node->isLeaf())
@@ -149,7 +146,7 @@ QVariantHoldingWidget WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared 
     {
         if (auto *widget = (*widgetmaker)(node, options))
         {
-            return QVariantHoldingWidget::fromValue( widget );
+            return widget;
         }
         else
         {

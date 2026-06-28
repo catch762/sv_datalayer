@@ -57,21 +57,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(LimitedValueVecWidget*);
-
-template<>
-class Serializer< LimitedValueVecWidget* >
-{
-public:
-    using WidgetPtr = LimitedValueVecWidget*;
-
-    QJsonValue toJson(const WidgetPtr& value)
-    {
-        if (auto options = value->makeOptions()) return *options;
-        return {};
-    }
-
-    std::optional<WidgetPtr> fromJson(const QJsonValue& json)
-    {
-        SV_UNREACHABLE();
-    }
-};

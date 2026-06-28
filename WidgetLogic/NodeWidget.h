@@ -34,7 +34,7 @@ public:
         const QJsonObjectWithWidgetOptionsOpt& options = {},
         QWidget* parent = nullptr);
 
-    static NodeWidget* makeNodeWidgetForCompositeNode( const std::vector<QVariantHoldingWidget>& contentWidgets,
+    static NodeWidget* makeNodeWidgetForCompositeNode( const std::vector<NodeWidget*>& contentWidgets,
                                                 DataNodeShared node,
                                                 const QString& name = {},
                                                 const QJsonObjectWithWidgetOptionsOpt& options = {},
@@ -45,11 +45,9 @@ public:
 
         for (auto contentWidget : contentWidgets)
         {
-            SV_ASSERT(contentWidget.canConvert<QWidget*>());
-            QWidget* contentAsQWidget = contentWidget.value<QWidget*>();
-            SV_ASSERT(contentAsQWidget);
+            SV_ASSERT(contentWidget);
 
-            widget->addContentWidget(contentAsQWidget);
+            widget->addContentWidget(contentWidget);
         }
 
         return widget;
@@ -89,16 +87,16 @@ public:
         return contentLayout->count();
     }
 
-    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const
-    {
-        return {};
-    };
 
 signals:
     void valueChanged();
 
 
-    
+protected:    
+    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const
+    {
+        return {};
+    };
 
 public:
 ///////////////////////////////////////////////////////////////
@@ -139,20 +137,3 @@ private:
 };
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
-
-template<>
-class Serializer< NodeWidget* >
-{
-public:
-    using WidgetPtr = NodeWidget*;
-
-    QJsonValue toJson(const WidgetPtr& value)
-    {
-        return value->makeOptions();
-    }
-
-    std::optional<WidgetPtr> fromJson(const QJsonValue& json)
-    {
-        SV_UNREACHABLE();
-    }
-};

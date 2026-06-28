@@ -9,6 +9,8 @@ inline void addTypeFieldToJson(QJsonObject &obj)
     obj[TypeFieldKey] = qtTypeName<T>();
 }
 
+//todo rewrite old bullshit
+
 // todo: emphasis on serializing just options.
 // Must contain QPointer<ConcreteWidgetType>
 //
@@ -20,31 +22,20 @@ inline void addTypeFieldToJson(QJsonObject &obj)
 //          This is out of scope for Serializer interface, and its done in WidgetMakerSystem. Just FYI.)
 //
 // ...and then all the other code can serialize widgets like all other items, i.e. simply
-// giving 'QVariantHoldingWidget' to 'SerializerSystem'.
+// giving 'QVariant---HoldingWidget' to 'SerializerSystem'.
 //
 // The alternative to that would be forcing all widgets inherit from some serializing
 // interface. I dont want that, i want any existing widget ready to be used. If you want,
 // say, QLineEdit, you dont make more widget classes, you just supply Serializer< QPointer<QLineEdit> >
 // and everything should just work.
-using QVariantHoldingWidget = QVariant;
-using QVariantHoldingWidgetVec = std::vector<QVariantHoldingWidget>;
 
-//Yes, this casts from QPointer<ConcreteWidget> to QPointer<QWidget>
-inline QWidget* getWidgetFromQVariant(const QVariantHoldingWidget& qvariant)
-{
-    return getValueOr< QWidget* >(qvariant, nullptr);
-}
+using NodeWidgetVec = std::vector<NodeWidget*>;
 
-inline bool qVariantHasWidget(const QVariantHoldingWidget& qvariant)
+inline void deleteWidgetsAndClear(NodeWidgetVec& vec)
 {
-    return getWidgetFromQVariant(qvariant) != nullptr;
-}  
-
-inline void deleteWidgetsAndClear(QVariantHoldingWidgetVec& vec)
-{
-    for (auto &qvariant : vec)
+    for (auto widget : vec)
     {
-        if (auto* widget = getWidgetFromQVariant(qvariant))
+        if (widget)
         {
             delete widget;
         }
@@ -86,11 +77,11 @@ inline void setWidgetMakerName(const QJsonObjectWithWidgetOptions &obj, QString 
 struct NodeAndWidgetPair
 {
     DataNodeShared node;
-    QVariantHoldingWidget widget;
+    NodeWidget* widget;
 
     inline bool isValid()
     {
-        return node && qVariantHasWidget(widget);
+        return node && widget;
     }
 };
 SV_DECL_OPT(NodeAndWidgetPair);
