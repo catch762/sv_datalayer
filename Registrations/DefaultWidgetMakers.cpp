@@ -260,10 +260,185 @@ private:
                      &LimitedValueWidget::setValue> helper;
 };
 
+class LimitedIntVecNodeWidget : public NodeWidget
+{
+public:
+    LimitedIntVecNodeWidget( DataNodeShared node,
+                    const QString& name = {},
+                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    QWidget* parent = nullptr )
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+        helper.initWidgetWithInitialVal();
+    }
 
+    bool setNodeValueFromWidgetValue() override
+    {
+        //widget returns variant double/int, so have to check it first
 
+        if (auto* intValue = std::get_if<LimitedIntVec>(&helper.widget->getValue()))
+        {
+            return setNodeValue(getNode(), *intValue);
+        }
+        else
+        {
+            SV_ERROR("Cant update node: LimitedIntVecNodeWidget didnt expect to find LimitedDoubleVec in a widget");
+            return false;
+        }
+    }
 
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
 
+private:
+    NodeWidgetHelper<LimitedIntVec,
+                     LimitedValueVecWidget,
+                     &LimitedValueVecWidget::valueChanged,
+                     &LimitedValueVecWidget::getValue,
+                     &LimitedValueVecWidget::setValue> helper;
+};
+
+class LimitedDoubleNodeWidget : public NodeWidget
+{
+public:
+    LimitedDoubleNodeWidget( DataNodeShared node,
+                    const QString& name = {},
+                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    QWidget* parent = nullptr )
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+        helper.initWidgetWithInitialVal();
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        //widget returns variant double/int, so have to check it first
+
+        if (auto* value = std::get_if<LimitedDouble>(&helper.widget->getValue()))
+        {
+            return setNodeValue(getNode(), *value);
+        }
+        else
+        {
+            SV_ERROR("Cant update node: LimitedDoubleNodeWidget didnt expect to find LimitedInt in a widget");
+            return false;
+        }
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
+
+private:
+    NodeWidgetHelper<LimitedDouble,
+                     LimitedValueWidget,
+                     &LimitedValueWidget::valueChanged,
+                     &LimitedValueWidget::getValue,
+                     &LimitedValueWidget::setValue> helper;
+};
+
+class LimitedDoubleVecNodeWidget : public NodeWidget
+{
+public:
+    LimitedDoubleVecNodeWidget( DataNodeShared node,
+                    const QString& name = {},
+                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    QWidget* parent = nullptr )
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+        helper.initWidgetWithInitialVal();
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        //widget returns variant double/int, so have to check it first
+
+        if (auto* value = std::get_if<LimitedDoubleVec>(&helper.widget->getValue()))
+        {
+            return setNodeValue(getNode(), *value);
+        }
+        else
+        {
+            SV_ERROR("Cant update node: LimitedDoubleVecNodeWidget didnt expect to find LimitedIntVec in a widget");
+            return false;
+        }
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
+
+private:
+    NodeWidgetHelper<LimitedDoubleVec,
+                     LimitedValueVecWidget,
+                     &LimitedValueVecWidget::valueChanged,
+                     &LimitedValueVecWidget::getValue,
+                     &LimitedValueVecWidget::setValue> helper;
+};
+
+class EnumNodeWidget : public NodeWidget
+{
+public:
+    EnumNodeWidget(DataNodeShared node,
+        const QString& name = {},
+        const QJsonObjectWithWidgetOptionsOpt& options = {},
+        QWidget* parent = nullptr)
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+        helper.initWidgetWithInitialVal();
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        return helper.setNodeValueFromWidgetValue();
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
+
+private:
+    NodeWidgetHelper<Enum,
+                    EnumWidget,
+                    &EnumWidget::valueChanged,
+                    &EnumWidget::getValue,
+                    &EnumWidget::setValue> helper;
+};
+
+class EnumVecNodeWidget : public NodeWidget
+{
+public:
+    EnumVecNodeWidget(DataNodeShared node,
+        const QString& name = {},
+        const QJsonObjectWithWidgetOptionsOpt& options = {},
+        QWidget* parent = nullptr)
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+        helper.initWidgetWithInitialVal();
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        return helper.setNodeValueFromWidgetValue();
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
+
+private:
+    NodeWidgetHelper<EnumVec,
+        EnumVecWidget,
+        &EnumVecWidget::valueChanged,
+        &EnumVecWidget::getValue,
+        &EnumVecWidget::setValue> helper;
+};
 
 
 
@@ -283,22 +458,13 @@ void registerWidgetMakerForType()
 
 void DefaultWidgetMakers::RegisterEverything()
 {
-    registerWidgetMakerForType<bool,        BoolNodeWidget>();
-    registerWidgetMakerForType<BoolVec,     BoolVecNodeWidget>();
-    registerWidgetMakerForType<QString,     QStringNodeWidget>();
-    registerWidgetMakerForType<LimitedInt,  LimitedIntNodeWidget>();
-
-    /*
-    auto& system = WidgetMakerSystem::instance();
-
-    system.registerWidgetMaker<QString>         (widgetMakerForQString);
-    system.registerWidgetMaker<bool>            (widgetMakerForBool);
-    system.registerWidgetMaker<BoolVec>         (widgetMakerForBoolVec);
-    system.registerWidgetMaker<LimitedDouble>   (widgetMakerForLimitedDouble);
-    system.registerWidgetMaker<LimitedDoubleVec>(widgetMakerForLimitedDoubleVec);
-    system.registerWidgetMaker<LimitedInt>      (widgetMakerForLimitedInt);
-    system.registerWidgetMaker<LimitedIntVec>   (widgetMakerForLimitedIntVec);
-    system.registerWidgetMaker<Enum>            (widgetMakerForEnum);
-    system.registerWidgetMaker<EnumVec>         (widgetMakerForEnumVec);
-    */
+    registerWidgetMakerForType<QString,             QStringNodeWidget>();
+    registerWidgetMakerForType<bool,                BoolNodeWidget>();
+    registerWidgetMakerForType<BoolVec,             BoolVecNodeWidget>();
+    registerWidgetMakerForType<LimitedInt,          LimitedIntNodeWidget>();
+    registerWidgetMakerForType<LimitedIntVec,       LimitedIntVecNodeWidget>();
+    registerWidgetMakerForType<LimitedDouble,       LimitedDoubleNodeWidget>();
+    registerWidgetMakerForType<LimitedDoubleVec,    LimitedDoubleVecNodeWidget>();
+    registerWidgetMakerForType<Enum,                EnumNodeWidget>();
+    registerWidgetMakerForType<EnumVec,             EnumVecNodeWidget>();
 }
