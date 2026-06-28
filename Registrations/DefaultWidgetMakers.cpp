@@ -100,7 +100,7 @@ public:
 
     //You call either of 2 variants below, or init widget manually:
     //1) When widget doesnt have constructor which lets you pass value in it.
-    void initWidgetAndSetValFromNode()
+    void initWidgetAndSetValOnIt()
     {
         widget = new WidgetType();
         setWidgetValueFromNodeValue();
@@ -109,7 +109,7 @@ public:
         trackWidgetValueChanges();
     }
     //2) When widget does have constructor WidgetType(ValueType initialVal)
-    void initWidgetWithValFromNode()
+    void initWidgetWithInitialVal()
     {
         SV_ASSERT(nodeHasProperContent());
 
@@ -139,7 +139,7 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetAndSetValFromNode();
+        helper.initWidgetAndSetValOnIt();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -153,96 +153,90 @@ public:
     }
 
 private:
-    NodeWidgetHelper<bool, QCheckBox, &QCheckBox::stateChanged, &QCheckBox::isChecked, &QCheckBox::setChecked> helper;
+    NodeWidgetHelper<bool, 
+                     QCheckBox, 
+                     &QCheckBox::stateChanged, 
+                     &QCheckBox::isChecked, 
+                     &QCheckBox::setChecked> helper;
 };
 
 class BoolVecNodeWidget : public NodeWidget
 {
-    using ValueT = BoolVec;
 public:
     BoolVecNodeWidget( DataNodeShared node,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {}, 
                     QWidget* parent = nullptr )
-        : NodeWidget(node, name, options, parent)
+        : NodeWidget(node, name, options, parent), helper(this)
     {
-        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
-
-        widget = new BoolVecWidget(node->tryGetLeafValueContent<ValueT>().value(), this);
-        //setWidgetValueFromNodeValue();
-
-        trackValueChanges(widget, &BoolVecWidget::valueChanged);
+        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
     {
-        return setNodeValue(getNode(), widget->getValue());
+        return helper.setNodeValueFromWidgetValue();
     }
 
     bool setWidgetValueFromNodeValue() override
     {
-        return setWidgetValueFromNode<ValueT, &BoolVecWidget::setValue>(widget, getNode());
+        return helper.setWidgetValueFromNodeValue();
     }
 
 private:
-    BoolVecWidget* widget = nullptr;
+    NodeWidgetHelper<BoolVec, 
+                     BoolVecWidget, 
+                     &BoolVecWidget::valueChanged, 
+                     &BoolVecWidget::getValue, 
+                     &BoolVecWidget::setValue> helper;
 };
 
 class QStringNodeWidget : public NodeWidget
 {
-    using ValueT = QString;
 public:
     QStringNodeWidget( DataNodeShared node,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {}, 
                     QWidget* parent = nullptr )
-        : NodeWidget(node, name, options, parent)
+        : NodeWidget(node, name, options, parent), helper(this)
     {
-        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
-
-        widget = new QLineEdit(node->tryGetLeafValueContent<ValueT>().value(), this);
-        //setWidgetValueFromNodeValue();
-
-        trackValueChanges(widget, &QLineEdit::textChanged);
+        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
     {
-        return setNodeValue(getNode(), widget->text());
+        return helper.setNodeValueFromWidgetValue();
     }
 
     bool setWidgetValueFromNodeValue() override
     {
-        return setWidgetValueFromNode<ValueT, &QLineEdit::setText>(widget, getNode());
+        return helper.setWidgetValueFromNodeValue();
     }
 
 private:
-    QLineEdit* widget = nullptr;
+    NodeWidgetHelper<QString, 
+                     QLineEdit, 
+                     &QLineEdit::textChanged, 
+                     &QLineEdit::text, 
+                     &QLineEdit::setText> helper;
 };
 
 class LimitedIntNodeWidget : public NodeWidget
 {
-    using ValueT    = LimitedInt;
-    using WidgetT   = LimitedValueWidget;
-
 public:
     LimitedIntNodeWidget( DataNodeShared node,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {}, 
                     QWidget* parent = nullptr )
-        : NodeWidget(node, name, options, parent)
+        : NodeWidget(node, name, options, parent), helper(this)
     {
-        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
-
-        widget = new WidgetT(node->tryGetLeafValueContent<ValueT>().value(), this);
-        //setWidgetValueFromNodeValue();
-
-        trackValueChanges(widget, &WidgetT::valueChanged);
+        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
     {
-        if (auto* intValue = std::get_if<ValueT>(&widget->getValue()))
+        //widget returns variant double/int, so have to check it first
+
+        if (auto* intValue = std::get_if<LimitedInt>(&helper.widget->getValue()))
         {
             return setNodeValue(getNode(), *intValue);
         }
@@ -255,15 +249,16 @@ public:
 
     bool setWidgetValueFromNodeValue() override
     {
-        return setWidgetValueFromNode<ValueT, &WidgetT::setValue>(widget, getNode());
+        return helper.setWidgetValueFromNodeValue();
     }
 
 private:
-    WidgetT* widget = nullptr;
+    NodeWidgetHelper<LimitedInt,
+                     LimitedValueWidget,
+                     &LimitedValueWidget::valueChanged,
+                     &LimitedValueWidget::getValue,
+                     &LimitedValueWidget::setValue> helper;
 };
-
-
-
 
 
 
