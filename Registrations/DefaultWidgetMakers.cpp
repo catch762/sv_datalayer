@@ -2,7 +2,7 @@
 #include "WidgetLogic/WidgetMakerSystem.h"
 #include "WidgetLogic/NodeWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
-
+//#include "WidgetLogic/WidgetUtils.h"
 
 //Returns success
 template<typename ValueType>
@@ -54,7 +54,7 @@ bool setWidgetValueFromNode(Widget* widget, ConstDataNodeWeak weakNode)
         return false;
     }
 
-    (*widget.*WidgetSetValueMethod)(*valOpt);
+    (widget->*WidgetSetValueMethod)(*valOpt);
 
     //todo: is it needed?
     widget->update();
@@ -62,58 +62,98 @@ bool setWidgetValueFromNode(Widget* widget, ConstDataNodeWeak weakNode)
     return true;
 }
 
-/*template<typename ValueType,
+template<typename ValueType,
          typename WidgetType,
-         typename WidgetChangedSignal,
-         typename WidgetGetValueMethod,
-         typename WidgetSetValueMethod
+         auto WidgetChangedSignal,
+         auto WidgetGetValueMethod,
+         auto WidgetSetValueMethod
 >
 class NodeWidgetHelper
 {
 public:
-    bool createAndInitContentWidgets(   DataNodeShared leafNode,
-                                        const QJsonObjectWithWidgetOptionsOpt& options = {},
-                                        QWidget* widgetParent = nullptr )
+    NodeWidgetHelper(NodeWidget* _widgetWrapper)
     {
-        if (!WidgetMakerSystem::checkIsProperLeafNodeForCreatingWidgetOfType<ValueType>(leafNode))
-        {
-            return false;
-        }
+        widgetWrapper = _widgetWrapper;
+        SV_ASSERT(widgetWrapper);
+        SV_ASSERT(nodeHasProperContent());
     }
+
+    bool nodeHasProperContent()
+    {
+        return nodeSuitableForWidgetOfType<ValueType>(node().lock());
+    }
+
+    void trackWidgetValueChanges()
+    {
+        widgetWrapper->trackValueChanges(widget, WidgetChangedSignal);
+    }
+
+    bool setNodeValueFromWidgetValue()
+    {
+        return setNodeValue(node(), (widget->*WidgetGetValueMethod)());
+    }
+
+    bool setWidgetValueFromNodeValue()
+    {
+        return setWidgetValueFromNode<ValueType, WidgetSetValueMethod>(widget, node());
+    }
+
+    //You call either of 2 variants below, or init widget manually:
+    //1) When widget doesnt have constructor which lets you pass value in it.
+    void initWidgetAndSetValFromNode()
+    {
+        widget = new WidgetType();
+        setWidgetValueFromNodeValue();
+
+        widgetWrapper->addContentWidget(widget);
+        trackWidgetValueChanges();
+    }
+    //2) When widget does have constructor WidgetType(ValueType initialVal)
+    void initWidgetWithValFromNode()
+    {
+        SV_ASSERT(nodeHasProperContent());
+
+        widget = new WidgetType(node().lock()->tryGetLeafValueContent<ValueType>().value());
+
+        widgetWrapper->addContentWidget(widget);
+        trackWidgetValueChanges();
+    }
+
+private:
+    DataNodeWeak node()
+    {
+        return widgetWrapper->getNode();
+    }
+private:
+    NodeWidget* widgetWrapper = nullptr;
 public:
     WidgetType* widget = nullptr;
-};*/
+};
 
 class BoolNodeWidget : public NodeWidget
 {
-    using ValueT = bool;
 public:
     BoolNodeWidget( DataNodeShared node,
                     const QString& name = {},
                     const QJsonObjectWithWidgetOptionsOpt& options = {}, 
                     QWidget* parent = nullptr )
-        : NodeWidget(node, name, options, parent)
+        : NodeWidget(node, name, options, parent), helper(this)
     {
-        if (!nodeSuitableForWidgetOfType<ValueT>(node)) return;
-
-        widget = new QCheckBox(this);
-        setWidgetValueFromNodeValue();
-
-        trackValueChanges(widget, &QCheckBox::stateChanged);
+        helper.initWidgetAndSetValFromNode();
     }
 
     bool setNodeValueFromWidgetValue() override
     {
-        return setNodeValue(getNode(), widget->isChecked());
+        return helper.setNodeValueFromWidgetValue();
     }
 
     bool setWidgetValueFromNodeValue() override
     {
-        return setWidgetValueFromNode<ValueT, &QCheckBox::setChecked>(widget, getNode());
+        return helper.setWidgetValueFromNodeValue();
     }
 
 private:
-    QCheckBox* widget = nullptr;
+    NodeWidgetHelper<bool, QCheckBox, &QCheckBox::stateChanged, &QCheckBox::isChecked, &QCheckBox::setChecked> helper;
 };
 
 class BoolVecNodeWidget : public NodeWidget
