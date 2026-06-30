@@ -61,13 +61,13 @@ inline void DataForTypeMap<DataEntry>::addEntryForType(TypeIndex typeIndex, cons
     {
         SV_ERROR(std::format("DataForTypeMap: typeIndexExists is [{}] for [{}] but typeNameExists is [{}] for [{}], "
                              "so you are not even supplying properly unique key pair. Entry will not be added",
-                             typeIndexExists, typeIndex, typeNameExists, theTypeName));
+                             typeIndexExists, typeIndex.name(), typeNameExists, theTypeName));
         return;
     }
 
     if (typeIndexExists || typeNameExists)
     {
-        SV_WARN(std::format("DataForTypeMap: overwriting entry for type [{}, {}]", typeIndex, theTypeName));
+        SV_WARN(std::format("DataForTypeMap: overwriting entry for type [{}, {}]", typeIndex.name(), theTypeName));
     }
 
     dataMap.insert({typeIndex, theTypeName, std::move(entry)});
