@@ -35,7 +35,7 @@ public:
         Composite
     };
 
-    using LeafValue = QVariant;
+    using LeafValue = std::any;
     struct CompositeData
     {
         DataNodeShared getChild(int idx)
@@ -72,14 +72,14 @@ public:
     {
         auto node = new DataNode(_name, NodeType::Leaf);
 
-        //avoiding double wrapping qvariant in qvariant:
-        if constexpr (std::is_same_v<LeafValueT, QVariant>)
+        //avoiding double wrapping any in any:
+        if constexpr (std::is_same_v<LeafValueT, std::any>)
         {
             *node->tryGetLeafvalue() = value;
         }
         else
         {
-            *node->tryGetLeafvalue() = QVariant::fromValue(value);
+            *node->tryGetLeafvalue() = std::any(value);
         }
 
         return DataNodeShared(node);
@@ -128,7 +128,10 @@ public:
     {
         if (auto leaf = tryGetLeafvalue())
         {
-            return leaf->typeName();
+            if (auto name = anyTypeName(*leaf)) 
+            {
+                return QString(name);
+            }
         }
         
         return {};
@@ -255,7 +258,7 @@ public:
     {
         if (auto leafValue = tryGetLeafvalue())
         {
-            return qtTypeId<T>() == leafValue->typeId();
+            return anyHoldsType<T>(*leafValue);
         }
         else return false;
     }
@@ -264,7 +267,7 @@ public:
     std::optional<T> tryGetLeafValueContent() const
     {
         if (!isLeafWithType<T>()) return {};
-        return tryGetLeafvalue()->value<T>();
+        return anyGetOpt<T>( *tryGetLeafvalue() );
     }
 
     //visitor is called on this and all inner subnodes

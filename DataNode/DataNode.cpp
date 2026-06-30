@@ -8,7 +8,7 @@ QJsonObjectOpt DataNode::toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction,
 
     if (auto *leafValue = tryGetLeafvalue())
     {
-        obj[valueKey] = SerializationSystem::instance().qVariantToJson(*leafValue, true);
+        obj[valueKey] = SerializationSystem::instance().anyToJson(*leafValue, true);
     }
     else if(auto compData = tryGetCompositeData())
     {
@@ -66,7 +66,7 @@ DataNodeShared DataNode::fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAct
     {
         result->initPayload(NodeType::Leaf);
 
-        *result->tryGetLeafvalue() = SerializationSystem::instance().jsonToQVariant(leafValue);
+        *result->tryGetLeafvalue() = SerializationSystem::instance().jsonToAny(leafValue);
     }
     else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
     {

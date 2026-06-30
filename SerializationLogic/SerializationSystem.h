@@ -59,7 +59,7 @@ public:
 	template<class T>
 	QJsonValue toJson(const T& value);
 	
-	QJsonValue anyToJson(const QVariant& val, bool logOnError = false);
+	QJsonValue anyToJson(const std::any& val, bool logOnError = false);
 	
 	//todo write about type and how its not needed for double bool qstring
 	std::any jsonToAny(const QJsonValue& json);
