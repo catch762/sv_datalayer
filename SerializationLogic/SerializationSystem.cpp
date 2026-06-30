@@ -8,7 +8,7 @@ SerializationSystem &SerializationSystem::instance()
     return s;
 }
 
-QJsonValue SerializationSystem::qVariantToJson(const QVariant &val, bool logOnError)
+QJsonValue SerializationSystem::anyToJson(const QVariant &val, bool logOnError)
 {
     if (auto * entry = getSerializerByIndex(val.typeId()))
     {
@@ -24,7 +24,7 @@ QJsonValue SerializationSystem::qVariantToJson(const QVariant &val, bool logOnEr
     return QJsonValue();
 }
 
-QVariant SerializationSystem::jsonToQVariant(const QJsonValue &json)
+std::any SerializationSystem::jsonToAny(const QJsonValue &json)
 {
     auto logJsonErr = [&](const QString &err)
     {
@@ -75,7 +75,7 @@ QVariant SerializationSystem::jsonToQVariant(const QJsonValue &json)
     }
 }
 
-const SerializationSystem::SerializerEntry *SerializationSystem::getSerializerByIndex(QtTypeIndex id)
+const SerializationSystem::SerializerEntry *SerializationSystem::getSerializerByIndex(std::type_index id)
 {
     return serializerEntries.getEntry(id);
 }

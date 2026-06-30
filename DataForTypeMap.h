@@ -8,13 +8,15 @@ template<typename DataEntry>
 class DataForTypeMap
 {
 public:
+    using TypeIndex = std::type_index;
+
     //Its like std::map but with two keys
     using DataMap = boost::bimaps::bimap<
-		boost::bimaps::tagged<QtTypeIndex, 	struct TypeIndexKey_Tag>,   // key 1: type index
+		boost::bimaps::tagged<TypeIndex, 	struct TypeIndexKey_Tag>,   // key 1: type index
 		boost::bimaps::tagged<QString, 		struct TypeNameKey_Tag>,    // key 2: type name
 		boost::bimaps::with_info<DataEntry>                             // value: DataEntry
 	>;
-    //DataMap as if it was simple map with just QtTypeIndex for key
+    //DataMap as if it was simple map with just TypeIndex for key
     using DataMapAsTypeIndexMap = typename DataMap::template map_by<TypeIndexKey_Tag>::type;
     //DataMap as if it was simple map with just QString for key
     using DataMapAsTypeNameMap  = typename DataMap::template map_by<TypeNameKey_Tag>::type;
@@ -23,22 +25,23 @@ public:
     // Will overwrite DataEntry if it exists for the type, but will LOG_WARN about it.
     // User is responsible for supplying correct pair of keys (which uniquely identify the same value)
     // If both keys CLEARLY dont identify same value, will do nothing and LOG_ERROR.
-    void addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry&& entry);
+    void addEntryForType(TypeIndex typeIndex, const QString &typeName, DataEntry&& entry);
 
     template<typename T>
     void addEntryForType(DataEntry&& entry)
     {
-        addEntryForType(qtTypeId<T>(), qtTypeName<T>(), std::move(entry));
+        SV_ASSERT(typeIsNamed<T>());
+        addEntryForType(typeIndex<T>(), typeName<T>(), std::move(entry));
     }
 
-    const DataEntry* getEntry   (QtTypeIndex    typeIndex);
+    const DataEntry* getEntry   (TypeIndex    typeIndex);
     const DataEntry* getEntry   (const QString& typeName);
-    DataEntry*       getEntryPtr(QtTypeIndex    typeIndex);
+    DataEntry*       getEntryPtr(TypeIndex    typeIndex);
     DataEntry*       getEntryPtr(const QString& typeName);
 
-    bool entryExists(QtTypeIndex typeIndex);
+    bool entryExists(TypeIndex typeIndex);
     bool entryExists(const QString& typeName);
-    bool entryExistsForEither(QtTypeIndex typeIndex, const QString& typeName);
+    bool entryExistsForEither(TypeIndex typeIndex, const QString& typeName);
 
 	DataMapAsTypeIndexMap& getDataMapAsTypeindexMap();
     DataMapAsTypeNameMap&  getDataMapAsTypeNameMap();
@@ -49,7 +52,7 @@ private:
 };
 
 template <typename DataEntry>
-inline void DataForTypeMap<DataEntry>::addEntryForType(QtTypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
+inline void DataForTypeMap<DataEntry>::addEntryForType(TypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
 {
     auto typeIndexExists = entryExists(typeIndex);
     auto typeNameExists  = entryExists(typeName);
@@ -71,7 +74,7 @@ inline void DataForTypeMap<DataEntry>::addEntryForType(QtTypeIndex typeIndex, co
 }
 
 template <typename DataEntry>
-inline const DataEntry *DataForTypeMap<DataEntry>::getEntry(QtTypeIndex typeIndex)
+inline const DataEntry *DataForTypeMap<DataEntry>::getEntry(TypeIndex typeIndex)
 {
     auto& theMap = getDataMapAsTypeindexMap();
     auto found = theMap.find(typeIndex);
@@ -89,7 +92,7 @@ inline const DataEntry *DataForTypeMap<DataEntry>::getEntry(const QString &typeN
 }
 
 template <typename DataEntry>
-inline DataEntry *DataForTypeMap<DataEntry>::getEntryPtr(QtTypeIndex typeIndex)
+inline DataEntry *DataForTypeMap<DataEntry>::getEntryPtr(TypeIndex typeIndex)
 {
     auto& theMap = getDataMapAsTypeindexMap();
     auto found = theMap.find(typeIndex);
@@ -107,7 +110,7 @@ inline DataEntry *DataForTypeMap<DataEntry>::getEntryPtr(const QString &typeName
 }
 
 template <typename DataEntry>
-inline bool DataForTypeMap<DataEntry>::entryExists(QtTypeIndex typeIndex)
+inline bool DataForTypeMap<DataEntry>::entryExists(TypeIndex typeIndex)
 {
     return getDataMapAsTypeindexMap().find(typeIndex) != getDataMapAsTypeindexMap().end();
 }
@@ -119,7 +122,7 @@ inline bool DataForTypeMap<DataEntry>::entryExists(const QString &typeName)
 }
 
 template <typename DataEntry>
-inline bool DataForTypeMap<DataEntry>::entryExistsForEither(QtTypeIndex typeIndex, const QString &typeName)
+inline bool DataForTypeMap<DataEntry>::entryExistsForEither(TypeIndex typeIndex, const QString &typeName)
 {
     return entryExists(typeIndex) || entryExists(typeName);
 }

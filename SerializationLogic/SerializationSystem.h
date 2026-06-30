@@ -5,6 +5,8 @@
 #include "SerializationLogic/SerializerInterface.h"
 #include "DataForTypeMap.h"
 
+#include "TypeNames.h"
+
 //**************************************************************************************************************
 //
 // System for serializing/deserializing arbitrary types.
@@ -35,15 +37,13 @@
 class SerializationSystem
 {
 public:
-    using QVariantToJsonFunc = std::function<QJsonValue(const QVariant&)>;
-	using JsonToQVariantFunc = std::function<QVariant(const QJsonValue&)>;
-	using DefaultValueFunc 	 = std::function<QVariant()>; 
+    using AnyToJsonFunc = std::function<QJsonValue(const std::any&)>;
+	using JsonToAnyFunc = std::function<std::any(const QJsonValue&)>;
 
     struct SerializerEntry
 	{
-		QVariantToJsonFunc 	serializer;
-		JsonToQVariantFunc 	deserializer;
-		DefaultValueFunc 	defaultValueMaker; //todo delete it ?
+		AnyToJsonFunc 	serializer;
+		JsonToAnyFunc 	deserializer;
 	};
 
 	//using SerializerMap = DataForTypeMap<SerializerEntry>;
@@ -59,10 +59,10 @@ public:
 	template<class T>
 	QJsonValue toJson(const T& value);
 	
-	QJsonValue qVariantToJson(const QVariant& val, bool logOnError = false);
+	QJsonValue anyToJson(const QVariant& val, bool logOnError = false);
 	
 	//todo write about type and how its not needed for double bool qstring
-	QVariant jsonToQVariant(const QJsonValue& json);
+	std::any jsonToAny(const QJsonValue& json);
 	
 	template<class T>
 	std::optional<T> fromJson(const QJsonValue& json);
@@ -73,13 +73,13 @@ private:
 	SerializationSystem() = default;
 	DISABLE_COPY_AND_ASSIGNMENT(SerializationSystem);
 	
-	const SerializerEntry* getSerializerByIndex(QtTypeIndex id);
+	const SerializerEntry* getSerializerByIndex(std::type_index id);
 	const SerializerEntry* getSerializerByTypeName(QString typeName);
 	
 	// This could ve been public method too, but i feel like leaving only one way to do things -
 	// the other, and the only one, public 'registerSerialization()'
     template<class T>
-	void registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer, DefaultValueFunc defaultValueMaker);
+	void registerSerialization(AnyToJsonFunc serializer, JsonToAnyFunc deserializer);
 
 private:
 	DataForTypeMap<SerializerEntry> serializerEntries;
@@ -88,57 +88,54 @@ private:
 
 
 template<class T>
-void SerializationSystem::registerSerialization(QVariantToJsonFunc serializer, JsonToQVariantFunc deserializer, DefaultValueFunc defaultValueMaker)
+void SerializationSystem::registerSerialization(AnyToJsonFunc serializer, JsonToAnyFunc deserializer)
 {
-	SV_ASSERT(qtTypeIsRegisteredAndNamed<T>());
+	SV_ASSERT(typeIsNamed<T>());
 
-	serializerEntries.addEntryForType( qtTypeId<T>(), qtTypeName<T>(), SerializerEntry{serializer, deserializer, defaultValueMaker} );
+	serializerEntries.addEntryForType( typeIndex<T>(), typeName<T>(), SerializerEntry{serializer, deserializer} );
 }
 
 template<class T>
 QJsonValue SerializationSystem::toJson(const T& value)
 {
-	return qVariantToJson(QVariant::fromValue(value));
+	static_assert(!std::is_same_v<T, std::any>, "You dont pass std::any here, only concrete type");
+
+	return anyToJson(std::any(value));
 }
 
 template<class T>
 std::optional<T> SerializationSystem::fromJson(const QJsonValue& json)
 {
-	auto qvariant = jsonToQVariant(json);
-	if (!qvariant.isValid()) return {};
+	auto any = jsonToAny(json);
+	if (!any.has_value()) return {};
 
-	if (qvariant.typeId() != qtTypeId<T>())
+	if (!anyHoldsType<T>())
 	{
-		SV_ERROR(("SerializationSystem::fromJson, while trying to deserialize type " + qtTypeName<T>()
-			  		+ " received mismatching result " + qVariantInfo(qvariant)).toStdString());
+		SV_ERROR(std::format("SerializationSystem::fromJson, while trying to deserialize type {}"
+			  				 " received mismatching result {}", typeName<T>(), any));
 		return {};
 	}
 
-	return qvariant.value<T>();
+	return anyGetOpt<T>(any);
 }
 
 template <Serializable T>
 void SerializationSystem::registerSerialization()
 {
-	auto wrappedSerializer = [](const QVariant& val)->QJsonValue
+	auto wrappedSerializer = [](const std::any& any)->QJsonValue
 	{
-		SV_ASSERT(qtTypeId<T>() == val.typeId());
-		return Serializer<T>().toJson(val.value<T>());
+		SV_ASSERT(anyHoldsType<T>(any));
+		return Serializer<T>().toJson(*anyGet<T>(any));
 	};
 
-	auto wrappedDeserializer = [](const QJsonValue& json)->QVariant
+	auto wrappedDeserializer = [](const QJsonValue& json)->std::any
 	{
 		if (auto valueOpt = Serializer<T>().fromJson(json))
 		{
-			return QVariant::fromValue(*valueOpt);
+			return std::any(*valueOpt);
 		}
-		else return QVariant();
+		else return std::any();
 	};
 
-	DefaultValueFunc defaultValueMaker = []()->QVariant
-	{
-		return QVariant::fromValue(T{});
-	};
-
-	registerSerialization<T>(wrappedSerializer, wrappedDeserializer, defaultValueMaker);
+	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
 }
