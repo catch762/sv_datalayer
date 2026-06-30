@@ -18,7 +18,7 @@ public:
                                                 std::any& Result,
                                                 double ratioAToB01)>;
 
-    // All QVariant's must be same type, ofcourse.
+    // All std::any's must be same type, ofcourse.
     // Will only return 'false' in case of types mismatch.
     //
     // If no interpolator registered for this type, will execute 'defaultStrat'.

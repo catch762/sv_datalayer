@@ -53,11 +53,13 @@ private:
     std::vector<EnumEntry> entries;
     int currentIndex = 0;
 };
+SV_REGTYPENAME(Enum);
 SV_DECL_STD_FORMATTER(Enum, obj.toString());
 SV_DECL_STD_FORMATTER(Enum::EnumEntry, obj.toString());
 SV_DECL_ALIASES(Enum);
 
 using EnumVec = std::vector<Enum>;
+SV_REGTYPENAME(EnumVec);
 SV_DECL_ALIASES(EnumVec);
 
 template <>

@@ -208,15 +208,19 @@ public:
 
 using LimitedInt    = LimitedValue<int>;
 using LimitedDouble = LimitedValue<double>;
+SV_REGTYPENAME(LimitedInt);
+SV_REGTYPENAME(LimitedDouble);
 SV_DECL_STD_FORMATTER(LimitedInt,    obj.toString().toStdString());
 SV_DECL_STD_FORMATTER(LimitedDouble, obj.toString().toStdString());
-Q_DECLARE_METATYPE(LimitedInt)
+Q_DECLARE_METATYPE(LimitedInt) //todo remove
 Q_DECLARE_METATYPE(LimitedDouble)
 SV_DECL_ALIASES(LimitedInt)
 SV_DECL_ALIASES(LimitedDouble)
 
 using LimitedIntVec     = std::vector<LimitedInt>;
 using LimitedDoubleVec  = std::vector<LimitedDouble>;
+SV_REGTYPENAME(LimitedIntVec);
+SV_REGTYPENAME(LimitedDoubleVec);
 Q_DECLARE_METATYPE(LimitedIntVec)
 Q_DECLARE_METATYPE(LimitedDoubleVec)
 SV_DECL_ALIASES(LimitedIntVec)

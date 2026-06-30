@@ -10,11 +10,12 @@ class DatalayerDefaultTypesMetadata
 public:
     static void registerEverything()
     {
+        DefaultTypeNames::registerEverything();
+
         DefaultSerializers::RegisterEverything();
         DefaultWidgetMakers::RegisterEverything();
         DefaultInterpolators::registerEverything();
         DefaultComparators::registerEverything();
-        DefaultTypeNames::registerEverything();
 
         everythingRegisteredFlagRef() = true;
     }

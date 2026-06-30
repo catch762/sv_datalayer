@@ -6,7 +6,7 @@ void DefaultComparators::registerEverything()
 {
     //fuzzy:
     ComparisonSystem::registerEqualsFuncForType<double>(arithmeticEquals<double, double>);
-    ComparisonSystem::registerEqualsFuncForType<float>(arithmeticEquals<float, float>);
+    //ComparisonSystem::registerEqualsFuncForType<float>(arithmeticEquals<float, float>);
 
     ComparisonSystem::registerDefaultEqualsForType<bool>();
     ComparisonSystem::registerDefaultEqualsForType<int>();

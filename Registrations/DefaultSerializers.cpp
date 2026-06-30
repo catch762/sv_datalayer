@@ -13,6 +13,7 @@ void DefaultSerializers::RegisterEverything()
     system.registerSerialization<bool>   ();
     system.registerSerialization<QString>();
     
+
     system.registerSerialization<BoolVec>   ();
 
     system.registerSerialization<LimitedDouble>();

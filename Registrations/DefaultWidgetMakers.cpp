@@ -29,8 +29,10 @@ bool setNodeValue(DataNodeWeak weakNode, const ValueType& value)
         return false;
     }
 
+    //todo check for when u assign explicit std any... can be optimized ?
+    // 
     //SV_LOG(std::format("upd val {}", value));
-    *leaf = QVariant::fromValue(value);
+    *leaf = value;
     return true;
 }
 

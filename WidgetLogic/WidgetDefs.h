@@ -24,6 +24,10 @@ inline void addTypeFieldToJson(QJsonObject &obj)
 //
 // ...and then all the other code can serialize widgets like all other items, i.e. simply
 // giving 'QVariant---HoldingWidget' to 'SerializerSystem'.
+// 
+// 
+// bullshit rewrite todo
+// 
 //
 // The alternative to that would be forcing all widgets inherit from some serializing
 // interface. I dont want that, i want any existing widget ready to be used. If you want,

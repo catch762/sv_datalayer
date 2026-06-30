@@ -9,9 +9,9 @@
 // but we can override this impl for any type if we wanted to.
 //
 // The problem this class solves is: both values we want to compare
-// are inside QVariant. So we have to explicitly register this std::equal_to() func.
+// are inside std::any. So we have to explicitly register this std::equal_to() func.
 //
-// Then we can call: ComparisonSystem::equals(QVariant(a), QVariant(b))
+// Then we can call: ComparisonSystem::equals(std::any(a), std::any(b))
 //**********************************************************************************
 
 //Note: tests that test this system are in DataNode/DataNodeEqualityTest.cpp

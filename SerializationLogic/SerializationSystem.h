@@ -16,9 +16,9 @@
 //	- to register your type simply call either variant of: 
 //		SerializationSystem::instance().registerSerialization()
 //
-// 	- then when variable of this type is wrapped in QVariant, you can call:
-// 		qVariantToJson()
-//		jsonToQVariant() for the opposite
+// 	- then when variable of this type is wrapped in std::any, you can call:
+// 		anyToJson()
+//		jsonToAny() for the opposite
 //
 // Requirements:
 //	 
@@ -54,8 +54,8 @@ public:
 	void registerSerialization();
 	
 	
-	//todo its bad cause qvariant also fits
-	//convenience function, wraps in QVariant and calls 'qVariantToJson'
+	//todo its bad cause std::any also fits
+	//convenience function, wraps in std::any and calls 'anyToJson'
 	template<class T>
 	QJsonValue toJson(const T& value);
 	

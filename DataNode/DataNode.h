@@ -21,7 +21,7 @@ using ConstDataNodeShared = std::shared_ptr<const DataNode>;
 // 'Composite pattern' tree node class to hold arbitrary data / nested structures.
 // 
 // Any DataNode is either:
-//  1) isLeaf()      - just holds one variable (wrapped in QVariant). Can not have children nodes.
+//  1) isLeaf()      - just holds one variable (wrapped in std::any). Can not have children nodes.
 //  2) isComposite() - the opposite: holds no data, but does have a list of children nodes.
 //
 // The class is written with Qt Model's in mind

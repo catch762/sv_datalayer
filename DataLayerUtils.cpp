@@ -19,7 +19,7 @@ void checkSerializeAndDeserialize(T val, Func valToString)
     {
         SV_LOG(std::format("Output: {}", *reconstructedVal));
     }
-    else SV_LOG("Empty QVariant was returned by jsonToQVariant");
+    else SV_LOG("Empty std::any was returned by jsonToAny");
     
     SV_LOG("Was serialized as " + jsonValueToString(jsonVal).toStdString());
 }

@@ -31,7 +31,7 @@ TEST_CASE("Interpolating trees")
         
         REQUIRE(anyHoldsType<ValueType>(actualMixResult)); //just in case
 
-        if(!ComparisonSystem::equals(QVariant::fromValue(expectedMixResult), actualMixResult))
+        if(!ComparisonSystem::equals(std::any(expectedMixResult), actualMixResult))
         {
             FAIL_CHECK(std::format("{}: interpolation result doesnt match expected: \nA  ={} \nB  ={} \nEXP={} \nRES={}",
                                    typeName<ValueType>(), a, b, expectedMixResult, *anyGet<ValueType>(actualMixResult)));
