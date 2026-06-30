@@ -29,7 +29,7 @@ public:
         instance().comparators.addEntryForType<T>(
             [](const std::any& a, const std::any& b)
             {
-                if (!anyholdsType<T>(a) || !anyholdsType<T>(b)) return false;
+                if (!anyHoldsType<T>(a) || !anyHoldsType<T>(b)) return false;
 
                 auto cmp = std::equal_to<T>();
                 return cmp(*anyGet<T>(a), *anyGet<T>(b));

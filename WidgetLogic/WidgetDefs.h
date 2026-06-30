@@ -6,7 +6,8 @@ static constexpr auto TypeFieldKey = "_type";
 template <typename T>
 inline void addTypeFieldToJson(QJsonObject &obj)
 {
-    obj[TypeFieldKey] = qtTypeName<T>();
+    SV_ASSERT(typeIsNamed<T>());
+    obj[TypeFieldKey] = typeName<T>();
 }
 
 //todo rewrite old bullshit

@@ -53,13 +53,13 @@ std::any SerializationSystem::jsonToAny(const QJsonValue &json)
         else
         {
             logJsonErr(QString("its object, but it doesnt have [%1] field").arg(TypeFieldKey));
-            return QVariant();
+            return {};
         }
     }
     else
     {
         logJsonErr(QString("its something unsupported"));
-        return QVariant();
+        return {};
     }
 
     if (auto * e = instance().getSerializerByTypeName(typeName))
@@ -70,7 +70,7 @@ std::any SerializationSystem::jsonToAny(const QJsonValue &json)
     {
         //OnError("json_to_any: no deserializer for " + type_name);
         SV_ERROR("Serialization", "No deserializer found for typeName=" + typeName.toStdString());
-        return QVariant();
+        return {};
     }
 }
 

@@ -22,10 +22,10 @@ bool setNodeValue(DataNodeWeak weakNode, const ValueType& value)
         return false;
     }
 
-    if (leaf->typeId() != qtTypeId<ValueType>())
+    if (!anyHoldsType<ValueType>(*leaf))
     {
         SV_ERROR(std::format("Couldnt set DataNode value, type mismatch: node leaf value type: {} and value to set: {}",
-            qVariantInfo(*leaf), qtTypeInfo<ValueType>()));
+            *leaf, typeName<ValueType>()));
         return false;
     }
 
@@ -50,7 +50,7 @@ bool setWidgetValueFromNode(Widget* widget, ConstDataNodeWeak weakNode)
     if (!valOpt)
     {
         SV_ERROR(std::format("Couldnt set widget value, expected leaf node of type [{}], got {}",
-            qtTypeName<LeafValueType>(), nodeShared));
+            typeName<LeafValueType>(), nodeShared));
         return false;
     }
 

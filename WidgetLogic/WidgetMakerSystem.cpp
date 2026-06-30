@@ -27,7 +27,7 @@ NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared nod
     return resultWidget;
 }
 
-WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection((std::type_index typeIndex)
+WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection(std::type_index typeIndex)
 {
     auto found = widgetMakerCollections.find(typeIndex);
     if (found != widgetMakerCollections.end())
@@ -39,7 +39,7 @@ WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection((std:
     return nullptr;
 }
 
-WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollectionAndCreateIfNotFound((std::type_index typeIndex)
+WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollectionAndCreateIfNotFound(std::type_index typeIndex)
 {
     if (auto existing = getCollection(typeIndex))
     {

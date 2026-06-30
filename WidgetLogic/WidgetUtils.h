@@ -7,22 +7,13 @@ template<typename T>
 bool nodeSuitableForWidgetOfType(DataNodeShared node)
 {
     //todo: write about how exactly to register
-
-    int typeId = qtTypeId<T>();
-    if (typeId == 0)
+    if (!typeIsNamed<T>())
     {
-        SV_ERROR("Can not create widget: the type has typeid=0, so its not registered");
+        SV_ERROR(std::format("Can not create widget: the type is not named: {}", mangledTypeName<T>()));
         return false;
     }
 
-    QString typeName = qtTypeName<T>();
-    if (typeName.isEmpty())
-    {
-        SV_ERROR(std::format("Can not create widget: type has typeid=[{}], but empty typeName, so is not FULLY registered", typeId));
-        return false;
-    }
-
-    auto errMsgHeader = std::format("Can not create widget of type[{}]: ", typeName.toStdString());
+    auto errMsgHeader = std::format("Can not create widget of type[{}]: ", typeName<T>());
 
     if (!node)
     {

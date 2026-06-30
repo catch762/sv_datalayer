@@ -8,18 +8,16 @@
 template<typename T, typename Func>
 void checkSerializeAndDeserialize(T val, Func valToString)
 {
-    SV_LOG( std::format("****** Testing type <{}>", qtTypeName<T>().toStdString()) );
+    SV_LOG( std::format("****** Testing type <{}>", typeName<T>()) );
 
     SV_LOG(std::format("Input: {}", val));
 
-    auto jsonVal                = SerializationSystem::instance().qVariantToJson(QVariant::fromValue(val));
-    auto reconstructedVariant   = SerializationSystem::instance().jsonToQVariant(jsonVal);
+    auto jsonVal                = SerializationSystem::instance().anyToJson(std::any(val));
+    auto reconstructedAny       = SerializationSystem::instance().jsonToAny(jsonVal);
 
-    if (reconstructedVariant.isValid())
+    if (auto reconstructedVal = anyGet<T>(reconstructedAny))
     {
-        auto reconstructedVal       = reconstructedVariant.template value<T>();
-
-        SV_LOG(std::format("Output: {}", reconstructedVal));
+        SV_LOG(std::format("Output: {}", *reconstructedVal));
     }
     else SV_LOG("Empty QVariant was returned by jsonToQVariant");
     

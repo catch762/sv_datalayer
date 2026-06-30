@@ -147,7 +147,7 @@ public:
 
     static QString thisTypeName()
     {
-        return qtTypeName<LimitedValue<T>>();
+        return typeName<LimitedValue<T>>();
     }
 
     QString toString() const

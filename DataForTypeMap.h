@@ -52,25 +52,25 @@ private:
 };
 
 template <typename DataEntry>
-inline void DataForTypeMap<DataEntry>::addEntryForType(TypeIndex typeIndex, const QString &typeName, DataEntry &&entry)
+inline void DataForTypeMap<DataEntry>::addEntryForType(TypeIndex typeIndex, const QString &theTypeName, DataEntry &&entry)
 {
     auto typeIndexExists = entryExists(typeIndex);
-    auto typeNameExists  = entryExists(typeName);
+    auto typeNameExists  = entryExists(theTypeName);
 
     if (typeIndexExists != typeNameExists)
     {
         SV_ERROR(std::format("DataForTypeMap: typeIndexExists is [{}] for [{}] but typeNameExists is [{}] for [{}], "
                              "so you are not even supplying properly unique key pair. Entry will not be added",
-                             typeIndexExists, typeIndex, typeNameExists, typeName));
+                             typeIndexExists, typeIndex, typeNameExists, theTypeName));
         return;
     }
 
     if (typeIndexExists || typeNameExists)
     {
-        SV_WARN(std::format("DataForTypeMap: overwriting entry for type [{}, {}]", typeIndex, typeName));
+        SV_WARN(std::format("DataForTypeMap: overwriting entry for type [{}, {}]", typeIndex, theTypeName));
     }
 
-    dataMap.insert({typeIndex, typeName, std::move(entry)});
+    dataMap.insert({typeIndex, theTypeName, std::move(entry)});
 }
 
 template <typename DataEntry>

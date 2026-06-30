@@ -16,9 +16,9 @@ TEST_CASE("Interpolating trees")
     {
         using ValueType = std::remove_cvref_t<decltype(a)>;
 
-        auto varA               = QVariant::fromValue(a);
-        auto varB               = QVariant::fromValue(b);
-        auto actualMixResult    = QVariant::fromValue(a); // assigning 'a' just so it has same type
+        auto varA               = std::any(a);
+        auto varB               = std::any(b);
+        auto actualMixResult    = std::any(a); // assigning 'a' just so it has same type
         auto success            = InterpolationSystem::interpolate( varA,
                                                                     varB,
                                                                     actualMixResult,
@@ -26,15 +26,15 @@ TEST_CASE("Interpolating trees")
         if (!success)
         {
             FAIL_CHECK(std::format("{}: failed to interpolate, prob type mismatch, variants were A={} B={} RES={}",
-                                   qtTypeName<ValueType>(), varA, varB, actualMixResult));
+                                   typeName<ValueType>(), varA, varB, actualMixResult));
         }
         
-        REQUIRE(holdsType<ValueType>(actualMixResult)); //just in case
+        REQUIRE(anyHoldsType<ValueType>(actualMixResult)); //just in case
 
         if(!ComparisonSystem::equals(QVariant::fromValue(expectedMixResult), actualMixResult))
         {
             FAIL_CHECK(std::format("{}: interpolation result doesnt match expected: \nA  ={} \nB  ={} \nEXP={} \nRES={}",
-                                   qtTypeName<ValueType>(), a, b, expectedMixResult, actualMixResult.template value<ValueType>()));
+                                   typeName<ValueType>(), a, b, expectedMixResult, *anyGet<ValueType>(actualMixResult)));
         }
     };
 

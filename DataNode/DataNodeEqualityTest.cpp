@@ -32,7 +32,7 @@ TEST_CASE("All DataNode tree equality functions")
 
         if (auto leaf = nodeC0->tryGetLeafvalue())
         {
-            *leaf = QVariant::fromValue(*val);
+            *leaf = std::any(*val);
         }
     }
 

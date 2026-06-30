@@ -122,7 +122,7 @@ QJsonValue Enum::toJSON(const Enum &e)
         entriesArray.append(EnumEntry::toJson(entry));
     }
     obj[EntriesKey] = entriesArray;
-    obj[TypeFieldKey] = qtTypeName<Enum>();
+    obj[TypeFieldKey] = typeName<Enum>();
 
     return obj;
 }

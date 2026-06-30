@@ -26,8 +26,8 @@ public:
 
 	QJsonValue toJson(const VectorT& vec)
     {
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<T>()); //not really needed
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>()); //this IS needed, because im adding typeName in next line
+        SV_ASSERT(typeIsNamed<T>()); //not really needed
+        SV_ASSERT(typeIsNamed<VectorT>()); //this IS needed, because im adding typeName in next line
 
         QJsonObject json;
         addTypeFieldToJson<VectorT>(json);
@@ -45,10 +45,10 @@ public:
 
 	std::optional<VectorT> fromJson(const QJsonValue& jsonValue)
     {
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<T>()); //not really needed
-        SV_ASSERT(qtTypeIsRegisteredAndNamed<VectorT>()); //not really needed
+        SV_ASSERT(typeIsNamed<T>()); //not really needed
+        SV_ASSERT(typeIsNamed<VectorT>()); //not really needed
 
-        const QString err = "Error deserializing " + qtTypeName<VectorT>();
+        const QString err = "Error deserializing " + QString(typeName<VectorT>());
 
         auto json = convertJsonAndLogError<QJsonObject>(jsonValue, err);
         if (!json) return {};

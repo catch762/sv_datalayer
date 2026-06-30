@@ -54,7 +54,7 @@ bool visitStructurallyEqualTrees(const Visitor&     siblingVisitor,
                                  DataNode&          nodeFirst,
                                  OtherDataNodes&... nodesRest);
 
-bool leafValuesEqual(const QVariant& a, const QVariant& b);
+bool leafValuesEqual(const std::any& a, const std::any& b);
 //**************************************
 // ACTUAL HELPER METHODS YOU SHOULD USE:
 //**************************************
@@ -183,7 +183,7 @@ bool visitStructurallyEqualTreesImpl(const Visitor& siblingVisitor, std::string 
         int argIndex = 1;
         auto checkLeafTypeId = [&](const DataNode& nodeNext)->bool
         {
-            if (nodeFirst.tryGetLeafvalue()->typeId() != nodeNext.tryGetLeafvalue()->typeId())
+            if ( !anyHoldSameType(*nodeFirst.tryGetLeafvalue(), *nodeNext.tryGetLeafvalue()) )
             {
                 if (outMismatchInfo) setMismatchError(nodeNext, argIndex, "different leaf value type");
                 return false;

@@ -55,11 +55,11 @@ private:
 template<typename T>
 void InterpolationSystem::registerTypeInterpolator()
 {
-    const auto typeId = qtTypeId<T>();
+    const auto typeId = typeIndex<T>();
 
     SV_ASSERT(!instance().interpolators.contains(typeId));
 
-    InterpolatorFunc wrappedInterpolator = [typeId](const std::any &A, const std::any &B, std::any &Result, double ratioAToB01)
+    InterpolatorFunc wrappedInterpolator = [](const std::any &A, const std::any &B, std::any &Result, double ratioAToB01)
     {
         SV_ASSERT(anyHoldsType<T>(A));
         SV_ASSERT(anyHoldsType<T>(B));
@@ -71,5 +71,5 @@ void InterpolationSystem::registerTypeInterpolator()
                                      ratioAToB01);
     };
 
-    instance().interpolators[typeIndex<T>()] = wrappedInterpolator;
+    instance().interpolators[typeId] = wrappedInterpolator;
 }

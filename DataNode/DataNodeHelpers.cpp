@@ -2,7 +2,7 @@
 #include "Comparison/ComparisonSystem.h"
 #include "doctest/doctest.h"
 
-bool leafValuesEqual(const QVariant &a, const QVariant &b)
+bool leafValuesEqual(const std::any& a, const std::any& b)
 {
     return ComparisonSystem::equals(a,b);
 }
