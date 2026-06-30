@@ -12,6 +12,10 @@
 // Whether its:
 //      - Leaf DataNode with single content widget,
 //      - Leaf DataNode with multiple content widgets (if the type is vector<Something>, for example) 
+// 
+//                  ^is it true ?
+// 
+// 
 //      - Composite DataNode with multiple content widgets for each DataNode child --
 // 
 //   -- all these content widgets are used uniformly, and simply inserted into layout.

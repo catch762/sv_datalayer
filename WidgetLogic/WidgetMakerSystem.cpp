@@ -27,7 +27,7 @@ NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared nod
     return resultWidget;
 }
 
-WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection(QtTypeIndex typeIndex)
+WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection((std::type_index typeIndex)
 {
     auto found = widgetMakerCollections.find(typeIndex);
     if (found != widgetMakerCollections.end())
@@ -39,7 +39,7 @@ WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollection(QtTyp
     return nullptr;
 }
 
-WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollectionAndCreateIfNotFound(QtTypeIndex typeIndex)
+WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollectionAndCreateIfNotFound((std::type_index typeIndex)
 {
     if (auto existing = getCollection(typeIndex))
     {
@@ -53,10 +53,10 @@ WidgetMakerSystem::WidgetMakerCollection *WidgetMakerSystem::getCollectionAndCre
     return res;
 }
 
-const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerForContentType(const QVariant &var,
+const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerForContentType(const std::any &any,
                                                                                               QStringOpt widgetMakerNameOpt)
 {
-    if (auto* collection = getCollection(var.typeId()))
+    if (auto* collection = getCollection(typeIndex(any)))
     {
         QString widgetMakerName = widgetMakerNameOpt.value_or(collection->defaultWidgetMakerName);
 
@@ -67,14 +67,14 @@ const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerF
         }
         else
         {
-            SV_ERROR(QString("Requested widgetMakerName=[%1] for %2, but no such widgetMaker in collection")
-                    .arg(widgetMakerName).arg(qVariantInfo(var)).toStdString());
+            SV_ERROR(std::format("Requested widgetMakerName=[%1] for %2, but no such widgetMaker in collection",
+                widgetMakerName, any));
         }
     }
     else
     {
-        SV_ERROR(QString("Requested widgetMaker for %1, but nothing is registered for this type")
-                .arg(qVariantInfo(var)).toStdString());
+        SV_ERROR(std::format("Requested widgetMaker for %1, but nothing is registered for this type",
+                any));
     }
 
     return nullptr;

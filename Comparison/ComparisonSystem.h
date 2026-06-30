@@ -19,20 +19,20 @@
 class ComparisonSystem
 {
 public:
-    using ComparatorFunc = std::function<bool(const QVariant& a, const QVariant& b)>;
+    using ComparatorFunc = std::function<bool(const std::any& a, const std::any& b)>;
 
     template<typename T>
     static void registerDefaultEqualsForType()
     {
-        SV_ASSERT(!instance().comparators.entryExists(qtTypeId<T>()));
+        SV_ASSERT(!instance().comparators.entryExists(typeIndex<T>()));
 
         instance().comparators.addEntryForType<T>(
-            [](const QVariant& a, const QVariant& b)
+            [](const std::any& a, const std::any& b)
             {
-                if (!holdsType<T>(a) || !holdsType<T>(b)) return false;
+                if (!anyholdsType<T>(a) || !anyholdsType<T>(b)) return false;
 
                 auto cmp = std::equal_to<T>();
-                return cmp(a.value<T>(), b.value<T>());
+                return cmp(*anyGet<T>(a), *anyGet<T>(b));
             }
         );
     }
@@ -42,32 +42,32 @@ public:
              std::same_as<bool, std::invoke_result_t<FuncT, const T&, const T&>>
     static void registerEqualsFuncForType(FuncT func)
     {
-        SV_ASSERT(!instance().comparators.entryExists(qtTypeId<T>()));
+        SV_ASSERT(!instance().comparators.entryExists(typeIndex<T>()));
 
         instance().comparators.addEntryForType<T>(
-            [func](const QVariant& a, const QVariant& b)
+            [func](const std::any& a, const std::any& b)
             {
-                if (!holdsType<T>(a) || !holdsType<T>(b)) return false;
+                if (!anyHoldsType<T>(a) || !anyHoldsType<T>(b)) return false;
 
-                return func(a.value<T>(), b.value<T>());
+                return func(*anyGet<T>(a), *anyGet<T>(b));
             }
         );
     }
 
-    static bool equals(const QVariant& a, const QVariant& b)
+    static bool equals(const std::any& a, const std::any& b)
     {
-        if (a.typeId() != b.typeId())
+        if (typeIndex(a) != typeIndex(b))
         {
             return false;
         }
 
-        if (auto cmp = instance().comparators.getEntry(a.typeId()))
+        if (auto cmp = instance().comparators.getEntry(typeIndex(a)))
         {
             return (*cmp)(a,b);
         }
         else
         {
-            SV_ERROR(std::format("No comparator found for {}", qVariantInfo(a)));
+            SV_ERROR(std::format("No comparator found for {}", a));
             return false;
         }
     }

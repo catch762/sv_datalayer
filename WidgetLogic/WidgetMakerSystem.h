@@ -12,14 +12,14 @@
 // Usage: 
 //
 //  - First you build a 'DataNode' tree (Read more in DataNode.h)
-//    The tree wraps arbitrary type variables in QVariant.
+//    The tree wraps arbitrary type variables in std::any.
 //    This tree is your data model.
 //
 //    (Note: tree is 'model' that will be updated when 'view' (widgets) change; but it works
 //    one way. As of now, theres no mechanism to update 'view' if you change 'model'
 //    other than delete and rebuild entire tree of widgets.)
 //
-//  - For every type T that is wrapped in QVariant's in the DataNode tree,
+//  - For every type T that is wrapped in std::any's in the DataNode tree,
 //    there must exist a registered 'WidgetMakerForTypeT'.
 //    You do register types with 'WidgetMakerSystem::instance().registerWidgetMaker(widgetMaker)'
 //
@@ -91,12 +91,12 @@ public:
 
 private:
     //returns nullptr if not found
-    WidgetMakerCollection* getCollection(QtTypeIndex typeIndex);
+    WidgetMakerCollection* getCollection(std::type_index typeIndex);
     //always returns valid ptr
-    WidgetMakerCollection* getCollectionAndCreateIfNotFound(QtTypeIndex typeIndex);
+    WidgetMakerCollection* getCollectionAndCreateIfNotFound(std::type_index typeIndex);
 
     //if 'widgetMakerNameOpt' is {}, returns default widget maker for this WidgetMakerCollection
-    const WidgetMakerForTypeT* getWidgetMakerForContentType(const QVariant &var, QStringOpt widgetMakerNameOpt = {});
+    const WidgetMakerForTypeT* getWidgetMakerForContentType(const std::any &var, QStringOpt widgetMakerNameOpt = {});
 
     NodeWidget* createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
 
@@ -110,7 +110,7 @@ private:
     WidgetMakerSystem() = default;
 
 private:
-    std::map<QtTypeIndex, WidgetMakerCollection> widgetMakerCollections;
+    std::map<std::type_index, WidgetMakerCollection> widgetMakerCollections;
 };
 
 
@@ -118,9 +118,9 @@ private:
 template<class T>
 void WidgetMakerSystem::registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName)
 {
-    QtTypeIndex typeIndex = qMetaTypeId<T>();
+    auto index = typeIndex<T>();
 
-    auto *collection = getCollectionAndCreateIfNotFound(typeIndex);
+    auto *collection = getCollectionAndCreateIfNotFound(index);
     SV_ASSERT(collection);
     SV_ASSERT(!collection->widgetMakers.contains(widgetMakerName) && "You are trying to register widetMaker, but such name already exists");
 

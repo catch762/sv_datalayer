@@ -13,9 +13,9 @@ public:
         TakeB
     };
 
-    using InterpolatorFunc = std::function<void(const QVariant &A,
-                                                const QVariant &B,
-                                                QVariant &Result,
+    using InterpolatorFunc = std::function<void(const std::any& A,
+                                                const std::any& B,
+                                                std::any& Result,
                                                 double ratioAToB01)>;
 
     // All QVariant's must be same type, ofcourse.
@@ -23,9 +23,9 @@ public:
     //
     // If no interpolator registered for this type, will execute 'defaultStrat'.
     // The situation is perfectly fine, not all types need interpolation.
-    static bool interpolate(const QVariant &A,
-                            const QVariant &B,
-                            QVariant &Result,
+    static bool interpolate(const std::any &A,
+                            const std::any &B,
+                            std::any &Result,
                             double ratioAToB01,
                             DefaultMixingStrategy defaultStrat = DefaultMixingStrategy::DoNothing);
 
@@ -45,10 +45,10 @@ private:
 
     static InterpolationSystem& instance();
 
-    static const InterpolatorFunc* getInterpolator(QtTypeIndex typeIndex);
+    static const InterpolatorFunc* getInterpolator(std::type_index typeIndex);
 
 private:
-    std::map<QtTypeIndex, InterpolatorFunc> interpolators;
+    std::map<std::type_index, InterpolatorFunc> interpolators;
 };
 
 
@@ -59,19 +59,17 @@ void InterpolationSystem::registerTypeInterpolator()
 
     SV_ASSERT(!instance().interpolators.contains(typeId));
 
-    InterpolatorFunc wrappedInterpolator = [typeId](const QVariant &A, const QVariant &B, QVariant &Result, double ratioAToB01)
+    InterpolatorFunc wrappedInterpolator = [typeId](const std::any &A, const std::any &B, std::any &Result, double ratioAToB01)
     {
-        SV_ASSERT(A.typeId()        == typeId);
-        SV_ASSERT(B.typeId()        == typeId);
-        SV_ASSERT(Result.typeId()   == typeId);
+        SV_ASSERT(anyHoldsType<T>(A));
+        SV_ASSERT(anyHoldsType<T>(B));
+        SV_ASSERT(anyHoldsType<T>(Result));
 
-        // Todo: this is huge ass oversight. We still have to make bunch of expensive copies here.
-        // Because cant get fkin pointer/ref from QVariant. I think i ll switch to std::any later, then fix this.
-
-        T resultValue{};
-        Interpolator<T>::interpolate(A.value<T>(), B.value<T>(), resultValue, ratioAToB01);
-        Result = QVariant::fromValue(resultValue);
+        Interpolator<T>::interpolate(*anyGet<T>(A),
+                                     *anyGet<T>(B),
+                                     *anyGet<T>(Result),
+                                     ratioAToB01);
     };
 
-    instance().interpolators[qtTypeId<T>()] = wrappedInterpolator;
+    instance().interpolators[typeIndex<T>()] = wrappedInterpolator;
 }

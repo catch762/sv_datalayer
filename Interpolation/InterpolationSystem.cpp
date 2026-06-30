@@ -1,21 +1,21 @@
 #include "InterpolationSystem.h"
 
-bool InterpolationSystem::interpolate(  const QVariant &A, 
-                                        const QVariant &B, 
-                                        QVariant &Result, 
+bool InterpolationSystem::interpolate(  const std::any& A, 
+                                        const std::any& B,
+                                        std::any& Result,
                                         double ratioAToB01,
                                         DefaultMixingStrategy defaultStrat )
 {
-    QtTypeIndex aType       = A.typeId();
-    QtTypeIndex bType       = B.typeId();
-    QtTypeIndex resultType  = Result.typeId();
+    auto aType       = typeIndex(A);
+    auto bType       = typeIndex(B);
+    auto resultType  = typeIndex(Result);
 
     bool allSameType = aType == bType && aType == resultType;
 
     if (!allSameType)
     {
         SV_ERROR(std::format("Trying to interpolate mismatching values: {} {} to {}",
-                                qVariantInfo(A), qVariantInfo(B), qVariantInfo(Result)));
+                                A, B, Result));
         return false;
     }
 
@@ -74,7 +74,7 @@ InterpolationSystem &InterpolationSystem::instance()
     return system;
 }
 
-const InterpolationSystem::InterpolatorFunc *InterpolationSystem::getInterpolator(QtTypeIndex typeIndex)
+const InterpolationSystem::InterpolatorFunc *InterpolationSystem::getInterpolator(std::type_index typeIndex)
 {
     return getValue(instance().interpolators, typeIndex);
 }
