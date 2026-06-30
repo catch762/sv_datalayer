@@ -1,7 +1,7 @@
 #include "sv_common.h"
 #include "doctest/doctest.h"
 #include <cstring>
-#include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
+#include "TypeNames.h"
 
 template<typename T>
 bool nameIs(const char* name)
@@ -9,7 +9,6 @@ bool nameIs(const char* name)
 	return std::strcmp(typeName<T>(), name) == 0;
 }
 
-/*
 TEST_CASE("Checking that type names are registered")
 {
 	//no need to check actual names - if type is registered, name is correct,
@@ -27,4 +26,3 @@ TEST_CASE("Checking that type names are registered")
 	CHECK(nameIs<EnumVec>("EnumVec"));
 	CHECK(nameIs<BoolVec>("BoolVec"));
 }
-*/

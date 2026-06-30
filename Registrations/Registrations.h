@@ -3,6 +3,7 @@
 #include "DefaultSerializers.h"
 #include "DefaultInterpolators.h"
 #include "DefaultComparators.h"
+#include "DefaultTypeNames.h"
 
 class DatalayerDefaultTypesMetadata
 {
@@ -13,6 +14,7 @@ public:
         DefaultWidgetMakers::RegisterEverything();
         DefaultInterpolators::registerEverything();
         DefaultComparators::registerEverything();
+        DefaultTypeNames::registerEverything();
 
         everythingRegisteredFlagRef() = true;
     }
