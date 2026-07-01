@@ -15,12 +15,19 @@ void checkSerializeAndDeserialize(T val, Func valToString)
     auto jsonVal                = SerializationSystem::instance().anyToJson(std::any(val));
     auto reconstructedAny       = SerializationSystem::instance().jsonToAny(jsonVal);
 
-    if (auto reconstructedVal = anyGet<T>(reconstructedAny))
+    if (!reconstructedAny)
     {
-        SV_LOG(std::format("Output: {}", *reconstructedVal));
+        SV_LOG("Empty std::any was returned by jsonToAny");
     }
-    else SV_LOG("Empty std::any was returned by jsonToAny");
-    
+    else
+    {
+        if (auto reconstructedVal = anyGet<T>(*reconstructedAny))
+        {
+            SV_LOG(std::format("Output: {}", *reconstructedVal));
+        }
+        else SV_LOG("std::any that doesnt match type was returned by jsonToAny");
+    }
+
     SV_LOG("Was serialized as " + jsonValueToString(jsonVal).toStdString());
 }
 

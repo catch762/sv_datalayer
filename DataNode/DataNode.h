@@ -245,7 +245,7 @@ public:
         return QString("DataNode%1{%2 | %3 | 0x%4}")
             .arg(isLeaf() ? "Leaf":"Comp")
             .arg(name)
-            .arg(isLeaf() ? *tryGetLeafTypeName() : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()))
+            .arg(isLeaf() ? tryGetLeafTypeName().value_or(QString("Error, unnamed leaf")) : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()))
             .arg(reinterpret_cast<quintptr>(this), 0, 16);
     }
     std::string stdBasicInfo() const

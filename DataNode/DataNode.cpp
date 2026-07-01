@@ -66,7 +66,15 @@ DataNodeShared DataNode::fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAct
     {
         result->initPayload(NodeType::Leaf);
 
-        *result->tryGetLeafvalue() = SerializationSystem::instance().jsonToAny(leafValue);
+        if (anyOpt leafAny = SerializationSystem::instance().jsonToAny(leafValue))
+        {
+            *result->tryGetLeafvalue() = *leafAny;
+        }
+        else
+        {
+            SV_ERROR(result->formatMsg("During deserializing, received nullopt from SerializationSystem for leaf"));
+            return {};
+        }
     }
     else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
     {
@@ -88,6 +96,8 @@ DataNodeShared DataNode::fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAct
     }
     else
     {
+        SV_ERROR(result->formatMsg(std::format("During deserializing, on level {}, found ivalid json "
+                                               "which hasnt leaf content and hasnt chidlren content", _level)));
         return {};
     }
 

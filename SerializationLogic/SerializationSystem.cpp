@@ -23,26 +23,26 @@ QJsonValue SerializationSystem::anyToJson(const std::any& any, bool logOnError)
     return QJsonValue();
 }
 
-std::any SerializationSystem::jsonToAny(const QJsonValue &json)
+anyOpt SerializationSystem::jsonToAny(const QJsonValue &json)
 {
     auto logJsonErr = [&](const QString &err)
     {
-        SV_ERROR("Serialization", QString("Error trying to deserialize JSON: %1. Json: %2")
+        SV_ERROR("Serialization", QString("JSON deserialize error: %1. Json: %2")
                                         .arg(err).arg(jsonValueToString(json)).toStdString());
     };
 
     QString typeName;
     if (json.isDouble())
     {
-        typeName = "double";
+        typeName = QString::fromStdString( typeNameStringAssertive<double>() );
     }
     else if (json.isBool())
     {
-        typeName = "bool";
+        typeName = QString::fromStdString(typeNameStringAssertive<bool>());
     }
     else if (json.isString())
     {
-        typeName = "QString";
+        typeName = QString::fromStdString(typeNameStringAssertive<QString>());
     }
     else if (json.isObject())
     {
@@ -62,9 +62,14 @@ std::any SerializationSystem::jsonToAny(const QJsonValue &json)
         return {};
     }
 
-    if (auto * e = instance().getSerializerByTypeName(typeName))
+    if (auto *e = instance().getSerializerByTypeName(typeName))
     {
-        return e->deserializer(json);
+        anyOpt result = e->deserializer(json);
+        if (!result)
+        {
+            logJsonErr("Deserializer returned nullopt");
+        }
+        return result;
     }
     else
     {

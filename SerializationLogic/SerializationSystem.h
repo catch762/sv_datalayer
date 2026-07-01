@@ -38,7 +38,7 @@ class SerializationSystem
 {
 public:
     using AnyToJsonFunc = std::function<QJsonValue(const std::any&)>;
-	using JsonToAnyFunc = std::function<std::any(const QJsonValue&)>;
+	using JsonToAnyFunc = std::function<anyOpt(const QJsonValue&)>;
 
     struct SerializerEntry
 	{
@@ -62,7 +62,7 @@ public:
 	QJsonValue anyToJson(const std::any& val, bool logOnError = false);
 	
 	//todo write about type and how its not needed for double bool qstring
-	std::any jsonToAny(const QJsonValue& json);
+	anyOpt jsonToAny(const QJsonValue& json);
 	
 	template<class T>
 	std::optional<T> fromJson(const QJsonValue& json);
@@ -107,16 +107,16 @@ template<class T>
 std::optional<T> SerializationSystem::fromJson(const QJsonValue& json)
 {
 	auto any = jsonToAny(json);
-	if (!any.has_value()) return {};
+	if (!any) return {};
 
-	if (!anyHoldsType<T>())
+	if (!anyHoldsType<T>(*any))
 	{
 		SV_ERROR(std::format("SerializationSystem::fromJson, while trying to deserialize type {}"
-			  				 " received mismatching result {}", typeName<T>(), any));
+			  				 " received mismatching result {}", typeName<T>(), *any));
 		return {};
 	}
 
-	return anyGetOpt<T>(any);
+	return anyGetOpt<T>(*any);
 }
 
 template <Serializable T>
@@ -128,13 +128,13 @@ void SerializationSystem::registerSerialization()
 		return Serializer<T>().toJson(*anyGet<T>(any));
 	};
 
-	auto wrappedDeserializer = [](const QJsonValue& json)->std::any
+	auto wrappedDeserializer = [](const QJsonValue& json)->anyOpt
 	{
 		if (auto valueOpt = Serializer<T>().fromJson(json))
 		{
 			return std::any(*valueOpt);
 		}
-		else return std::any();
+		else return {};
 	};
 
 	registerSerialization<T>(wrappedSerializer, wrappedDeserializer);
