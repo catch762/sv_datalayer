@@ -32,6 +32,9 @@ public:
     QJsonObjectWithWidgetOptionsOpt makeOptions() const;
     void setupButtonsOnWrapperParent(NodeWidget* wrapper, const QJsonObjectWithWidgetOptionsOpt& options = {} );
 
+    void setMode(Mode mode);
+    Mode getMode() const;
+
 signals:
     void valueChanged(const LimitedIntOrDoubleVec &val);
     void intValueChanged(const LimitedIntVec& val);
@@ -40,7 +43,7 @@ signals:
 private:
     //no signals will be emitted from views
     void setViewsStateFromValue(const LimitedIntOrDoubleVec& value);
-    void setMode(Mode mode);
+    
 
 private:
     LimitedIntOrDoubleVec value;

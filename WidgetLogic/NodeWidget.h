@@ -91,6 +91,15 @@ public:
         return contentLayout->count();
     }
 
+    QWidget* getContentWidget(int index)
+    {
+        if (isValidIndex(index, contentWidgetsCount()))
+        {
+            auto* item = contentLayout->itemAt(index);
+            return item->widget();
+        }
+        else return nullptr;
+    }
 
 signals:
     void valueChanged();

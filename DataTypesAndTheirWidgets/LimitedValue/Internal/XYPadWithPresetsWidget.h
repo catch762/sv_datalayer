@@ -28,6 +28,10 @@ private:
 class XYPadWithPresetsWidget : public QWidget
 {
     Q_OBJECT
+
+private:
+    static inline const int PresetsCount = 9;
+
 public:
     XYPadWithPresetsWidget(LimitedValueVecWidget* parent = nullptr);
 
@@ -55,6 +59,10 @@ public:
 
     QJsonObjectWithWidgetOptionsOpt makeOptions();
     void restoreFromOptions(const QJsonObjectWithWidgetOptions& options);
+
+
+    const std::array<PresetData, PresetsCount>& getPresets() const;
+    int getCurrentPresetIdx() const;
 
 public slots:
     void updateEverythingToMatchParentValue(); //will not emit any signals
@@ -103,7 +111,6 @@ private:
 private:
     LimitedValueVecWidget* parent = nullptr;
 
-    static inline const int PresetsCount = 9;
     std::array<PresetData, PresetsCount> presets;
     int currentPresetIdx = 0; //index in 'presets' array
 };

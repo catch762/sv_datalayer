@@ -272,6 +272,7 @@ public:
         : NodeWidget(node, name, options, parent), helper(this)
     {
         helper.initWidgetWithInitialVal();
+        helper.widget->setupButtonsOnWrapperParent(this, options);
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -357,6 +358,8 @@ public:
         : NodeWidget(node, name, options, parent), helper(this)
     {
         helper.initWidgetWithInitialVal();
+
+        helper.widget->setupButtonsOnWrapperParent(this, options);
     }
 
     bool setNodeValueFromWidgetValue() override

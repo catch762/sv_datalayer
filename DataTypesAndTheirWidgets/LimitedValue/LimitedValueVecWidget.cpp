@@ -109,14 +109,36 @@ void LimitedValueVecWidget::setViewsStateFromValue(const LimitedIntOrDoubleVec& 
 
 void LimitedValueVecWidget::setMode(Mode mode)
 {
+    auto setWrapperButtonChecked = [this](bool checked)
+    {
+        if (viewSelectorWrapperButton)
+        {
+            QSignalBlocker blocker(viewSelectorWrapperButton);
+            viewSelectorWrapperButton->setChecked(checked);
+        }
+    };
+
     if (mode == Mode::ShowJustLimitedValueWidgets)
     {
         slidersView->setVisible(true);
         xyPadView->setVisible(false);
+
+        setWrapperButtonChecked(false);
     }
     else
     {
         slidersView->setVisible(false);
         xyPadView->setVisible(true);
+
+        setWrapperButtonChecked(true);
     }
+}
+
+LimitedValueVecWidget::Mode LimitedValueVecWidget::getMode() const
+{
+    //nah
+    //return slidersView->isVisible() ? Mode::ShowJustLimitedValueWidgets : Mode::ShowXYPad;
+
+    SV_ASSERT(viewSelectorWrapperButton);
+    return viewSelectorWrapperButton->isChecked() ? Mode::ShowXYPad : Mode::ShowJustLimitedValueWidgets;
 }

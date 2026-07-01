@@ -656,3 +656,13 @@ void XYPadWithPresetsWidget::keyPressEvent(QKeyEvent *event)
 
     QWidget::keyPressEvent(event);
 }
+
+const std::array<XYPadWithPresetsWidget::PresetData, XYPadWithPresetsWidget::PresetsCount>& XYPadWithPresetsWidget::getPresets() const
+{
+    return presets;
+}
+
+int XYPadWithPresetsWidget::getCurrentPresetIdx() const
+{
+    return currentPresetIdx;
+}
