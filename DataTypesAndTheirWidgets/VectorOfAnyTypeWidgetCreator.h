@@ -125,7 +125,8 @@ private:
     {
         for (int i = 0; i < widgetsToDelete; ++i)
         {
-            delete elemWidgets.back();
+            //delete elemWidgets.back();
+            elemWidgets.back()->deleteLater();
             elemWidgets.pop_back();
         }
     }
