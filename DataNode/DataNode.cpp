@@ -13,7 +13,7 @@ QJsonObjectOpt DataNode::toJSON(OnJsonCreatedFromNodeAction onJsonCreatedAction,
     else if(auto compData = tryGetCompositeData())
     {
         QJsonArray childrenArray;
-        for (auto &child : compData->children)
+        for (auto &child : compData->getChildren())
         {
             if (!child)
             {
@@ -79,13 +79,12 @@ DataNodeShared DataNode::fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAct
     else if(auto childrenArray = getFromJsonAndLogError<QJsonArray>(*json, childrenKey, err)) //Then its Composite node
     {
         result->initPayload(NodeType::Composite);
-        CompositeData* resCompData = result->tryGetCompositeData();
 
         for (auto child : *childrenArray)
         {
             if (DataNodeShared loadedChild = fromJSON(child, onNodeCreatedAction, _level + 1))
             {
-                resCompData->children.push_back(loadedChild);
+                result->addChild(loadedChild);
             }
             else
             {

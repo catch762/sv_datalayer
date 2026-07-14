@@ -92,7 +92,7 @@ std::tuple<DataNodeShared, NodeWidgetVec> SerializerForDataNodeTreeAndItsWidgets
     NodeWidgetVec topLevelChildrenWidgets;
     if (rootNode->isComposite())
     {
-        for (auto child : rootNode->tryGetCompositeData()->children)
+        for (auto child : rootNode->tryGetCompositeData()->getChildren())
         {   
             auto childWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(child);
 

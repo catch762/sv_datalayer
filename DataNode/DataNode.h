@@ -38,6 +38,7 @@ public:
     using LeafValue = std::any;
     struct CompositeData
     {
+    public:
         DataNodeShared getChild(int idx)
         {
             return hasChild(idx) ? children[idx] : DataNodeShared();
@@ -55,6 +56,29 @@ public:
             return idx >= 0 && idx < childrenCount();
         }
 
+        void setChildren(std::vector<DataNodeShared> theChildren, DataNodeWeak parent)
+        {
+            children = std::move(theChildren);
+            for (auto& child : children)
+            {
+                SV_ASSERT(child);
+                child->setParent(parent);
+            }
+        }
+
+        void addChild(DataNodeShared child, DataNodeWeak parent)
+        {
+            SV_ASSERT(child);
+            child->setParent(parent);
+            children.push_back(child);
+        }
+
+        const std::vector<DataNodeShared>& getChildren() const
+        {
+            return children;
+        }
+
+    private:
         std::vector<DataNodeShared> children;
         //tsl::ordered_map<QString, QString> test;
     };
@@ -88,7 +112,7 @@ public:
     static DataNodeShared makeComposite(const QString &_name = QString(), std::vector<DataNodeShared>&& children = {})
     {
         auto node = DataNodeShared(new DataNode(_name, NodeType::Composite));
-        node->tryGetCompositeData()->children = std::move(children);
+        node->tryGetCompositeData()->setChildren( std::move(children), node );
         return node;
     }
 
@@ -170,14 +194,16 @@ public:
         {
             if (auto compdata = parentPtr->tryGetCompositeData())
             {
-                const auto foundThis = std::find_if(compdata->children.cbegin(), compdata->children.cend(),
+                const auto& children = compdata->getChildren();
+
+                const auto foundThis = std::find_if(children.cbegin(), children.cend(),
                                  [this](const auto &treeItem) {
                                      return treeItem.get() == this;
                                  });
 
-                if (foundThis != compdata->children.cend())
+                if (foundThis != children.cend())
                 {
-                    return std::distance(compdata->children.cbegin(), foundThis);
+                    return std::distance(children.cbegin(), foundThis);
                 }
             }
             
@@ -204,8 +230,7 @@ public:
 
         if(auto compData = tryGetCompositeData())
         {
-            compData->children.push_back(child);
-            child->parent = weak_from_this();
+            compData->addChild(child, shared_from_this());
         }
     }
 
@@ -279,7 +304,7 @@ public:
 
         if (auto *compData = node->tryGetCompositeData())
         {
-            for (auto& child : compData->children)
+            for (auto& child : compData->getChildren())
             {
                 iterateRecoursively(child, visitor);
             }
@@ -298,7 +323,7 @@ public:
             std::vector<DataNodeShared> childrenCopies;
             childrenCopies.reserve(compdata->childrenCount());
 
-            for (const auto& child : compdata->children)
+            for (const auto& child : compdata->getChildren())
             {
                 childrenCopies.push_back(DataNode::makeCopy(child));
             }
@@ -318,6 +343,11 @@ private:
     std::string formatMsg(const std::string &msg) const
     {
         return basicInfo().toStdString() + ": " + msg;
+    }
+
+    void setParent(DataNodeWeak theParent)
+    {
+        parent = theParent;
     }
 
 private:

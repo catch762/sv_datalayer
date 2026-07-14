@@ -104,7 +104,7 @@ NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared nod
 
     std::vector<NodeWidget*> widgetsOfChildren;
 
-    for (auto childNode : node->tryGetCompositeData()->children)
+    for (auto childNode : node->tryGetCompositeData()->getChildren())
     {
         if (auto widgetVariant = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(childNode))
         {
