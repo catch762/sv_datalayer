@@ -1,4 +1,4 @@
-#include "DataNodeHelpers.h"
+#include "DataNodeEquality.h"
 #include "Comparison/ComparisonSystem.h"
 #include "doctest/doctest.h"
 
