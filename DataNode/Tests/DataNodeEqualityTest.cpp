@@ -1,4 +1,4 @@
-#include "DataNodeEquality.h"
+#include "../DataNodeEquality.h"
 #include "doctest/doctest.h"
 
 TEST_CASE("All DataNode tree equality functions")

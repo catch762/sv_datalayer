@@ -5,3 +5,4 @@
 #include "DataNode.h"
 #include "DataNodeSerializers.h"
 #include "DataNodeEquality.h"
+#include "DataNodeAddress.h"
