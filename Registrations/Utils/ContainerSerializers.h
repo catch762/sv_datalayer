@@ -18,6 +18,8 @@
 //
 //*****************************************************************************************
 
+//Note: in this impl, we ARE adding info that it is a vector<T>, so that we can find
+//appropriate serializer in runtime
 template<Serializable T>
 class Serializer< std::vector<T> >
 {
@@ -77,4 +79,48 @@ public:
 
 private:
     static inline const auto ValuesKey = "values";
+};
+
+//Unlike in case with vector above, we are not adding type information
+template<Serializable T>
+class Serializer< std::set<T> >
+{
+public:
+    using SetT = std::set<T>;
+
+	QJsonValue toJson(const SetT& set)
+    {
+        QJsonArray jsonValues;
+        for (auto value : set)
+        {
+            jsonValues.append( Serializer<T>().toJson(value) );
+        }
+
+        return jsonValues;
+    }
+
+	std::optional<SetT> fromJson(const QJsonValue& jsonValue)
+    {
+        const QString err = "Error deserializing " + QString(typeNameOrMangled<SetT>());
+
+        auto jsonValuesArr = convertJsonAndLogError<QJsonArray>(jsonValue, err);
+        if (!jsonValuesArr) return {};
+
+        SetT set;
+
+        for (auto jsonValue : *jsonValuesArr)
+        {
+            if (auto optT = Serializer<T>().fromJson(jsonValue) )
+            {
+                set.insert(*optT);
+            }
+            else
+            {
+                SV_ERROR((err + ": failed to deserialize set element").toStdString());
+                return {};
+            }
+        }
+
+        return set;
+    }
 };

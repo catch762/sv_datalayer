@@ -38,11 +38,11 @@ anyOpt SerializationSystem::jsonToAny(const QJsonValue &json)
     }
     else if (json.isBool())
     {
-        typeName = QString::fromStdString(typeNameStringAssertive<bool>());
+        typeName = QString::fromStdString( typeNameStringAssertive<bool>() );
     }
     else if (json.isString())
     {
-        typeName = QString::fromStdString(typeNameStringAssertive<QString>());
+        typeName = QString::fromStdString( typeNameStringAssertive<QString>() );
     }
     else if (json.isObject())
     {
