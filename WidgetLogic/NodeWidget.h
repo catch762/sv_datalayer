@@ -66,7 +66,7 @@ public:
 
     virtual bool setWidgetValueFromNodeValue()
     {
-        SV_ASSERT(false);
+        //SV_ASSERT(false); //its fine: plain NodeWidget for comp node doesnt do anything to update self
         return false;
     }
 
