@@ -1,5 +1,7 @@
 #include "NodeWidget.h"
 #include "SerializationLogic/SerializationSystem.h"
+#include "NodeWidgetChangeNotifier.h"
+
 namespace
 {
     const int StripeHeight = 24;
@@ -78,7 +80,14 @@ NodeWidget::NodeWidget(DataNodeShared node,
     }
 
     //note: derived not constructed yet, make sure its not get called yet
-    connect(this, &NodeWidget::valueChanged, this, &NodeWidget::setNodeValueFromWidgetValue);
+    connect(this, &NodeWidget::valueChanged, this, [this]()
+    {
+        setNodeValueFromWidgetValue();
+        if (auto notifier = NodeWidgetChangeNotifier::instance())
+        {
+            emit notifier->someNodeWidgetChanged();
+        }
+    });
 }
 
 void NodeWidget::setExpanded(bool expanded)
