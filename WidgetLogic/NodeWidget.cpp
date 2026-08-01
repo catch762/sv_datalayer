@@ -80,6 +80,7 @@ NodeWidget::NodeWidget(DataNodeShared node,
         if (auto tabIndexFromJson = getFromJson<int>(*options, tabIndexKey))
         {
             tabIndex = tabIndexFromJson;
+            SV_LOG(std::format("NodeWidget [{}] got assigned tab index [{}]", name, *tabIndex));
         }
     }
 

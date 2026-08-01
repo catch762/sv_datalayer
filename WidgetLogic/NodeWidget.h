@@ -137,7 +137,7 @@ private:
     
     void setContentWidgetsVisibleStatus(bool visible);
 
-private:
+public:
     static const inline QString isExpandedKey   = "_NW_isExpanded";
     static const inline QString tabIndexKey     = "_NW_tabIndex";
 
