@@ -2,6 +2,10 @@
 #include "sv_qtcommon.h"
 #include "DataNode/DataNode.h"
 
+//NodeWidget's belong in the tabs, and they have this property to identify the tab 
+using TabIndex = int;
+SV_DECL_OPT(TabIndex);
+
 using NodeWidgetVec = std::vector<NodeWidget*>;
 
 static constexpr auto TypeFieldKey = "_type";

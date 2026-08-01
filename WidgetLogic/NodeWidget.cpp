@@ -14,12 +14,11 @@ NodeWidget::NodeWidget(DataNodeShared node,
                         const QString &name,
                         const QJsonObjectWithWidgetOptionsOpt& options,
                         QWidget *parent)
- : QWidget(parent)
+ : QWidget(parent), isForCompositeNode(node->isComposite())
 {
     SV_ASSERT(node);
     weakNode = node;
 
-    isForCompositeNode = node->isComposite();
     layout = new QVBoxLayout(this);
     initLayoutSpacing(layout);
     layout->setAlignment(Qt::AlignTop);
@@ -76,6 +75,11 @@ NodeWidget::NodeWidget(DataNodeShared node,
         {
             //SV_LOG("applied expansion");
             setExpanded(*isExpandedOpt);
+        }
+
+        if (auto tabIndexFromJson = getFromJson<int>(*options, tabIndexKey))
+        {
+            tabIndex = tabIndexFromJson;
         }
     }
 
@@ -257,6 +261,11 @@ QJsonObjectWithWidgetOptions NodeWidget::makeOptions() const
     */
 
     obj[isExpandedKey] = stripeShowHideContentButton->isChecked();
+
+    if (tabIndex)
+    {
+        obj[tabIndexKey] = tabIndex.value();
+    }
 
     return obj;
 }

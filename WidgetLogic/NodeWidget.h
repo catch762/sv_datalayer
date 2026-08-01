@@ -101,6 +101,16 @@ public:
         else return nullptr;
     }
 
+    TabIndexOpt getTabIndex() const
+    {
+        return tabIndex;
+    }
+    void setTabIndex(TabIndexOpt newIndex)
+    {
+        tabIndex = newIndex;
+    }
+
+
 signals:
     void valueChanged();
 
@@ -128,7 +138,8 @@ private:
     void setContentWidgetsVisibleStatus(bool visible);
 
 private:
-    static const inline QString isExpandedKey = "_DNWW_isExpanded"; //todo rename
+    static const inline QString isExpandedKey   = "_NW_isExpanded";
+    static const inline QString tabIndexKey     = "_NW_tabIndex";
 
 private:
     QVBoxLayout*                            layout                              = nullptr;
@@ -143,10 +154,11 @@ private:
     QFrame*                                     frameVerticalLine               = nullptr;
     QVBoxLayout*                                contentLayout                   = nullptr;
 
-    bool isForCompositeNode = false;
-
 private:
+    const bool isForCompositeNode;
     DataNodeWeak weakNode;
+
+    TabIndexOpt tabIndex;
 };
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
