@@ -87,7 +87,7 @@ NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const QJ
     SV_LOG(std::format("createWidgetForNode {} with options: {}", node, options ? jsonValueToString(*options) : QString("none")));
 
     NodeWidget* res = node->isLeaf() ? createWidgetForLeafNode (node, options) :
-                                                 createWidgetisForCompositeNode(node, options);
+                                       createWidgetisForCompositeNode(node, options);
     if (!res)
     {
         SV_ERROR(std::format("createWidgetForNode failed for {}", node));
