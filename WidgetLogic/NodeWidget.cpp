@@ -100,6 +100,11 @@ void NodeWidget::setExpanded(bool expanded)
     stripeShowHideContentButton->setChecked(expanded);
 }
 
+bool NodeWidget::isExpanded() const
+{
+    return stripeShowHideContentButton->isChecked();
+}
+
 QHBoxLayout *NodeWidget::getStripeButtonsLayout()
 {
     return stripeButtonsLayout;
@@ -261,7 +266,7 @@ QJsonObjectWithWidgetOptions NodeWidget::makeOptions() const
     }
     */
 
-    obj[isExpandedKey] = stripeShowHideContentButton->isChecked();
+    obj[isExpandedKey] = isExpanded();
 
     if (tabIndex)
     {

@@ -20,7 +20,10 @@ bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOpt
             jsonOfNode[widgetsKey] = widgetOptions;
         }
     }
-    else SV_WARN(std::format("Serializer: Couldnt find widget for {}", node));
+    else if (level != 0) //root never has a widget
+    {
+        SV_WARN(std::format("Serializer: Couldnt find associated widget in WidgetsForNodeManager for {}", node));
+    }
 
     return true;
 }

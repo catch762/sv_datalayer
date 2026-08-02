@@ -84,6 +84,7 @@ public:
     void addContentWidget(QWidget* widget)
     {
         contentLayout->addWidget(widget);
+        widget->setVisible(isExpanded());
     }
 
     int contentWidgetsCount() const
@@ -125,7 +126,8 @@ public:
 ///////////////////////////////////////////////////////////////
 
     void setExpanded(bool expanded);
-    
+    bool isExpanded() const;
+
     QHBoxLayout* getStripeButtonsLayout();
     
     QJsonObjectWithWidgetOptions makeOptions() const;
