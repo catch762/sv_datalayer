@@ -311,6 +311,7 @@ public:
         }
     }
 
+    //DataNode returned has empty parent, but other than that its deep copy with identical content
     static DataNodeShared makeCopy(const DataNodeShared& node)
     {
         SV_ASSERT(node);

@@ -6,26 +6,26 @@
 #include "WidgetLogic/WidgetMakerSystem.h"
 #include "WidgetLogic/NodeWidget.h"
 
-bool SerializerForDataNodeTreeAndItsWidgets::onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level)
+MapOfWidgetOptionsForNodes SerializerForDataNodeTreeAndItsWidgets::getOptionsFromWidgetsOfTree(DataNodeShared tree)
 {
-    //its fine if there is one, its fine if there are none
-    if (auto* nodeWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node))
-    {
-        auto widgetOptions = nodeWidget->makeOptions();
+    SV_ASSERT(tree);
 
-        //its never empty tho
-        if (!widgetOptions.isEmpty())
+    MapOfWidgetOptionsForNodes result;
+
+    tree->iterateRecoursively(tree, [&](const DataNodeShared& node)
+    {
+        if (auto* nodeWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node))
         {
-            SV_LOG("Did write widget data to json");
-            jsonOfNode[widgetsKey] = widgetOptions;
+            auto widgetOptions = nodeWidget->makeOptions();
+            if (!widgetOptions.isEmpty())
+            {
+                result[node] = widgetOptions;
+            }
         }
-    }
-    else if (level != 0) //root never has a widget
-    {
-        SV_WARN(std::format("Serializer: Couldnt find associated widget in WidgetsForNodeManager for {}", node));
-    }
+        else SV_WARN(std::format("getWidgetOptionsForTree: Are you sure its ok that we cant find widget for {} ?", node));
+    });
 
-    return true;
+    return result;
 }
 
 bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget(   DataNodeShared      node,
@@ -51,16 +51,25 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget
     return true;
 }
 
-
-QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& value)
+QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& tree)
 {
-    if (!value)
-    {
-        SV_LOG("Error: trying to serialize null DataNodeShared value");
-        return QJsonValue();
-    }
+    MapOfWidgetOptionsForNodes optionsMap = getOptionsFromWidgetsOfTree(tree);
+    return toJson(tree, optionsMap);
+}
 
-    return value->toJSON(onJsonCreatedFromNode_saveWidgetOptions);
+QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& tree, const MapOfWidgetOptionsForNodes& optionsMap)
+{
+    auto onJsonCreatedFromNodeAlsoInjectOptionsFromMap = [optionsMap](ConstDataNodeShared node, QJsonObject& jsonOfNode, int level)
+    {
+        if (auto options = getValue(optionsMap, ConstDataNodeWeak(node)))
+        {
+            jsonOfNode[widgetsKey] = *options;
+        }
+
+        return true;
+    };
+
+    return tree->toJSON(onJsonCreatedFromNodeAlsoInjectOptionsFromMap);
 }
 
 std::tuple<DataNodeShared, NodeWidget*> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndItsWidget(const QJsonValue& json)

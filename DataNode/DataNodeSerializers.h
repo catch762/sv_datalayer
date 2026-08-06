@@ -3,37 +3,16 @@
 #include "SerializationLogic/SerializerInterface.h"
 #include "WidgetLogic/WidgetDefs.h"
 
-/*template<>
-class BasicSerializer< DataNodeShared >
-{
-public:
-    QJsonValue toJson(const DataNodeShared& value)
-    {
-        if (!value)
-        {
-            SV_LOG("Error: trying to serialize null DataNodeShared value");
-            return QJsonValue();
-        }
-
-        auto jsonOpt = value->toJSON();
-        return jsonOpt.value_or(QJsonValue());
-    }
-    
-    std::optional<DataNodeShared> fromJson(const QJsonValue& json)
-    {
-        auto result = DataNode::fromJSON(json);
-        if (result) return result;
-        else return {};
-    }
-};*/
-
-
+using MapOfWidgetOptionsForNodes = std::map<ConstDataNodeWeak, QJsonObjectWithWidgetOptions, std::owner_less<>>;
 
 class SerializerForDataNodeTreeAndItsWidgets
 {
 public:
 
-    static QJsonValueOpt toJson(const DataNodeShared& value);
+    static MapOfWidgetOptionsForNodes getOptionsFromWidgetsOfTree(DataNodeShared tree);
+
+    static QJsonValueOpt toJson(const DataNodeShared& tree);
+    static QJsonValueOpt toJson(const DataNodeShared& tree, const MapOfWidgetOptionsForNodes& options);
 
     //returns root node and widget for root node
     static std::tuple<DataNodeShared, NodeWidget*> jsonToRootNodeAndItsWidget(const QJsonValue& json);
@@ -42,9 +21,8 @@ public:
     static std::tuple<DataNodeShared, NodeWidgetVec> jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue& json);
 
 private:
-    static bool onJsonCreatedFromNode_saveWidgetOptions(ConstDataNodeShared node, QJsonObject &jsonOfNode, int level);
     static bool onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode, int level,
-                                             bool makeWidgetForRootNode);
+                                                    bool makeWidgetForRootNode);
     
 private:
     static inline const QString widgetsKey  = "widgets";
