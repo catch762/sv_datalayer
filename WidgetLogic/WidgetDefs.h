@@ -19,6 +19,7 @@ inline void addTypeFieldToJson(QJsonObject &obj)
 
 using QJsonObjectWithWidgetOptions = QJsonObject;
 SV_DECL_OPT(QJsonObjectWithWidgetOptions);
+SV_DECL_ERR(QJsonObjectWithWidgetOptionsOpt);
 inline QJsonObjectWithWidgetOptionsOpt getWidgetOptionsFromString(const QStringOpt &jsonString)
 {
     return jsonString ? jsonStringToObject(*jsonString) : QJsonObjectWithWidgetOptionsOpt{};
