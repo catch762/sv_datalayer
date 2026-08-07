@@ -24,6 +24,8 @@
 
 //todo write abt it
 
+class NodeWidget;
+SV_DECL_ALIASES(NodeWidget);
 
 class NodeWidget : public QWidget
 {
@@ -55,6 +57,25 @@ public:
         }
 
         return widget;
+    }
+
+    //Difference we are passing unique ptrs for content widgets. We 'steal' the widgets from unique ptr ownership
+    //and turn them to regular widget pointers.
+    static NodeWidget* makeNodeWidgetForCompositeNodeStealingContentWidgets( std::vector<NodeWidgetUnique>& contentWidgetsUniquePtrs,
+                                                DataNodeShared node,
+                                                const QString& name = {},
+                                                const QJsonObjectWithWidgetOptionsOpt& options = {},
+                                                QWidget* parent = nullptr)
+    {
+        std::vector<NodeWidget*> stolenWidgets;
+        stolenWidgets.reserve(contentWidgetsUniquePtrs.size());
+        for (auto& widgetUniquePtr : contentWidgetsUniquePtrs)
+        {
+            stolenWidgets.push_back(widgetUniquePtr.release());
+        }
+        contentWidgetsUniquePtrs.clear();
+
+        return makeNodeWidgetForCompositeNode(stolenWidgets, node, name, options, parent);
     }
 
 
