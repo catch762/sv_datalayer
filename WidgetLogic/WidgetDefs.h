@@ -25,6 +25,7 @@ inline WidgetOptionsJsonOpt getWidgetOptionsFromString(const QStringOpt &jsonStr
     return jsonString ? jsonStringToObject(*jsonString) : WidgetOptionsJsonOpt{};
 }
 
+using MapOfWidgetOptionsForNodes = std::map<ConstDataNodeWeak, WidgetOptionsJson, std::owner_less<>>;
 
 static constexpr auto WidgetMakerNameKey = "_maker";
 inline QStringOpt getWidgetMakerNameOpt(const WidgetOptionsJson &obj)

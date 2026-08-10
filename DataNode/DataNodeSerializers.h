@@ -3,8 +3,6 @@
 #include "SerializationLogic/SerializerInterface.h"
 #include "WidgetLogic/WidgetDefs.h"
 
-using MapOfWidgetOptionsForNodes = std::map<ConstDataNodeWeak, WidgetOptionsJson, std::owner_less<>>;
-
 class SerializerForDataNodeTreeAndItsWidgets
 {
 public:
