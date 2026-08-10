@@ -6,7 +6,7 @@
 
 
 LimitedValueVecWidget::LimitedValueVecWidget(const LimitedIntOrDoubleVec& initialValue,
-    const QJsonObjectWithWidgetOptionsOpt& options, QWidget *parent)
+    const WidgetOptionsJsonOpt& options, QWidget *parent)
     : QFrame(parent)
 {
     value = initialValue;
@@ -65,9 +65,9 @@ void LimitedValueVecWidget::setValue(const LimitedIntOrDoubleVec& newValue)
     }
 }
 
-QJsonObjectWithWidgetOptionsOpt LimitedValueVecWidget::makeOptions() const
+WidgetOptionsJsonOpt LimitedValueVecWidget::makeOptions() const
 {
-    QJsonObjectWithWidgetOptions options = xyPadView->makeOptions().value_or(QJsonObjectWithWidgetOptions());
+    WidgetOptionsJson options = xyPadView->makeOptions().value_or(WidgetOptionsJson());
 
     if (viewSelectorWrapperButton)
     {
@@ -77,7 +77,7 @@ QJsonObjectWithWidgetOptionsOpt LimitedValueVecWidget::makeOptions() const
     return options;
 }
 
-void LimitedValueVecWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper, const QJsonObjectWithWidgetOptionsOpt& options)
+void LimitedValueVecWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper, const WidgetOptionsJsonOpt& options)
 {
     viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::MediaPlaybackStop,
                                                                      QIcon::ThemeIcon::FormatJustifyLeft);

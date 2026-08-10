@@ -12,7 +12,7 @@ namespace
 
 NodeWidget::NodeWidget(DataNodeShared node,
                         const QString &name,
-                        const QJsonObjectWithWidgetOptionsOpt& options,
+                        const WidgetOptionsJsonOpt& options,
                         QWidget *parent)
  : QWidget(parent), isForCompositeNode(node->isComposite())
 {
@@ -248,9 +248,9 @@ void NodeWidget::setContentWidgetsVisibleStatus(bool visible)
     }
 }
 
-QJsonObjectWithWidgetOptions NodeWidget::makeOptions() const
+WidgetOptionsJson NodeWidget::makeOptions() const
 {
-    QJsonObjectWithWidgetOptions obj = makeContentWidgetOptions().value_or(QJsonObjectWithWidgetOptions());
+    WidgetOptionsJson obj = makeContentWidgetOptions().value_or(WidgetOptionsJson());
     
     //todo add widget name...
 

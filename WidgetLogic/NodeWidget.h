@@ -37,13 +37,13 @@ public:
     //new constructor, soon the only one
     NodeWidget(DataNodeShared node,
         const QString& name = {},
-        const QJsonObjectWithWidgetOptionsOpt& options = {},
+        const WidgetOptionsJsonOpt& options = {},
         QWidget* parent = nullptr);
 
     static NodeWidget* makeNodeWidgetForCompositeNode( const std::vector<NodeWidget*>& contentWidgets,
                                                 DataNodeShared node,
                                                 const QString& name = {},
-                                                const QJsonObjectWithWidgetOptionsOpt& options = {},
+                                                const WidgetOptionsJsonOpt& options = {},
                                                 QWidget* parent = nullptr)
     {
         SV_ASSERT(node && node->isComposite());
@@ -64,7 +64,7 @@ public:
     static NodeWidget* makeNodeWidgetForCompositeNodeStealingContentWidgets( std::vector<NodeWidgetUnique>& contentWidgetsUniquePtrs,
                                                 DataNodeShared node,
                                                 const QString& name = {},
-                                                const QJsonObjectWithWidgetOptionsOpt& options = {},
+                                                const WidgetOptionsJsonOpt& options = {},
                                                 QWidget* parent = nullptr)
     {
         std::vector<NodeWidget*> stolenWidgets;
@@ -138,7 +138,7 @@ signals:
 
 
 protected:    
-    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const
+    virtual WidgetOptionsJsonOpt makeContentWidgetOptions() const
     {
         return {};
     };
@@ -151,7 +151,7 @@ public:
 
     QHBoxLayout* getStripeButtonsLayout();
     
-    QJsonObjectWithWidgetOptions makeOptions() const;
+    WidgetOptionsJson makeOptions() const;
 
 
 private:

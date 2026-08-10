@@ -17,17 +17,17 @@ inline void addTypeFieldToJson(QJsonObject &obj)
 }
 
 
-using QJsonObjectWithWidgetOptions = QJsonObject;
-SV_DECL_OPT(QJsonObjectWithWidgetOptions);
-SV_DECL_ERR(QJsonObjectWithWidgetOptionsOpt);
-inline QJsonObjectWithWidgetOptionsOpt getWidgetOptionsFromString(const QStringOpt &jsonString)
+using WidgetOptionsJson = QJsonObject;
+SV_DECL_OPT(WidgetOptionsJson);
+SV_DECL_ERR(WidgetOptionsJsonOpt);
+inline WidgetOptionsJsonOpt getWidgetOptionsFromString(const QStringOpt &jsonString)
 {
-    return jsonString ? jsonStringToObject(*jsonString) : QJsonObjectWithWidgetOptionsOpt{};
+    return jsonString ? jsonStringToObject(*jsonString) : WidgetOptionsJsonOpt{};
 }
 
 
 static constexpr auto WidgetMakerNameKey = "_maker";
-inline QStringOpt getWidgetMakerNameOpt(const QJsonObjectWithWidgetOptions &obj)
+inline QStringOpt getWidgetMakerNameOpt(const WidgetOptionsJson &obj)
 {
     //return getFromJsonAndLogError<QString>(obj, WidgetMakerNameKey);
 
@@ -36,11 +36,11 @@ inline QStringOpt getWidgetMakerNameOpt(const QJsonObjectWithWidgetOptions &obj)
 
     return {};
 }
-inline QStringOpt getWidgetMakerNameOpt(const QJsonObjectWithWidgetOptionsOpt &objOpt)
+inline QStringOpt getWidgetMakerNameOpt(const WidgetOptionsJsonOpt &objOpt)
 {
     return objOpt ? getWidgetMakerNameOpt(*objOpt) : QStringOpt();
 }
-inline void setWidgetMakerName(const QJsonObjectWithWidgetOptions &obj, QString widgetMakerName)
+inline void setWidgetMakerName(const WidgetOptionsJson &obj, QString widgetMakerName)
 {
     obj[WidgetMakerNameKey] = widgetMakerName;
 }

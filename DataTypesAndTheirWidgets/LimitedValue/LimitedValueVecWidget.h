@@ -21,7 +21,7 @@ public:
     };
 
     LimitedValueVecWidget(const LimitedIntOrDoubleVec& vec,
-                           const QJsonObjectWithWidgetOptionsOpt& options = {},
+                           const WidgetOptionsJsonOpt& options = {},
                            QWidget *parent = nullptr);
 
     const LimitedIntOrDoubleVec& getValue() const;
@@ -29,8 +29,8 @@ public:
     //may add or remove widgets based on difference between current value and new value
     void setValue(const LimitedIntOrDoubleVec& newValue);
 
-    QJsonObjectWithWidgetOptionsOpt makeOptions() const;
-    void setupButtonsOnWrapperParent(NodeWidget* wrapper, const QJsonObjectWithWidgetOptionsOpt& options = {} );
+    WidgetOptionsJsonOpt makeOptions() const;
+    void setupButtonsOnWrapperParent(NodeWidget* wrapper, const WidgetOptionsJsonOpt& options = {} );
 
     void setMode(Mode mode);
     Mode getMode() const;

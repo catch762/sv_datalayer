@@ -57,8 +57,8 @@ public:
     };
     static ColorData colorsForPreset(int presetIdx, bool isValid);
 
-    QJsonObjectWithWidgetOptionsOpt makeOptions();
-    void restoreFromOptions(const QJsonObjectWithWidgetOptions& options);
+    WidgetOptionsJsonOpt makeOptions();
+    void restoreFromOptions(const WidgetOptionsJson& options);
 
 
     const std::array<PresetData, PresetsCount>& getPresets() const;

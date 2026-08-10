@@ -12,7 +12,7 @@
 //    - synchronizing all widgets state if you  a) change value in one of them
 //                                              b) change DataNode directly
 //    - when serializing DataNode, we also want to pull existing widget(s) and save
-//      their 'QJsonObjectWithWidgetOptions' as well. (see DataNodeSerializers.h)
+//      their 'WidgetOptionsJson' as well. (see DataNodeSerializers.h)
 //
 // As of now, there will be only one widget for any node, ever, but soon this will change
 //

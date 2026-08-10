@@ -38,7 +38,7 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget
         return true;
     }
 
-    QJsonObjectWithWidgetOptionsOpt widgetOptionsOpt = getFromJson<QJsonObject>(jsonOfNode, widgetsKey);
+    WidgetOptionsJsonOpt widgetOptionsOpt = getFromJson<QJsonObject>(jsonOfNode, widgetsKey);
 
     auto createdWidget = WidgetMakerSystem::instance().createAndRegisterWidgetForNode(node, widgetOptionsOpt);
 

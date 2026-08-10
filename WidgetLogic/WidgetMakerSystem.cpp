@@ -9,7 +9,7 @@ WidgetMakerSystem& WidgetMakerSystem::instance()
     return system;
 }
 
-NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
 {
     if (!node)
     {
@@ -80,7 +80,7 @@ const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerF
     return nullptr;
 }
 
-NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
 {
     SV_ASSERT(node);
 
@@ -97,7 +97,7 @@ NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const QJ
 }
 
 //todo rename
-NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
 {
     SV_ASSERT(node);
     SV_ASSERT(node->isComposite())
@@ -113,7 +113,7 @@ NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared nod
         else
         {
             //Apparently, we didnt go depth-first. So we are creating widgets now, and at the moment we dont have options for them
-            if (auto createdChildWidget = createAndRegisterWidgetForNode(childNode, QJsonObjectWithWidgetOptionsOpt{}))
+            if (auto createdChildWidget = createAndRegisterWidgetForNode(childNode, WidgetOptionsJsonOpt{}))
             {
                 widgetsOfChildren.push_back(createdChildWidget);
             }
@@ -133,7 +133,7 @@ NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared nod
     return wrapper;
 }
 
-NodeWidget* WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetForLeafNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
 {
     SV_ASSERT(node);
     SV_ASSERT(node->isLeaf())

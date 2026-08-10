@@ -137,7 +137,7 @@ class BoolNodeWidget : public NodeWidget
 public:
     BoolNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -167,7 +167,7 @@ class BoolVecNodeWidget : public NodeWidget
 public:
     BoolVecNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -197,7 +197,7 @@ class QStringNodeWidget : public NodeWidget
 public:
     QStringNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -227,7 +227,7 @@ class LimitedIntNodeWidget : public NodeWidget
 public:
     LimitedIntNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -267,7 +267,7 @@ class LimitedIntVecNodeWidget : public NodeWidget
 public:
     LimitedIntVecNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -295,7 +295,7 @@ public:
         return helper.setWidgetValueFromNodeValue();
     }
 
-    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const override
+    virtual WidgetOptionsJsonOpt makeContentWidgetOptions() const override
     {
         return helper.widget->makeOptions();
     };
@@ -313,7 +313,7 @@ class LimitedDoubleNodeWidget : public NodeWidget
 public:
     LimitedDoubleNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -353,7 +353,7 @@ class LimitedDoubleVecNodeWidget : public NodeWidget
 public:
     LimitedDoubleVecNodeWidget( DataNodeShared node,
                     const QString& name = {},
-                    const QJsonObjectWithWidgetOptionsOpt& options = {}, 
+                    const WidgetOptionsJsonOpt& options = {}, 
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -382,7 +382,7 @@ public:
         return helper.setWidgetValueFromNodeValue();
     }
 
-    virtual QJsonObjectWithWidgetOptionsOpt makeContentWidgetOptions() const override
+    virtual WidgetOptionsJsonOpt makeContentWidgetOptions() const override
     {
         return helper.widget->makeOptions();
     };
@@ -400,7 +400,7 @@ class EnumNodeWidget : public NodeWidget
 public:
     EnumNodeWidget(DataNodeShared node,
         const QString& name = {},
-        const QJsonObjectWithWidgetOptionsOpt& options = {},
+        const WidgetOptionsJsonOpt& options = {},
         QWidget* parent = nullptr)
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -430,7 +430,7 @@ class EnumVecNodeWidget : public NodeWidget
 public:
     EnumVecNodeWidget(DataNodeShared node,
         const QString& name = {},
-        const QJsonObjectWithWidgetOptionsOpt& options = {},
+        const WidgetOptionsJsonOpt& options = {},
         QWidget* parent = nullptr)
         : NodeWidget(node, name, options, parent), helper(this)
     {
@@ -458,7 +458,7 @@ private:
 
 
 template <class DerivedNodeWidgetType>
-NodeWidget* widgetMaker(DataNodeShared leaf, const QJsonObjectWithWidgetOptionsOpt& options)
+NodeWidget* widgetMaker(DataNodeShared leaf, const WidgetOptionsJsonOpt& options)
 {
     return new DerivedNodeWidgetType(leaf, leaf->getName(), options, nullptr);
 }

@@ -58,7 +58,7 @@ public:
     //  
     //************************************************************************************************
     using WidgetMakerForTypeT = std::function<NodeWidget*(DataNodeShared leafNodeContainingValueOfTypeT,
-                                                                    const QJsonObjectWithWidgetOptionsOpt &options)>;
+                                                                    const WidgetOptionsJsonOpt &options)>;
 
     struct WidgetMakerCollection
     {
@@ -70,7 +70,7 @@ public:
 
     // Typically, there are 2 use cases which both work fine:
     //
-    //  - You start from scratch, you dont have any QJsonObjectWithWidgetOptions to recover.
+    //  - You start from scratch, you dont have any WidgetOptionsJson to recover.
     //    So you build entire DataNode tree, and you pass root node to this function, and you pass {} for 'options'.
     //    It will build entire widget tree and return root widget.
     //    (Note: if you pass actual value for 'options' it will only be used to create widget for this node,
@@ -80,8 +80,8 @@ public:
     //    So as you build a DataNode tree, you call this function on each node. You go depth-first, from bottom to the top.
     //    So this function never needs to create widgets for children, because children widgets are always already created:
     //    this way, this function only creates one widget for node you pass in.  
-    //    And this way, you can pass aproppriate QJsonObjectWithWidgetOptions for each node.
-    NodeWidget* createAndRegisterWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    //    And this way, you can pass aproppriate WidgetOptionsJson for each node.
+    NodeWidget* createAndRegisterWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName = "");
@@ -98,14 +98,14 @@ private:
     //if 'widgetMakerNameOpt' is {}, returns default widget maker for this WidgetMakerCollection
     const WidgetMakerForTypeT* getWidgetMakerForContentType(const std::any &var, QStringOpt widgetMakerNameOpt = {});
 
-    NodeWidget* createWidgetForNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    NodeWidget* createWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
 
     // If widgets for children arent already created, it creates and registers them
-    // (but for all created children QJsonObjectWithWidgetOptionsOpt will be a nullopt, ofcourse - the 'options' passed
+    // (but for all created children WidgetOptionsJsonOpt will be a nullopt, ofcourse - the 'options' passed
     // to the functions only concerns that single 'node' and we dont have any options for children).
-    NodeWidget* createWidgetisForCompositeNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    NodeWidget* createWidgetisForCompositeNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
 
-    NodeWidget* createWidgetForLeafNode(DataNodeShared node, const QJsonObjectWithWidgetOptionsOpt &options = {});
+    NodeWidget* createWidgetForLeafNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
 
     WidgetMakerSystem() = default;
 

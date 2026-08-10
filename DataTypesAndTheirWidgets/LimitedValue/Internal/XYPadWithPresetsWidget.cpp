@@ -466,9 +466,9 @@ XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int pr
 }
 
 
-QJsonObjectWithWidgetOptionsOpt XYPadWithPresetsWidget::makeOptions()
+WidgetOptionsJsonOpt XYPadWithPresetsWidget::makeOptions()
 {
-    QJsonObjectWithWidgetOptions res;
+    WidgetOptionsJson res;
 
     auto getPresetsJson = [&]() -> QJsonObjectOpt
     {
@@ -497,10 +497,10 @@ QJsonObjectWithWidgetOptionsOpt XYPadWithPresetsWidget::makeOptions()
         res[currentPresetKey] = currentPresetIdx;
     }
 
-    return !res.empty() ? res : QJsonObjectWithWidgetOptionsOpt{};
+    return !res.empty() ? res : WidgetOptionsJsonOpt{};
 }
 
-void XYPadWithPresetsWidget::restoreFromOptions(const QJsonObjectWithWidgetOptions &options)
+void XYPadWithPresetsWidget::restoreFromOptions(const WidgetOptionsJson &options)
 {
     auto restorePresets = [&](const QJsonObject& presetsJson)
     {
