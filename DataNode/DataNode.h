@@ -47,6 +47,17 @@ public:
         {
             return hasChild(idx) ? children[idx] : ConstDataNodeShared();
         }
+
+        DataNodeShared getChild(const QString& name)
+        {
+            for (auto& child : children)
+            {
+                if (child->getName() == name) return child;
+            }
+
+            return {};
+        }
+
         int childrenCount() const
         {
             return children.size();
