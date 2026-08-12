@@ -48,7 +48,17 @@ public:
             return hasChild(idx) ? children[idx] : ConstDataNodeShared();
         }
 
-        DataNodeShared getChild(const QString& name)
+        DataNodeShared getChild(const QString& name) 
+        {
+            for (auto& child : children)
+            {
+                if (child->getName() == name) return child;
+            }
+
+            return {};
+        }
+
+        ConstDataNodeShared getChild(const QString& name) const
         {
             for (auto& child : children)
             {
@@ -77,11 +87,22 @@ public:
             }
         }
 
-        void addChild(DataNodeShared child, DataNodeWeak parent)
+        //insertIndex must be [from 0 to childrenCount], inclusive
+        void addChild(DataNodeShared child, DataNodeWeak parent, intOpt insertIndex = {})
         {
             SV_ASSERT(child);
             child->setParent(parent);
-            children.push_back(child);
+
+            if (insertIndex)
+            {
+                SV_ASSERT(*insertIndex >= 0 && *insertIndex <= children.size());
+                children.insert(children.begin() + *insertIndex, child);
+            }
+            else
+            {
+                //dont care, push it to the end
+                children.push_back(child);
+            }
         }
 
         const std::vector<DataNodeShared>& getChildren() const
@@ -232,13 +253,13 @@ public:
     static DataNodeShared fromJSON(QJsonValue jsonValue, OnNodeCreatedFromJsonAction onNodeCreatedAction = nullptr, int _level = 0);
 
     //These methods can not operate on wrong type, so will assert in case of mismatch:
-    void addChild(DataNodeShared child)
+    void addChild(DataNodeShared child, intOpt insertIndex = {})
     {
         SV_ASSERT(isComposite());
 
         if(auto compData = tryGetCompositeData())
         {
-            compData->addChild(child, shared_from_this());
+            compData->addChild(child, shared_from_this(), insertIndex);
         }
     }
 
@@ -248,8 +269,7 @@ public:
             static_cast<const DataNode*>(this)->tryGetChild(idx)
         );
     }
-
-    std::shared_ptr<const DataNode> tryGetChild(int idx) const
+    ConstDataNodeShared tryGetChild(int idx) const
     {
         auto compData = tryGetCompositeData();
         if (!compData)
@@ -265,6 +285,24 @@ public:
         }
 
         return compData->getChild(idx);
+    }
+
+    ConstDataNodeShared tryGetChild(const QString& name) const
+    {
+        auto compData = tryGetCompositeData();
+        if (!compData)
+        {
+            //its a leaf, but its perfectly fine
+            return {};
+        }
+
+        return compData->getChild(name);
+    }
+    DataNodeShared tryGetChild(const QString& name)
+    {
+        return std::const_pointer_cast<DataNode>(
+            static_cast<const DataNode*>(this)->tryGetChild(name)
+        );
     }
 
     //returns 0 for Leaf nodes
