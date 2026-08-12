@@ -23,14 +23,14 @@ bool nodeSuitableForWidgetOfType(DataNodeShared node)
 
     if (!node->isLeaf())
     {
-        SV_ERROR(errMsgHeader + "node isnt even leaf, its: " + node->stdBasicInfo());
+        SV_ERROR(errMsgHeader + "node isnt even leaf, its: " + node->basicInfo());
         return false;
     }
 
     if (!node->isLeafWithType<T>())
     {
         //todo better log
-        SV_ERROR(errMsgHeader + "its a leaf but types mismatch: " + node->stdBasicInfo());
+        SV_ERROR(errMsgHeader + "its a leaf but types mismatch: " + node->basicInfo());
         return false;
     }
 

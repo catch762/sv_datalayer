@@ -163,10 +163,7 @@ public:
     {
         if (auto leaf = tryGetLeafvalue())
         {
-            if (auto name = anyTypeName(*leaf)) 
-            {
-                return QString(name);
-            }
+            return QString::fromStdString(anyTypeNameOrMangled(*leaf));
         }
         
         return {};
@@ -276,17 +273,39 @@ public:
         return isLeaf() ? 0 : tryGetCompositeData()->childrenCount();
     }
 
-    QString basicInfo() const
+    std::string basicInfo(bool withAddress = false) const
     {
-        return QString("DataNode%1{%2 | %3 | 0x%4}")
-            .arg(isLeaf() ? "Leaf":"Comp")
-            .arg(name)
-            .arg(isLeaf() ? tryGetLeafTypeName().value_or(QString("Error, unnamed leaf")) : QString("%1 kids").arg(tryGetCompositeData()->childrenCount()))
-            .arg(reinterpret_cast<quintptr>(this), 0, 16);
+        return std::format("'{}': {}{}",
+                name,
+                isLeaf() ? tryGetLeafTypeName().value_or("error-no-leaf-type-name").toStdString() : std::format("{} kids", childrenCount()),
+                withAddress ? std::format(", {:#X}", reinterpret_cast<std::uintptr_t>(this)) : ""
+        );
     }
-    std::string stdBasicInfo() const
+
+    std::string toString(bool withAddress = false, int currentLevel = 0) const
     {
-        return basicInfo().toStdString();
+        auto offset = std::string(currentLevel * 3, ' ');
+
+        if (isLeaf())
+        {
+            return offset + basicInfo(withAddress);
+        }
+        else
+        {
+            auto result = offset + basicInfo(withAddress) + " {\n";
+
+            for (auto child : tryGetCompositeData()->getChildren())
+            {
+                result = std::format("{}{}\n",
+                    result,
+                    child->toString(withAddress, currentLevel + 1)
+                );
+            }
+
+            result = result + offset + "}";
+
+            return result;
+        }
     }
 
     template<typename T>
@@ -354,7 +373,7 @@ private:
 
     std::string formatMsg(const std::string &msg) const
     {
-        return basicInfo().toStdString() + ": " + msg;
+        return basicInfo() + ": " + msg;
     }
 
     void setParent(DataNodeWeak theParent)
@@ -377,10 +396,10 @@ private:
     static inline const std::string logCategory = "DataNode";
 };
 
-SV_DECL_STD_FORMATTER(DataNode,             obj.stdBasicInfo());
-SV_DECL_STD_FORMATTER(DataNodeShared,       obj             ? obj->stdBasicInfo()        : "DataNode{nullptr}");
-SV_DECL_STD_FORMATTER(ConstDataNodeShared,  obj             ? obj->stdBasicInfo()        : "DataNode{nullptr}");
-SV_DECL_STD_FORMATTER(ConstDataNodeWeak,    !obj.expired()  ? obj.lock()->stdBasicInfo() : "DataNode{nullptr}");
+SV_DECL_STD_FORMATTER(DataNode,             obj.basicInfo());
+SV_DECL_STD_FORMATTER(DataNodeShared,       obj             ? obj->basicInfo()        : "DataNode{nullptr}");
+SV_DECL_STD_FORMATTER(ConstDataNodeShared,  obj             ? obj->basicInfo()        : "DataNode{nullptr}");
+SV_DECL_STD_FORMATTER(ConstDataNodeWeak,    !obj.expired()  ? obj.lock()->basicInfo() : "DataNode{nullptr}");
 
 namespace datanode_helpers
 {
