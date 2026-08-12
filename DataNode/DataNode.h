@@ -180,6 +180,10 @@ public:
     {
         return name;
     }
+    void setName(QString newName)
+    {
+        name = std::move(newName);
+    }
     QStringOpt tryGetLeafTypeName() const
     {
         if (auto leaf = tryGetLeafvalue())
