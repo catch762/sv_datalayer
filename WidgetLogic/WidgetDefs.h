@@ -7,6 +7,7 @@ using TabIndex = int;
 SV_DECL_OPT(TabIndex);
 
 using NodeWidgetVec = std::vector<NodeWidget*>;
+using NodeWidgetQPointerVec = std::vector<QPointer<NodeWidget>>;
 
 static constexpr auto TypeFieldKey = "_type";
 template <typename T>

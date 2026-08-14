@@ -92,7 +92,7 @@ std::tuple<DataNodeShared, NodeWidget*> SerializerForDataNodeTreeAndItsWidgets::
     return {rootNode, rootNodeWidget};
 }
 
-std::tuple<DataNodeShared, NodeWidgetVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
+std::tuple<DataNodeShared, NodeWidgetQPointerVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
 {
     auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
                                             std::placeholders::_1,
@@ -102,7 +102,7 @@ std::tuple<DataNodeShared, NodeWidgetVec> SerializerForDataNodeTreeAndItsWidgets
 
     if (!rootNode) return {};
 
-    NodeWidgetVec topLevelChildrenWidgets;
+    NodeWidgetQPointerVec topLevelChildrenWidgets;
     if (rootNode->isComposite())
     {
         for (auto child : rootNode->tryGetCompositeData()->getChildren())
