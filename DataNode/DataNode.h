@@ -48,11 +48,20 @@ public:
             return hasChild(idx) ? children[idx] : ConstDataNodeShared();
         }
 
-        DataNodeShared getChild(const QString& name) 
+        DataNodeShared getChild(const QString& name, int* outIndex = nullptr) 
         {
+            if (outIndex) *outIndex = -1;
+
+            int curIndex = 0;
             for (auto& child : children)
             {
-                if (child->getName() == name) return child;
+                if (child->getName() == name)
+                {
+                    if (outIndex) *outIndex = curIndex;
+                    return child;
+                }
+
+                curIndex++;
             }
 
             return {};
