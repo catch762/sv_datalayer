@@ -102,9 +102,17 @@ public:
         connect(widget, valChangedSignal, this, &NodeWidget::valueChanged);
     }
 
-    void addContentWidget(QWidget* widget)
+    void addContentWidget(QWidget* widget, intOpt insertIndex = {})
     {
-        contentLayout->addWidget(widget);
+        if (insertIndex)
+        {
+            //dont need to check index boundaries, qt does this
+            contentLayout->insertWidget(*insertIndex, widget);
+        }
+        else
+        {
+            contentLayout->addWidget(widget);
+        }
         widget->setVisible(isExpanded());
     }
 
