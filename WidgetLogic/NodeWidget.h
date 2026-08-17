@@ -139,7 +139,10 @@ public:
     {
         tabIndex = newIndex;
     }
-
+    QStringOpt getCreationString() const
+    {
+        return creationString;
+    }
 
 signals:
     void valueChanged();
@@ -190,6 +193,7 @@ private:
     DataNodeWeak weakNode;
 
     TabIndexOpt tabIndex;
+    QStringOpt creationString;
 };
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);

@@ -58,7 +58,7 @@ public:
     //  
     //************************************************************************************************
     using WidgetMakerForTypeT = std::function<NodeWidget*(DataNodeShared leafNodeContainingValueOfTypeT,
-                                                                    const WidgetOptionsJsonOpt &options)>;
+                                                          const WidgetOptionsJsonOpt &options)>;
 
     struct WidgetMakerCollection
     {
@@ -76,12 +76,16 @@ public:
     //    (Note: if you pass actual value for 'options' it will only be used to create widget for this node,
     //    all potential children will use nullopt because it cant know what options are needed for children)
     //
+    //          todo write about optionsforchildren
+    // 
     //  - You are recovering both DataNode tree and widgets tree from JSON.
     //    So as you build a DataNode tree, you call this function on each node. You go depth-first, from bottom to the top.
     //    So this function never needs to create widgets for children, because children widgets are always already created:
     //    this way, this function only creates one widget for node you pass in.  
     //    And this way, you can pass aproppriate WidgetOptionsJson for each node.
-    NodeWidget* createAndRegisterWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
+    NodeWidget* createAndRegisterWidgetForNode( DataNodeShared              node, 
+                                                const WidgetOptionsJsonOpt& options = {}, 
+                                                MapOfWidgetOptionsForNodes* optionsForChildren = nullptr );
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName = "");
@@ -98,12 +102,16 @@ private:
     //if 'widgetMakerNameOpt' is {}, returns default widget maker for this WidgetMakerCollection
     const WidgetMakerForTypeT* getWidgetMakerForContentType(const std::any &var, QStringOpt widgetMakerNameOpt = {});
 
-    NodeWidget* createWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
+    NodeWidget* createWidgetForNode(DataNodeShared              node, 
+                                    const WidgetOptionsJsonOpt& options = {},
+                                    MapOfWidgetOptionsForNodes* optionsForChildren = nullptr);
 
     // If widgets for children arent already created, it creates and registers them
     // (but for all created children WidgetOptionsJsonOpt will be a nullopt, ofcourse - the 'options' passed
     // to the functions only concerns that single 'node' and we dont have any options for children).
-    NodeWidget* createWidgetisForCompositeNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
+    NodeWidget* recursivelyCreateWidgetsForCompositeNode(DataNodeShared              node, 
+                                                         const WidgetOptionsJsonOpt& options = {},
+                                                         MapOfWidgetOptionsForNodes* optionsForChildren = nullptr);
 
     NodeWidget* createWidgetForLeafNode(DataNodeShared node, const WidgetOptionsJsonOpt &options = {});
 

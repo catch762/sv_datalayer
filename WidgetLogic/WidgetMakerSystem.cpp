@@ -9,7 +9,9 @@ WidgetMakerSystem& WidgetMakerSystem::instance()
     return system;
 }
 
-NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
+NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(  DataNodeShared              node, 
+                                                                const WidgetOptionsJsonOpt& options,
+                                                                MapOfWidgetOptionsForNodes* optionsForChildren )
 {
     if (!node)
     {
@@ -80,14 +82,16 @@ const WidgetMakerSystem::WidgetMakerForTypeT *WidgetMakerSystem::getWidgetMakerF
     return nullptr;
 }
 
-NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
+NodeWidget* WidgetMakerSystem::createWidgetForNode( DataNodeShared              node, 
+                                                    const WidgetOptionsJsonOpt& options,
+                                                    MapOfWidgetOptionsForNodes* optionsForChildren )
 {
     SV_ASSERT(node);
 
     SV_LOG(std::format("createWidgetForNode {} with options: {}", node, options ? jsonValueToString(*options) : QString("none")));
 
-    NodeWidget* res = node->isLeaf() ? createWidgetForLeafNode (node, options) :
-                                       createWidgetisForCompositeNode(node, options);
+    NodeWidget* res = node->isLeaf() ? createWidgetForLeafNode                 (node, options) :
+                                       recursivelyCreateWidgetsForCompositeNode(node, options);
     if (!res)
     {
         SV_ERROR(std::format("createWidgetForNode failed for {}", node));
@@ -97,7 +101,9 @@ NodeWidget* WidgetMakerSystem::createWidgetForNode(DataNodeShared node, const Wi
 }
 
 //todo rename
-NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared node, const WidgetOptionsJsonOpt &options)
+NodeWidget* WidgetMakerSystem::recursivelyCreateWidgetsForCompositeNode(DataNodeShared              node, 
+                                                                        const WidgetOptionsJsonOpt& options,
+                                                                        MapOfWidgetOptionsForNodes* optionsForChildren)
 {
     SV_ASSERT(node);
     SV_ASSERT(node->isComposite())
@@ -112,13 +118,15 @@ NodeWidget* WidgetMakerSystem::createWidgetisForCompositeNode(DataNodeShared nod
         }
         else
         {
-            //Apparently, we didnt go depth-first. So we are creating widgets now, and at the moment we dont have options for them
-            if (auto createdChildWidget = createAndRegisterWidgetForNode(childNode, WidgetOptionsJsonOpt{}))
+            //Apparently, we didnt go depth-first. So we are creating child widgets now
+
+            auto childWidgetOptionsOpt = optionsForChildren ? getValueOpt(*optionsForChildren, ConstDataNodeWeak(childNode)) :
+                                                                                               WidgetOptionsJsonOpt{};
+
+            if (auto createdChildWidget = createAndRegisterWidgetForNode(childNode, childWidgetOptionsOpt, optionsForChildren))
             {
                 widgetsOfChildren.push_back(createdChildWidget);
             }
-            //is it fine? maybe it is
-            //SV_WARN(std::format("Could not obtain widget for node {} which is child of {}", childNode, node));
         }
     }
 

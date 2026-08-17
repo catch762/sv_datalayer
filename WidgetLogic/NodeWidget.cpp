@@ -82,6 +82,11 @@ NodeWidget::NodeWidget(DataNodeShared node,
             tabIndex = tabIndexFromJson;
             SV_LOG(std::format("NodeWidget [{}] got assigned tab index [{}]", name, *tabIndex));
         }
+
+        if (auto creationStringFromJson = getCreationStringOpt(*options))
+        {
+            creationString = creationStringFromJson;
+        }
     }
 
     //note: derived not constructed yet, make sure its not get called yet
@@ -271,6 +276,11 @@ WidgetOptionsJson NodeWidget::makeOptions() const
     if (tabIndex)
     {
         obj[tabIndexKey] = tabIndex.value();
+    }
+
+    if (creationString)
+    {
+        setCreationString(obj, *creationString);
     }
 
     return obj;

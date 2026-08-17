@@ -48,6 +48,22 @@ inline void setWidgetMakerName(const WidgetOptionsJson &obj, QString widgetMaker
 }
 
 
+static constexpr auto CreationStringKey = "_creationString";
+inline QStringOpt getCreationStringOpt(const WidgetOptionsJson& obj)
+{
+    return getFromJson<QString>(obj, CreationStringKey);
+}
+inline QStringOpt getCreationStringOpt(const WidgetOptionsJsonOpt& objOpt)
+{
+    return objOpt ? getCreationStringOpt(*objOpt) : QStringOpt();
+}
+inline void setCreationString(WidgetOptionsJson& obj, const QString& creationString)
+{
+    obj[CreationStringKey] = creationString;
+}
+
+
+
 struct NodeAndWidgetPair
 {
     DataNodeShared node;
