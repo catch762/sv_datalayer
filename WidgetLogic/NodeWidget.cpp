@@ -87,6 +87,11 @@ NodeWidget::NodeWidget(DataNodeShared node,
         {
             creationString = creationStringFromJson;
         }
+
+        if (auto updateStatusFromJson = getUpdateStatusOpt(*options))
+        {
+            setUpdateStatus(*updateStatusFromJson);
+        }
     }
 
     //note: derived not constructed yet, make sure its not get called yet
@@ -160,18 +165,7 @@ QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIco
 void NodeWidget::createAndInitTopStripe(const QString &name)
 {
     topStripe = new QWidget(this);
-    topStripe->setObjectName("topStripe");
-
-    /*
-    topStripe->setStyleSheet(
-            "#topStripe {"
-            "  border: 1px solid palette(mid);"
-            "  border-radius: 0px;"
-            "}"
-        );
-    */
-
-    //topStripe->setFrameStyle(QFrame::Box | QFrame::Plain);
+    topStripe->setObjectName("TopStripe");
     topStripe->setFixedHeight(StripeHeight);
     topStripe->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
@@ -259,18 +253,6 @@ WidgetOptionsJson NodeWidget::makeOptions() const
     
     //todo add widget name...
 
-    //then this widget is for leaf node; and if its for comp node, we dont save anything else
-    /*
-    if (contentWidgets.size() == 1)
-    {
-        //its perfectly ok to receive no value here - simply means content widget doesnt save anything
-        if (auto contentOptions = convertJson<QJsonObject>( SerializationSystem::instance().qVariantToJson(contentWidgets.front()) ))
-        {
-            obj = *contentOptions;
-        }
-    }
-    */
-
     obj[isExpandedKey] = isExpanded();
 
     if (tabIndex)
@@ -282,6 +264,14 @@ WidgetOptionsJson NodeWidget::makeOptions() const
     {
         setCreationString(obj, *creationString);
     }
+
+    //Lets not save it for now, see if we truly need it.
+    /*
+    if (updateStatus)
+    {
+        ::setUpdateStatus(obj, *updateStatus);
+    }
+    */
 
     return obj;
 }

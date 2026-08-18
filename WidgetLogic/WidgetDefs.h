@@ -20,7 +20,7 @@ inline void addTypeFieldToJson(QJsonObject &obj)
 
 using WidgetOptionsJson = QJsonObject;
 SV_DECL_OPT(WidgetOptionsJson);
-SV_DECL_ERR(WidgetOptionsJsonOpt);
+SV_DECL_ERR(WidgetOptionsJson);
 inline WidgetOptionsJsonOpt getWidgetOptionsFromString(const QStringOpt &jsonString)
 {
     return jsonString ? jsonStringToObject(*jsonString) : WidgetOptionsJsonOpt{};
@@ -60,6 +60,29 @@ inline QStringOpt getCreationStringOpt(const WidgetOptionsJsonOpt& objOpt)
 inline void setCreationString(WidgetOptionsJson& obj, const QString& creationString)
 {
     obj[CreationStringKey] = creationString;
+}
+
+
+
+//This status is obtained when we update existing tree/widgets after code has changed
+enum UpdateStatus : int
+{
+    RemadeVariable,
+    NewlyMadeVariable
+};
+SV_DECL_OPT(UpdateStatus);
+static constexpr auto UpdateStatusKey = "_updateStatus";
+inline UpdateStatusOpt getUpdateStatusOpt(const WidgetOptionsJson& obj)
+{
+    if (intOpt intCode = getFromJson<int>(obj, UpdateStatusKey))
+    {
+        return UpdateStatus(*intCode);
+    }
+    else return {};
+}
+inline void setUpdateStatus(WidgetOptionsJson& obj, UpdateStatus status)
+{
+    obj[UpdateStatusKey] = int(status);
 }
 
 

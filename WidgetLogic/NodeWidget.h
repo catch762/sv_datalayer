@@ -144,6 +144,25 @@ public:
         return creationString;
     }
 
+    void setUpdateStatus(UpdateStatusOpt newStatus)
+    {
+        if (updateStatus != newStatus)
+        {
+            updateStatus = newStatus;
+
+            if (!updateStatus)
+            {
+                topStripe->setStyleSheet({});
+            }
+            else
+            {
+                QColor stripeColor = *updateStatus == UpdateStatus::NewlyMadeVariable ? QColor(223,255,192) : QColor(255, 251, 196);
+
+                setQWidgetBackground(topStripe, stripeColor, true);
+            }
+        }
+    }
+
 signals:
     void valueChanged();
 
@@ -189,11 +208,12 @@ private:
     QVBoxLayout*                                contentLayout                   = nullptr;
 
 private:
-    const bool isForCompositeNode;
-    DataNodeWeak weakNode;
+    const bool      isForCompositeNode;
+    DataNodeWeak    weakNode;
 
-    TabIndexOpt tabIndex;
-    QStringOpt creationString;
+    TabIndexOpt     tabIndex;
+    QStringOpt      creationString;
+    UpdateStatusOpt updateStatus;
 };
 
 QPushButton* makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon offIcon, QIcon::ThemeIcon onIcon);
