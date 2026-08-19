@@ -11,7 +11,7 @@ WidgetMakerSystem& WidgetMakerSystem::instance()
 
 NodeWidget* WidgetMakerSystem::createAndRegisterWidgetForNode(  DataNodeShared              node, 
                                                                 const WidgetOptionsJsonOpt& options,
-                                                                MapOfWidgetOptionsForNodes* optionsForChildren )
+                                                                const MapOfWidgetOptionsForNodes* optionsForChildren )
 {
     if (!node)
     {

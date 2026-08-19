@@ -68,14 +68,16 @@ bool treesAreStructurallyEqual(const DataNode& nodeFirst,
 {
     return visitStructurallyEqualConstTrees<false>(nullptr, nullptr, nodeFirst, nodesRest...);
 }
+
+//Return value: nullopt if trees are equal, mismatch string if they are not
 template <class... OtherDataNodes>
-bool treesAreStructurallyEqual_withMismatchLog(const DataNode& nodeFirst,
+StringErrOpt treesAreStructurallyEqual_withMismatchInfo(const DataNode& nodeFirst,
                                                const OtherDataNodes&... nodesRest)
 {
     std::string mismatchError;
     bool result = visitStructurallyEqualConstTrees<false>(nullptr, &mismatchError, nodeFirst, nodesRest...);
-    if (!result) SV_ERROR(mismatchError);
-    return result;
+    if (!result) return mismatchError;
+    else return {};
 }
 
 template <class... OtherDataNodes>

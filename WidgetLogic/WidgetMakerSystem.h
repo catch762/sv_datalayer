@@ -85,7 +85,7 @@ public:
     //    And this way, you can pass aproppriate WidgetOptionsJson for each node.
     NodeWidget* createAndRegisterWidgetForNode( DataNodeShared              node, 
                                                 const WidgetOptionsJsonOpt& options = {}, 
-                                                MapOfWidgetOptionsForNodes* optionsForChildren = nullptr );
+                                                const MapOfWidgetOptionsForNodes* optionsForChildren = nullptr );
 
     template<class T>
     void registerWidgetMaker(WidgetMakerForTypeT maker, const QString& widgetMakerName = "");
