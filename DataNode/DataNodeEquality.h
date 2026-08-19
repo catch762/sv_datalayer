@@ -97,12 +97,12 @@ bool treesAreCompletelyEqual_withMismatchLog(const DataNode& nodeFirst,
     return result;
 }
 
-inline bool visitThreeStructurallyEqualTrees_withMismatchLog(   const DataNode& nodeFirst,
-                                                                const DataNode& nodeSecond,
-                                                                      DataNode& nodeThird,
-                                                                const std::function<void(   const DataNode&,
-                                                                                            const DataNode&,
-                                                                                                  DataNode&)> &visitor )
+inline StringErrOpt visitThreeStructurallyEqualTrees_withMismatchInfo(  const DataNode& nodeFirst,
+                                                                        const DataNode& nodeSecond,
+                                                                              DataNode& nodeThird,
+                                                                        const std::function<void(   const DataNode&,
+                                                                                                    const DataNode&,
+                                                                                                          DataNode&)> &visitor )
 {
     //one tree is non-const, so we have to cast all to non-const
 
@@ -112,11 +112,22 @@ inline bool visitThreeStructurallyEqualTrees_withMismatchLog(   const DataNode& 
                                                 const_cast<DataNode&>(nodeFirst),
                                                 const_cast<DataNode&>(nodeSecond),
                                                 nodeThird );
-    if (!result) SV_ERROR(mismatchError);
-    return result;
+    if (!result) return mismatchError;
+    else return {};
 };
 
-
+inline StringErrOpt visitTwoStructurallyEqualTrees_withMismatchInfo(const DataNode& nodeFirst,
+                                                                    const DataNode& nodeSecond,
+                                                                    const std::function<void(const DataNode&,const DataNode&)> &visitor)
+{
+    std::string mismatchError;
+    bool result = visitStructurallyEqualTrees<false>(visitor,
+                                                     &mismatchError,
+                                                     const_cast<DataNode&>(nodeFirst),
+                                                     const_cast<DataNode&>(nodeSecond));
+    if (!result) return mismatchError;
+    else return {};
+}
 
 //********************************
 // IMPLEMENTATION FUNCTIONS:

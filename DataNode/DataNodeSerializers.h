@@ -18,10 +18,19 @@ public:
     //returns root node (no widget is made for it. its an invisible root.) and list of widgets for all immediate children of root
     static std::tuple<DataNodeShared, NodeWidgetQPointerVec> jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue& json);
 
+    static std::tuple<DataNodeShared, MapOfWidgetOptionsForNodes> jsonToRootNodeAndWidgetOptions(const QJsonValue& json);
+
 private:
-    static bool onNodeCreatedFromJson_restoreWidget(DataNodeShared node, const QJsonObject &jsonOfNode, int level,
-                                                    bool makeWidgetForRootNode);
+    static bool onNodeCreatedFromJson_restoreWidget(DataNodeShared      node, 
+                                                    const QJsonObject&  jsonOfNode, 
+                                                    int                 level,
+                                                    bool                makeWidgetForRootNode);
     
+    static bool onNodeCreatedFromJson_saveOptions(  DataNodeShared              node, 
+                                                    const QJsonObject&          jsonOfNode,
+                                                    int                         level,
+                                                    MapOfWidgetOptionsForNodes& savedOptions);
+
 private:
     static inline const QString widgetsKey  = "widgets";
 };

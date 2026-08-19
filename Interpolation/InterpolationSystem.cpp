@@ -48,7 +48,7 @@ bool InterpolationSystem::interpolateTwoTreesToThird(   const DataNode &treeA,
                                                         double ratioAToB01,
                                                         DefaultMixingStrategy defaultStrat)
 {
-    return visitThreeStructurallyEqualTrees_withMismatchLog(treeA, treeB, treeResult, 
+    auto mismatchErrOpt = visitThreeStructurallyEqualTrees_withMismatchInfo(treeA, treeB, treeResult, 
         [ratioAToB01, defaultStrat](const DataNode &nodeA, const DataNode &nodeB, DataNode &nodeResult)
         {
             // One check is enough, we only arrive here when all nodes same type etc,
@@ -66,6 +66,13 @@ bool InterpolationSystem::interpolateTwoTreesToThird(   const DataNode &treeA,
                 //SV_LOG(std::format("[{}] interp for type {}", actuallyInterpolated, nodeA));
             }
         });
+
+    if (mismatchErrOpt)
+    {
+        SV_ERROR(*mismatchErrOpt);
+        return false;
+    }
+    else return true;
 }
 
 InterpolationSystem &InterpolationSystem::instance()

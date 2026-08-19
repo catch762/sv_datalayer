@@ -51,6 +51,19 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_restoreWidget
     return true;
 }
 
+bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_saveOptions( DataNodeShared              node,
+                                                                                const QJsonObject&          jsonOfNode,
+                                                                                int                         level,
+                                                                                MapOfWidgetOptionsForNodes& savedOptions)
+{
+    if (WidgetOptionsJsonOpt widgetOptionsOpt = getFromJson<QJsonObject>(jsonOfNode, widgetsKey))
+    {
+        savedOptions[node] = *widgetOptionsOpt;
+    }
+
+    return true;
+}
+
 QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& tree)
 {
     MapOfWidgetOptionsForNodes optionsMap = getOptionsFromWidgetsOfTree(tree);
@@ -74,11 +87,11 @@ QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShare
 
 std::tuple<DataNodeShared, NodeWidget*> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndItsWidget(const QJsonValue& json)
 {
-    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
-                                            std::placeholders::_1,
-                                            std::placeholders::_2,
-                                            std::placeholders::_3,
-                                            true)); // <- will make widget for root
+    auto rootNode = DataNode::fromJSON(json, std::bind( onNodeCreatedFromJson_restoreWidget,
+                                                            std::placeholders::_1,
+                                                            std::placeholders::_2,
+                                                            std::placeholders::_3,
+                                                            true )); // <- will make widget for root
 
     if (!rootNode) return {};
 
@@ -94,11 +107,11 @@ std::tuple<DataNodeShared, NodeWidget*> SerializerForDataNodeTreeAndItsWidgets::
 
 std::tuple<DataNodeShared, NodeWidgetQPointerVec> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndTopLevelChildrenWidgets(const QJsonValue &json)
 {
-    auto rootNode = DataNode::fromJSON(json, std::bind(onNodeCreatedFromJson_restoreWidget,
-                                            std::placeholders::_1,
-                                            std::placeholders::_2,
-                                            std::placeholders::_3,
-                                            false)); // <- will NOT make widget for root
+    auto rootNode = DataNode::fromJSON(json, std::bind( onNodeCreatedFromJson_restoreWidget,
+                                                            std::placeholders::_1,
+                                                            std::placeholders::_2,
+                                                            std::placeholders::_3,
+                                                            false )); // <- will NOT make widget for root
 
     if (!rootNode) return {};
 
@@ -121,4 +134,19 @@ std::tuple<DataNodeShared, NodeWidgetQPointerVec> SerializerForDataNodeTreeAndIt
     }
 
     return {rootNode, topLevelChildrenWidgets};
+}
+
+std::tuple<DataNodeShared, MapOfWidgetOptionsForNodes> SerializerForDataNodeTreeAndItsWidgets::jsonToRootNodeAndWidgetOptions(const QJsonValue& json)
+{
+    MapOfWidgetOptionsForNodes options = {};
+
+    auto rootNode = DataNode::fromJSON(json, std::bind( onNodeCreatedFromJson_saveOptions,
+                                                            std::placeholders::_1,
+                                                            std::placeholders::_2,
+                                                            std::placeholders::_3,
+                                                            std::ref(options) ));
+
+    if (!rootNode) return {};
+
+    return { rootNode, options };
 }
