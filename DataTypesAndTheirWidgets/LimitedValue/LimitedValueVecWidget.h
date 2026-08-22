@@ -36,9 +36,9 @@ public:
     Mode getMode() const;
 
 signals:
-    void valueChanged(const LimitedIntOrDoubleVec &val);
-    void intValueChanged(const LimitedIntVec& val);
-    void doubleValueChanged(const LimitedDoubleVec& val);
+    void valueChanged       (const LimitedIntOrDoubleVec &val);
+    void intValueChanged    (const LimitedIntVec& val);
+    void doubleValueChanged (const LimitedDoubleVec& val);
 
 private:
     //no signals will be emitted from views
@@ -48,9 +48,9 @@ private:
 private:
     LimitedIntOrDoubleVec value;
 
-    QVBoxLayout*            layout          = nullptr;
+    QVBoxLayout*                    layout          = nullptr;
     LimitedValueVecSlidersWidget*       slidersView = nullptr;
-    XYPadWithPresetsWidget*     xyPadView   = nullptr;
+    XYPadWithPresetsWidget*             xyPadView   = nullptr;
 
     // Button to select views, it will be created on a NodeWidget, but stored here.
     // default state: 'checked = false' which means slidersView is visible

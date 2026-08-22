@@ -141,7 +141,7 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent)
 
     auto limitedValueForParamInit = [&]() -> LimitedIntOrDouble
     {
-        auto isInt = std::holds_alternative<LimitedIntVec>(theParent->getValue());
+        auto isInt = std::holds_alternative<LimitedIntVec>(parent->getValue());
         if (isInt) return LimitedInt{};
         else       return LimitedDouble{};
     }();
