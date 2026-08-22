@@ -1,12 +1,12 @@
 #pragma once
 #include "sv_qtcommon.h"
-#include "../LimitedValue.h"
+#include "../../LimitedValue.h"
 #include <QGridLayout>
-#include "BaseXYPadWidget.h"
+#include "Internal/BaseXYPadWidget.h"
 #include "WidgetLogic/WidgetDefs.h"
 
 class LimitedValueWidget;
-class LimitedValueVecWidget;
+class LimitedValueVecMultiWidget;
 class XYPadWithPresetsWidget;
 
 // The actual XY Pad space.
@@ -33,7 +33,7 @@ private:
     static inline const int PresetsCount = 9;
 
 public:
-    XYPadWithPresetsWidget(LimitedValueVecWidget* parent = nullptr);
+    XYPadWithPresetsWidget(LimitedValueVecMultiWidget* parent = nullptr);
 
     struct PresetData
     {
@@ -109,7 +109,7 @@ private:
     QSpinBox*                           currentYIndex   = nullptr;
 
 private:
-    LimitedValueVecWidget* parent = nullptr;
+    LimitedValueVecMultiWidget* parent = nullptr;
 
     std::array<PresetData, PresetsCount> presets;
     int currentPresetIdx = 0; //index in 'presets' array

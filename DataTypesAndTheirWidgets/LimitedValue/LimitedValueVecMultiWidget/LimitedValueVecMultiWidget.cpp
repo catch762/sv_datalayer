@@ -1,11 +1,11 @@
-#include "LimitedValueVecWidget.h"
-#include "Internal/LimitedValueVecSlidersWidget.h"
-#include "Internal/XYPadWithPresetsWidget.h"
+#include "LimitedValueVecMultiWidget.h"
+#include "LimitedValueVecAtomicWidgets/LimitedValueVecSlidersWidget.h"
+#include "LimitedValueVecAtomicWidgets/XYPadWithPresetsWidget.h"
 #include "WidgetLogic/NodeWidget.h"
 #include <QToolButton>
 
 
-LimitedValueVecWidget::LimitedValueVecWidget(const LimitedIntOrDoubleVec& initialValue,
+LimitedValueVecMultiWidget::LimitedValueVecMultiWidget(const LimitedIntOrDoubleVec& initialValue,
     const WidgetOptionsJsonOpt& options, QWidget *parent)
     : QFrame(parent)
 {
@@ -35,12 +35,12 @@ LimitedValueVecWidget::LimitedValueVecWidget(const LimitedIntOrDoubleVec& initia
     }    
 }
 
-const LimitedIntOrDoubleVec& LimitedValueVecWidget::getValue() const
+const LimitedIntOrDoubleVec& LimitedValueVecMultiWidget::getValue() const
 {
     return value;
 }
 
-void LimitedValueVecWidget::setValue(const LimitedIntOrDoubleVec& newValue)
+void LimitedValueVecMultiWidget::setValue(const LimitedIntOrDoubleVec& newValue)
 {
     //static int i = 0;
     //SV_LOG("Master: setValue " + std::to_string(i++));
@@ -65,7 +65,7 @@ void LimitedValueVecWidget::setValue(const LimitedIntOrDoubleVec& newValue)
     }
 }
 
-WidgetOptionsJsonOpt LimitedValueVecWidget::makeOptions() const
+WidgetOptionsJsonOpt LimitedValueVecMultiWidget::makeOptions() const
 {
     WidgetOptionsJson options = xyPadView->makeOptions().value_or(WidgetOptionsJson());
 
@@ -77,7 +77,7 @@ WidgetOptionsJsonOpt LimitedValueVecWidget::makeOptions() const
     return options;
 }
 
-void LimitedValueVecWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper, const WidgetOptionsJsonOpt& options)
+void LimitedValueVecMultiWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper, const WidgetOptionsJsonOpt& options)
 {
     viewSelectorWrapperButton = makeTopStripeCheckableButtonWithIcon(QIcon::ThemeIcon::MediaPlaybackStop,
                                                                      QIcon::ThemeIcon::FormatJustifyLeft);
@@ -99,7 +99,7 @@ void LimitedValueVecWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper, con
     }
 }
 
-void LimitedValueVecWidget::setViewsStateFromValue(const LimitedIntOrDoubleVec& value)
+void LimitedValueVecMultiWidget::setViewsStateFromValue(const LimitedIntOrDoubleVec& value)
 {
     QSignalBlocker blockSliders(slidersView);
     slidersView->setValue(value);
@@ -107,7 +107,7 @@ void LimitedValueVecWidget::setViewsStateFromValue(const LimitedIntOrDoubleVec& 
     xyPadView->updateEverythingToMatchParentValue();
 }
 
-void LimitedValueVecWidget::setMode(Mode mode)
+void LimitedValueVecMultiWidget::setMode(Mode mode)
 {
     auto setWrapperButtonChecked = [this](bool checked)
     {
@@ -134,7 +134,7 @@ void LimitedValueVecWidget::setMode(Mode mode)
     }
 }
 
-LimitedValueVecWidget::Mode LimitedValueVecWidget::getMode() const
+LimitedValueVecMultiWidget::Mode LimitedValueVecMultiWidget::getMode() const
 {
     //nah
     //return slidersView->isVisible() ? Mode::ShowJustLimitedValueWidgets : Mode::ShowXYPad;

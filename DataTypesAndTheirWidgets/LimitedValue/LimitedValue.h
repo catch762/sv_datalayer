@@ -152,7 +152,7 @@ public:
 
     QString toString() const
     {
-        return QString("%1[left=%2][right=%3][val=%4]").arg(thisTypeName()).arg(_left).arg(_right).arg(_value);
+        return QString("%1[L=%2 R=%3 V=%4]").arg(thisTypeName()).arg(_left).arg(_right).arg(_value);
     }
 
     bool operator==(const LimitedValue<T>& other) const

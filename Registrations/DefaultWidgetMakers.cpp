@@ -302,10 +302,10 @@ public:
 
 private:
     NodeWidgetHelper<LimitedIntVec,
-                     LimitedValueVecWidget,
-                     &LimitedValueVecWidget::valueChanged,
-                     &LimitedValueVecWidget::getValue,
-                     &LimitedValueVecWidget::setValue> helper;
+                     LimitedValueVecMultiWidget,
+                     &LimitedValueVecMultiWidget::valueChanged,
+                     &LimitedValueVecMultiWidget::getValue,
+                     &LimitedValueVecMultiWidget::setValue> helper;
 };
 
 class LimitedDoubleNodeWidget : public NodeWidget
@@ -389,10 +389,10 @@ public:
 
 private:
     NodeWidgetHelper<LimitedDoubleVec,
-                     LimitedValueVecWidget,
-                     &LimitedValueVecWidget::valueChanged,
-                     &LimitedValueVecWidget::getValue,
-                     &LimitedValueVecWidget::setValue> helper;
+                     LimitedValueVecMultiWidget,
+                     &LimitedValueVecMultiWidget::valueChanged,
+                     &LimitedValueVecMultiWidget::getValue,
+                     &LimitedValueVecMultiWidget::setValue> helper;
 };
 
 class EnumNodeWidget : public NodeWidget

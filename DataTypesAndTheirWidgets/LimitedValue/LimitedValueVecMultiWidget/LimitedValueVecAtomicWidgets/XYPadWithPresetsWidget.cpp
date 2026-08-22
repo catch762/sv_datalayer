@@ -1,7 +1,7 @@
 #include "XYPadWithPresetsWidget.h"
-#include "BaseXYPadWidget.h"
-#include "../LimitedValueWidget.h"
-#include "../LimitedValueVecWidget.h"
+#include "Internal/BaseXYPadWidget.h"
+#include "../../LimitedValueWidget.h"
+#include "../LimitedValueVecMultiWidget.h"
 #include <QPainter>
 
 namespace
@@ -132,7 +132,7 @@ bool XYPadWithPresetsWidget::PresetData::hasValues() const
 //  [/class PresetData]  //
 //***********************//
 
-XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecWidget *theParent) : QWidget(theParent), parent(theParent)
+XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecMultiWidget *theParent) : QWidget(theParent), parent(theParent)
 {
     setFocusPolicy(Qt::StrongFocus);
 

@@ -1,6 +1,6 @@
 #include "LimitedValueVecSlidersWidget.h"
-#include "DataTypesAndTheirWidgets/LimitedValue/Internal/BaseXYPadWidget.h"
-#include "DataTypesAndTheirWidgets/LimitedValue/Internal/XYPadWithPresetsWidget.h"
+#include "Internal/BaseXYPadWidget.h"
+#include "XYPadWithPresetsWidget.h"
 
 LimitedValueVecSlidersWidget::LimitedValueVecSlidersWidget(const LimitedIntOrDoubleVec& initialValue, QWidget *parent)
     : QFrame(parent)

@@ -8,7 +8,7 @@
 
 #include "LimitedValue/LimitedValueWidget.h"
 
-#include "LimitedValue/LimitedValueVecWidget.h"
+#include "LimitedValue/LimitedValueVecMultiWidget/LimitedValueVecMultiWidget.h"
 
 #include "Bool/BoolVecWidget.h"
 

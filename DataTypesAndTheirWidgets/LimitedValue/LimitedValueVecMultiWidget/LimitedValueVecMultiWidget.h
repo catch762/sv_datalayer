@@ -1,5 +1,5 @@
 #pragma once
-#include "LimitedValueWidget.h"
+#include "../LimitedValueWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 #include <QStackedLayout>
 #include "WidgetLogic/WidgetDefs.h"
@@ -10,7 +10,17 @@ class NodeWidget;
 
 //todo on value change check validation
 
-class LimitedValueVecWidget : public QFrame
+/*
+class LimitedValueVecMultiWidget
+{
+public:
+
+};
+*/
+
+//LimitedValueVecMasterWidget
+
+class LimitedValueVecMultiWidget : public QFrame
 {
     Q_OBJECT
 public:
@@ -20,7 +30,7 @@ public:
         ShowXYPad
     };
 
-    LimitedValueVecWidget(const LimitedIntOrDoubleVec& vec,
+    LimitedValueVecMultiWidget(const LimitedIntOrDoubleVec& vec,
                            const WidgetOptionsJsonOpt& options = {},
                            QWidget *parent = nullptr);
 
@@ -59,4 +69,4 @@ private:
     static inline const QString modeIsXYKey = "modeIsXY";
 };
 
-Q_DECLARE_METATYPE(LimitedValueVecWidget*);
+Q_DECLARE_METATYPE(LimitedValueVecMultiWidget*);

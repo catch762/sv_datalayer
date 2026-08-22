@@ -1,5 +1,5 @@
 #pragma once
-#include "../LimitedValueWidget.h"
+#include "../../LimitedValueWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
 
 class BaseXYPadWidget;
