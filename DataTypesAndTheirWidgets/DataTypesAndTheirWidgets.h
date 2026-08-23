@@ -17,4 +17,6 @@
 #include "Enum/EnumWidget.h"
 #include "Enum/EnumVecWidget.h"
 
+#include "Camera/CameraWidget.h"
+
 //#include "VectorOfAnyTypeWidgetCreator.h"
