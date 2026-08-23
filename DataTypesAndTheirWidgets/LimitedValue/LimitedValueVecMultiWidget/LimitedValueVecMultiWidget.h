@@ -8,17 +8,19 @@ class LimitedValueVecSlidersWidget;
 class XYPadWithPresetsWidget;
 class NodeWidget;
 
-//todo on value change check validation
+//********************************************************
+//
+// THE SITUATION:
+//
+// There are various "essentially just sequence of numbers" types and different user widgets
+// for them, like plain QSliders, or a color picker widget, or a XY pad, etc. Big variety.
+// 
+// Also, it would be great if changing widget could work as easy as possible without recreating
+// the data. 
+// 
+// So it kinda screams "use vector of numbers as the model, and "
+// 
 
-/*
-class LimitedValueVecMultiWidget
-{
-public:
-
-};
-*/
-
-//LimitedValueVecMasterWidget
 
 class LimitedValueVecMultiWidget : public QFrame
 {
