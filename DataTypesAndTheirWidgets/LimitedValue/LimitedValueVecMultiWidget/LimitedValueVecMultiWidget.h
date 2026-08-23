@@ -18,8 +18,10 @@ class NodeWidget;
 // Also, it would be great if changing widget could work as easy as possible without recreating
 // the data. 
 // 
-// So it kinda screams "use vector of numbers as the model, and "
+// So it kinda screams "use vector of numbers as the model, and different widgets as easily changeable views".
 // 
+// 
+//*********************************************************
 
 
 class LimitedValueVecMultiWidget : public QFrame
