@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include "Internal/BaseXYPadWidget.h"
 #include "WidgetLogic/WidgetDefs.h"
+#include "../ILimitedValueVecAtomicWidget.h"
 
 class LimitedValueWidget;
 class LimitedValueVecMultiWidget;
@@ -25,7 +26,7 @@ private:
 };
 
 
-class XYPadWithPresetsWidget : public QWidget
+class XYPadWithPresetsWidget : public ILimitedValueVecAtomicWidget
 {
     Q_OBJECT
 

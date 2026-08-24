@@ -132,7 +132,7 @@ bool XYPadWithPresetsWidget::PresetData::hasValues() const
 //  [/class PresetData]  //
 //***********************//
 
-XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecMultiWidget *theParent) : QWidget(theParent), parent(theParent)
+XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecMultiWidget *theParent) : ILimitedValueVecAtomicWidget(theParent), parent(theParent)
 {
     setFocusPolicy(Qt::StrongFocus);
 
@@ -628,18 +628,8 @@ void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedIntOrDoubleP
         parent->getValue());
     };
 
-    //std::visit([](auto&& point)
-    //{
-    //    SV_LOG(std::format("onXYRepresentationChanged: point {} {}", point.first, point.second));
-    //}, point);
-
     if (auto newValue = getNewValueOpt())
     {
-        //std::visit([](auto&& newValue)
-        //{
-        //    SV_LOG(std::format("onXYRepresentationChanged: newValue {}", newValue));
-        //}, *newValue);
-
         //note that we are not changing 'other representation' of this widget:
         //we just set it on parent, and parent will synchronize everything
         parent->setValue(*newValue);

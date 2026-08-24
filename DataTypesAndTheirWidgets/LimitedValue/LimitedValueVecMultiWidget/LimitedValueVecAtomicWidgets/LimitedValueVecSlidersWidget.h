@@ -1,26 +1,21 @@
 #pragma once
 #include "../../LimitedValueWidget.h"
 #include "DataTypesAndTheirWidgets/DataTypesAndTheirWidgets.h"
+#include "../ILimitedValueVecAtomicWidget.h"
 
 class BaseXYPadWidget;
 class XYPadWithPresetsWidget;
 
 // Simplest widget for LimitedDoubleVec: just creates N LimitedValueWidget's in a layout 
-class LimitedValueVecSlidersWidget : public QFrame
+class LimitedValueVecSlidersWidget : public ILimitedValueVecAtomicWidget
 {
     Q_OBJECT
 public:
     LimitedValueVecSlidersWidget(const LimitedIntOrDoubleVec& vec, QWidget *parent = nullptr);
 
-    const LimitedIntOrDoubleVec& getValue() const;
-
+    const LimitedIntOrDoubleVec& getValue() const override;
     //may add or remove widgets based on difference between current value and new value
-    void setValue(const LimitedIntOrDoubleVec& newValue);
-
-signals:
-    //void doubleValueChanged(const LimitedDoubleVec &val);
-    //void intValueChanged(const LimitedIntVec &val);
-    void valueChanged(const LimitedIntOrDoubleVec& val);
+    void setValue(const LimitedIntOrDoubleVec& newValue) override;
 
 private slots:
     void onSomethingChanged();

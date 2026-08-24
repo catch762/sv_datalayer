@@ -3,7 +3,7 @@
 #include "XYPadWithPresetsWidget.h"
 
 LimitedValueVecSlidersWidget::LimitedValueVecSlidersWidget(const LimitedIntOrDoubleVec& initialValue, QWidget *parent)
-    : QFrame(parent)
+    : ILimitedValueVecAtomicWidget(parent)
 {
     basicWidgetsLayout = new QVBoxLayout(this);
     initLayoutSpacing(basicWidgetsLayout);
@@ -105,14 +105,6 @@ void LimitedValueVecSlidersWidget::setBasicWidgetsCount(int requiredBasicWidgets
 void LimitedValueVecSlidersWidget::emitValueChanged()
 {
     emit valueChanged(value);
-
-    /*
-    std::visit(sv_overloaded{
-        [&](const LimitedIntVec&    vec){ emit intValueChanged   (vec); },
-        [&](const LimitedDoubleVec& vec){ emit doubleValueChanged(vec); }
-    },
-    value);
-    */
 }
 
 void LimitedValueVecSlidersWidget::setWidgetsStateFromValue(const LimitedIntOrDoubleVec& value)
