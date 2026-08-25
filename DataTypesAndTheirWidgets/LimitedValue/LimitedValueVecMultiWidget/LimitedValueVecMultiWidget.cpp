@@ -15,24 +15,22 @@ LimitedValueVecMultiWidget::LimitedValueVecMultiWidget(const LimitedIntOrDoubleV
     initLayoutSpacing(layout, 2, 0);
 
     slidersView = new LimitedValueVecSlidersWidget(value, this);
-    {
-        connect(slidersView, &LimitedValueVecSlidersWidget::valueChanged, this, [this](auto &val)
-        {
-            setValue(val);
-        });
+    xyPadView   = new XYPadWithPresetsWidget(this);
 
-        layout->addWidget(slidersView);
-    }
-
-    xyPadView = new XYPadWithPresetsWidget(this);
+    visitAllAtomicWidgets([&](ILimitedValueVecAtomicWidget* atomicWidget)
     {
-        xyPadView->setVisible(false);
+        layout->addWidget(atomicWidget);
+
         if (options)
         {
-            xyPadView->restoreFromOptions(*options);
+            atomicWidget->applyOptions(*options);
         }
-        layout->addWidget(xyPadView);
-    }    
+
+        connect(atomicWidget, &ILimitedValueVecAtomicWidget::valueChanged, this, &LimitedValueVecMultiWidget::setValue);
+
+        bool initialVisible = atomicWidget == slidersView;
+        atomicWidget->setVisible(initialVisible);
+    });
 }
 
 const LimitedIntOrDoubleVec& LimitedValueVecMultiWidget::getValue() const
@@ -67,7 +65,17 @@ void LimitedValueVecMultiWidget::setValue(const LimitedIntOrDoubleVec& newValue)
 
 WidgetOptionsJsonOpt LimitedValueVecMultiWidget::makeOptions() const
 {
-    WidgetOptionsJson options = xyPadView->makeOptions().value_or(WidgetOptionsJson());
+    //this is controversial: merging all unknown widget type options into one flat object...
+    //but i dont want to further complicate it
+
+    WidgetOptionsJson options = {};
+    visitAllAtomicWidgetsConst([&](const auto* atomicWidget)
+    {
+        if (auto duplicateKeyErr = mergeJsonObjectsWithUniqueKeys(options, atomicWidget->makeOptions()))
+        {
+            SV_ERROR(*duplicateKeyErr);
+        }
+    });
 
     if (viewSelectorWrapperButton)
     {
@@ -101,10 +109,11 @@ void LimitedValueVecMultiWidget::setupButtonsOnWrapperParent(NodeWidget *wrapper
 
 void LimitedValueVecMultiWidget::setViewsStateFromValue(const LimitedIntOrDoubleVec& value)
 {
-    QSignalBlocker blockSliders(slidersView);
-    slidersView->setValue(value);
-
-    xyPadView->updateEverythingToMatchParentValue();
+    visitAllAtomicWidgets([&](ILimitedValueVecAtomicWidget* atomicWidget)
+    {
+        QSignalBlocker blocker(atomicWidget);
+        atomicWidget->setValue(value);
+    });
 }
 
 void LimitedValueVecMultiWidget::setMode(Mode mode)
@@ -120,25 +129,42 @@ void LimitedValueVecMultiWidget::setMode(Mode mode)
 
     if (mode == Mode::ShowJustLimitedValueWidgets)
     {
-        slidersView->setVisible(true);
-        xyPadView->setVisible(false);
+        setOnlyThisAtomicWidgetVisible(slidersView);
 
         setWrapperButtonChecked(false);
     }
     else
     {
-        slidersView->setVisible(false);
-        xyPadView->setVisible(true);
+        setOnlyThisAtomicWidgetVisible(xyPadView);
 
         setWrapperButtonChecked(true);
     }
 }
 
+void LimitedValueVecMultiWidget::setOnlyThisAtomicWidgetVisible(ILimitedValueVecAtomicWidget* atomicWidgetToMakeVisible)
+{
+    visitAllAtomicWidgets([&](auto* atomicWidget)
+    {
+        bool shouldBeVisible = atomicWidget == atomicWidgetToMakeVisible;
+        atomicWidget->setVisible(shouldBeVisible);
+    });
+}
+
 LimitedValueVecMultiWidget::Mode LimitedValueVecMultiWidget::getMode() const
 {
-    //nah
-    //return slidersView->isVisible() ? Mode::ShowJustLimitedValueWidgets : Mode::ShowXYPad;
-
     SV_ASSERT(viewSelectorWrapperButton);
     return viewSelectorWrapperButton->isChecked() ? Mode::ShowXYPad : Mode::ShowJustLimitedValueWidgets;
+}
+
+
+void LimitedValueVecMultiWidget::visitAllAtomicWidgets(const AtomicWidgetVisitor& visitor)
+{
+    visitor(slidersView);
+    visitor(xyPadView);
+}
+
+void LimitedValueVecMultiWidget::visitAllAtomicWidgetsConst(const AtomicWidgetVisitorConst& visitor) const
+{
+    visitor(slidersView);
+    visitor(xyPadView);
 }

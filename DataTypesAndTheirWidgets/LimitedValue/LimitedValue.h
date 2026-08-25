@@ -241,6 +241,15 @@ SV_DECL_ALIASES(LimitedIntPair)
 SV_DECL_ALIASES(LimitedDoublePair)
 SV_DECL_ALIASES(LimitedIntOrDoublePair)
 
+inline std::pair<double, double> getPair11(const LimitedIntOrDoublePair& point)
+{
+    return std::visit([](const auto& point)
+    {
+        return std::pair(point.first.getValue11(),
+                            point.second.getValue11());
+    },
+    point);
+}
 
 template <typename LimitedValueT>
 concept IsLimitedValue = std::same_as<

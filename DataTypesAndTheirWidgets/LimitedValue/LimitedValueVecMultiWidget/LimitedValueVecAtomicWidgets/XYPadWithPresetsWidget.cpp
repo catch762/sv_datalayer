@@ -47,12 +47,7 @@ void XYPadForPresets::paintEvent(QPaintEvent *event)
     
     parent->iterateValidPresetPoints([&](const LimitedIntOrDoublePair &point, int presetIndex, int presetIsSelected)
     {
-        auto [x11, y11] = std::visit([](auto&& point)
-        {
-            return std::tuple(point.first.getValue11(),
-                              point.second.getValue11());
-        },
-        point);
+        auto [x11, y11] = getPair11(point);
 
         QPointF pixCoord = coord11ToPixcoord(QPointF(x11, y11));
 
@@ -161,7 +156,7 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecMultiWidget *thePa
 
             if(auto point = tryGetPointFromSliders())
             {
-                onXYRepresentationChanged(*point);
+                onAnyRepresentationChanged(*point);
             }
         };
 
@@ -197,7 +192,8 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecMultiWidget *thePa
                 },
                 *point);
 
-                onXYRepresentationChanged(*point);
+                silentlySetPointOnSliderRepresentation(*point);
+                onAnyRepresentationChanged(*point);
             }
         };
 
@@ -277,6 +273,17 @@ XYPadWithPresetsWidget::XYPadWithPresetsWidget(LimitedValueVecMultiWidget *thePa
     }
 }
 
+const LimitedIntOrDoubleVec& XYPadWithPresetsWidget::getValue() const
+{
+    return parent->getValue();
+}
+
+void XYPadWithPresetsWidget::setValue(const LimitedIntOrDoubleVec& newValue)
+{
+    updateEverythingToMatchParentValue();
+    emit valueChanged(getValue());
+}
+
 void XYPadWithPresetsWidget::onPresetSelected(int presetIdx)
 {
     currentPresetIdx = presetIdx;
@@ -352,6 +359,21 @@ LimitedIntOrDoublePairOpt XYPadWithPresetsWidget::tryGetPointFromSliders()
     {
         return std::pair( std::get<LimitedDouble>(x), std::get<LimitedDouble>(y) );
     }
+}
+
+void XYPadWithPresetsWidget::silentlySetPointOnSliderRepresentation(const LimitedIntOrDoublePair& point)
+{
+    std::visit([this](const auto& point)
+    {
+        auto [x11, y11] = getPair11(point);
+
+        QSignalBlocker blockX(paramX);
+        QSignalBlocker blockY(paramY);
+
+        paramX->setValue11(x11);
+        paramY->setValue11(y11);
+
+    }, point);
 }
 
 void XYPadWithPresetsWidget::setPresetButtonStylesheetAndColors(QPushButton *btn, ColorData colors)
@@ -466,7 +488,7 @@ XYPadWithPresetsWidget::ColorData XYPadWithPresetsWidget::colorsForPreset(int pr
 }
 
 
-WidgetOptionsJsonOpt XYPadWithPresetsWidget::makeOptions()
+WidgetOptionsJsonOpt XYPadWithPresetsWidget::makeOptions() const
 {
     WidgetOptionsJson res;
 
@@ -500,7 +522,7 @@ WidgetOptionsJsonOpt XYPadWithPresetsWidget::makeOptions()
     return !res.empty() ? res : WidgetOptionsJsonOpt{};
 }
 
-void XYPadWithPresetsWidget::restoreFromOptions(const WidgetOptionsJson &options)
+void XYPadWithPresetsWidget::applyOptions(const WidgetOptionsJson &options)
 {
     auto restorePresets = [&](const QJsonObject& presetsJson)
     {
@@ -600,7 +622,7 @@ void XYPadWithPresetsWidget::updateEverythingToMatchParentValue()
     update();
 }
 
-void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedIntOrDoublePair &point)
+void XYPadWithPresetsWidget::onAnyRepresentationChanged(const LimitedIntOrDoublePair &point)
 {
     auto getNewValueOpt = [&]() -> LimitedIntOrDoubleVecOpt
     {
@@ -630,9 +652,13 @@ void XYPadWithPresetsWidget::onXYRepresentationChanged(const LimitedIntOrDoubleP
 
     if (auto newValue = getNewValueOpt())
     {
+        emit valueChanged(*newValue);
+
+        //fuck this:
+
         //note that we are not changing 'other representation' of this widget:
         //we just set it on parent, and parent will synchronize everything
-        parent->setValue(*newValue);
+        //parent->setValue(*newValue);
     }
 }
 

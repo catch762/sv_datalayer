@@ -36,6 +36,33 @@ private:
 public:
     XYPadWithPresetsWidget(LimitedValueVecMultiWidget* parent = nullptr);
 
+    //************************************************
+    // [ ILimitedValueVecAtomicWidget implementation ]
+    //
+    // Note that this specific widget isnt exactly
+    // what ILimitedValueVecAtomicWidget implies,
+    // because it doesnt hold its own value, it
+    // pulls it directly from LimitedValueVecMultiWidget.
+    // 
+    // So getValue/setValue functions being overriden kind 
+    // of do more or less what you expect, but not exactly.
+    //
+    //************************************************
+
+    // This widget doesnt hold a value, so this will pull it from parent.
+    // If you call this upon receiving valueChanged(actualNewValue) signal (before parent is updated),
+    // you ll still get old value
+    const LimitedIntOrDoubleVec& getValue() const override;
+    // This widget doesnt hold a value, but this will update everything visually
+    void setValue(const LimitedIntOrDoubleVec& newValue) override;
+
+    WidgetOptionsJsonOpt makeOptions() const override;
+    void applyOptions(const WidgetOptionsJson& options) override;
+
+    //************************************************
+    // [/ILimitedValueVecAtomicWidget implementation ]
+    //************************************************
+
     struct PresetData
     {
         QJsonArray toJson() const;
@@ -58,8 +85,7 @@ public:
     };
     static ColorData colorsForPreset(int presetIdx, bool isValid);
 
-    WidgetOptionsJsonOpt makeOptions();
-    void restoreFromOptions(const WidgetOptionsJson& options);
+    
 
 
     const std::array<PresetData, PresetsCount>& getPresets() const;
@@ -70,7 +96,7 @@ public slots:
                                                      
 private slots:
     void onPresetSelected(int presetIdx);
-    void onXYRepresentationChanged(const LimitedIntOrDoublePair& point);
+    void onAnyRepresentationChanged(const LimitedIntOrDoublePair& point);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -83,6 +109,9 @@ private:
     //if !presetIsValid(), returns {}
     LimitedIntOrDoublePairOpt tryGetPointFromPreset (const PresetData& data);
     LimitedIntOrDoublePairOpt tryGetPointFromSliders();
+
+    //silently means no signals will be emitted:
+    void silentlySetPointOnSliderRepresentation(const LimitedIntOrDoublePair& point);
 
     void setPresetButtonStylesheetAndColors (QPushButton* btn, ColorData colors);
     void updatePresetButtonIfNeeded         (QPushButton* btn, int index);

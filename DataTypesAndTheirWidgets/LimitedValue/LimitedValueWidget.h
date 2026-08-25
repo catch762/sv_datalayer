@@ -17,7 +17,8 @@ public:
 
     const LimitedIntOrDouble&      getValue() const;
 
-    double getValue11();
+    double getValue11() const;
+    void setValue11(double value11);
 
 signals:
     void doubleValueChanged(const LimitedDouble& value);

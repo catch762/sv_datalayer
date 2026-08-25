@@ -5,6 +5,7 @@
 #include "WidgetLogic/WidgetDefs.h"
 
 class LimitedValueVecSlidersWidget;
+class ILimitedValueVecAtomicWidget;
 class XYPadWithPresetsWidget;
 class NodeWidget;
 
@@ -58,13 +59,19 @@ private:
     //no signals will be emitted from views
     void setViewsStateFromValue(const LimitedIntOrDoubleVec& value);
     
+    using AtomicWidgetVisitor       = std::function<void(      ILimitedValueVecAtomicWidget* atomicWidget)>;
+    using AtomicWidgetVisitorConst  = std::function<void(const ILimitedValueVecAtomicWidget* atomicWidget)>;
+    void visitAllAtomicWidgets                   (const AtomicWidgetVisitor&      visitor);
+    void visitAllAtomicWidgetsConst              (const AtomicWidgetVisitorConst& visitor) const;
+
+    void setOnlyThisAtomicWidgetVisible(ILimitedValueVecAtomicWidget* atomicWidgetToMakeVisible);
 
 private:
     LimitedIntOrDoubleVec value;
 
     QVBoxLayout*                    layout          = nullptr;
-    LimitedValueVecSlidersWidget*       slidersView = nullptr;
-    XYPadWithPresetsWidget*             xyPadView   = nullptr;
+    ILimitedValueVecAtomicWidget*       slidersView = nullptr;
+    ILimitedValueVecAtomicWidget*       xyPadView   = nullptr;
 
     // Button to select views, it will be created on a NodeWidget, but stored here.
     // default state: 'checked = false' which means slidersView is visible

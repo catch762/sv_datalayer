@@ -201,11 +201,25 @@ LimitedInt LimitedValueWidget::currentIntValueFromSpinboxes() const
     return getIntSpinboxes().getLimitedValue();
 }
 
-double LimitedValueWidget::getValue11()
+double LimitedValueWidget::getValue11() const
 {
-    return std::visit([](auto&& v)
+    return std::visit([](const auto& v)
     {
         return v.getValue11();
+    },
+    currentValue);
+}
+
+void LimitedValueWidget::setValue11(double value11)
+{
+    std::visit([&](const auto& curValue)
+    {
+        //using LimitedT = std::decay_t<decltype(curValue)>;
+
+        auto newValue = curValue;
+        newValue.setValue11(value11);
+
+        setValue(newValue);
     },
     currentValue);
 }
