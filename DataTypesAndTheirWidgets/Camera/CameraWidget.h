@@ -57,13 +57,26 @@ public:
 
     void mousePressEvent(QMouseEvent* event) override
     {
-        //if (event->button() == Qt::LeftButton)
+        if (event->button() == Qt::LeftButton)
+        {
+            lastMousePos = event->pos();
+        }
 
         QWidget::mousePressEvent(event);
     }
     void mouseMoveEvent(QMouseEvent* event) override
     {
-        QWidget::mouseMoveEvent(event);
+        QPoint posDelta = event->pos() - lastMousePos;
+
+        if (!posDelta.isNull())
+        {
+            applyMousePitchYawChange(posDelta);
+            update();
+        }
+
+        lastMousePos = event->pos();
+
+        //QWidget::mouseMoveEvent(event);
     }
 
     void mouseReleaseEvent(QMouseEvent* event) override
@@ -98,6 +111,18 @@ private:
         else if (!enabled &&  updateTimer.isActive()) updateTimer.stop();
     }
 
+    void applyMousePitchYawChange(QPoint mouseDelta)
+    {
+        //mouseDelta.setX(0);
+
+        glm::vec2 pitchYaw = glm::vec2{ -mouseDelta.y(), -mouseDelta.x() };
+
+        pitchYaw *= 0.008;
+
+        camera.setPitch (camera.getPitch() + pitchYaw.x);
+        camera.setYaw   (camera.getYaw  () + pitchYaw.y);
+    }
+
     void applyMovementTick()
     {
         float moveForward = 0;
@@ -129,7 +154,8 @@ private:
             moveUpward -= 1;
         }
 
-        camera.moveBy(glm::vec3{ moveRight, moveUpward, moveForward } * moveSpeed);
+        auto moveVec = glm::vec3{ moveRight, moveUpward, moveForward } * moveSpeed;
+        camera.moveBy(moveVec);
     }
 
     void onUpdate()
@@ -160,6 +186,8 @@ private:
     QSet<int> keysPressed;
 
     float moveSpeed = 0.0025;
+
+    QPoint lastMousePos;
 
     inline static const QSet<int> keysToTrack = { Qt::Key_W, Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_Space, Qt::Key_Control };
 };
