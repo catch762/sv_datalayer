@@ -20,19 +20,27 @@ public:
 	{
 		setFixedSize(300, 300);
 
-        camera.setPos({ 3, 3, 3 });
-        camera.lookAt({ 0, 0, 0 });
+        camera.setPos({ 0, 3, 0 });
+        camera.lookAtWithoutRoll({ 0, 0, 0 });
 
         updateTimer.setSingleShot(false);
         updateTimer.setInterval(0);
         connect(&updateTimer, &QTimer::timeout, this, &CameraViewport::onUpdate);
 	}
 
+    int getKey(QKeyEvent* event)
+    {
+        //or nativeScanCode() or nativeVirtualKey() ?
+        return event->key();
+    }
+
     void keyPressEvent(QKeyEvent* event) override
     {
-        if (keysToTrack.contains(event->key()))
+        auto theKey = getKey(event);
+
+        if (keysToTrack.contains(theKey))
         {
-            keysPressed.insert(event->key());
+            keysPressed.insert(theKey);
 
             setUpdatesEnabled(true);
         }
@@ -43,9 +51,11 @@ public:
     }
     void keyReleaseEvent(QKeyEvent* event) override
     {
-        if (keysPressed.contains(event->key()))
+        auto theKey = getKey(event);
+
+        if (keysPressed.contains(theKey))
         {
-            keysPressed.remove(event->key());
+            keysPressed.remove(theKey);
 
             setUpdatesEnabled(!keysPressed.isEmpty());
         }
@@ -113,14 +123,10 @@ private:
 
     void applyMousePitchYawChange(QPoint mouseDelta)
     {
-        //mouseDelta.setX(0);
+        glm::vec3 pitchYawRoll = glm::vec3(-mouseDelta.y(), -mouseDelta.x(), 0);
+        pitchYawRoll *= 0.008;
 
-        glm::vec2 pitchYaw = glm::vec2{ -mouseDelta.y(), -mouseDelta.x() };
-
-        pitchYaw *= 0.008;
-
-        camera.setPitch (camera.getPitch() + pitchYaw.x);
-        camera.setYaw   (camera.getYaw  () + pitchYaw.y);
+        camera.addAngles(pitchYawRoll);
     }
 
     void applyMovementTick()
@@ -179,7 +185,7 @@ private:
     }
 
 private:
-    BasicCamera camera;
+    BasicPlaneCamera camera;
 
     QTimer updateTimer;
 
