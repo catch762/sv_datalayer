@@ -173,10 +173,19 @@ private:
     void drawWorldLine(QPainter& painter, glm::vec3 worldBegin, glm::vec3 worldEnd)
     {
         auto beginNdc = camera.worldToScreen11(worldBegin);
-        if (!beginNdc) return;
+        //if (!beginNdc) return;
 
         auto endNdc = camera.worldToScreen11(worldEnd);
-        if (!endNdc) return;
+        //if (!endNdc) return;
+
+        {
+            auto clippedLine = worldLineToScreen(camera.getViewProjection(), worldBegin, worldEnd);
+            if (!clippedLine) return;
+
+            beginNdc = clippedLine->first;
+            endNdc = clippedLine->second;
+        }
+
 
         QPointF beginPix = pixCoordOfNdcCoord(rect(), *beginNdc);
         QPointF endPix   = pixCoordOfNdcCoord(rect(), *endNdc);
