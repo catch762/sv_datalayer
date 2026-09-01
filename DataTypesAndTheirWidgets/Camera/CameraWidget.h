@@ -2,6 +2,7 @@
 #include "sv_qtcommon.h"
 #include <QTimer>
 #include <QTextLayout>
+#include <QApplication>
 
 struct CameraData
 {
@@ -85,14 +86,17 @@ public:
     {
         if (event->button() == Qt::LeftButton)
         {
-            lastMousePos = event->pos();
-        }
+            //because its crucial we receive release event so we can set cursor visible again
+            grabMouse();
+            setCursorVisible(false);
 
-        QWidget::mousePressEvent(event);
+            lastClickPos = event->pos();
+        }
+        else QWidget::mousePressEvent(event);
     }
     void mouseMoveEvent(QMouseEvent* event) override
     {
-        QPoint posDelta = event->pos() - lastMousePos;
+        QPoint posDelta = event->pos() - lastClickPos;
 
         if (!posDelta.isNull())
         {
@@ -100,19 +104,29 @@ public:
             update();
         }
 
-        lastMousePos = event->pos();
+        QPoint lastClickPosGlobal = mapToGlobal(lastClickPos);
+        QCursor::setPos(lastClickPosGlobal);
 
         //QWidget::mouseMoveEvent(event);
     }
 
     void mouseReleaseEvent(QMouseEvent* event) override
     {
-        QWidget::mouseMoveEvent(event);
+        if (event->button() == Qt::LeftButton)
+        {
+            releaseMouse();
+            setCursorVisible(true);
+        }
+        else QWidget::mouseMoveEvent(event);
     }
 
     void paintEvent(QPaintEvent* event) override
     {
         QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing, true);
+
+        float curAspect = float(rect().width()) / float(rect().height());
+        camera.setAspect(curAspect);
 
         if (renderFunc)
         {
@@ -142,6 +156,13 @@ public:
 
     //Painting methods:
 public:
+    struct LineGradientInfo
+    {
+        QColor  colorAtZeroDist = Qt::red;
+        QColor  colorAtMaxDist = Qt::blue;
+        float   maxWorldDist = 1;
+    };
+
     void drawWorldAxes(QPainter& p)
     {
         drawAxes(p, { 0,0,0 }, { 1,0,0 }, { 0,1,0 }, { 0,0,1 });
@@ -153,11 +174,13 @@ public:
         drawAxes(p, camera.getPos(), camera.getDirRight(), camera.getDirUp(), camera.getDir());
     }
 
-    void drawGrid(QPainter& p, glm::vec3 center, float lineSpacing, int linesCount, QPen xPen, QPen yPen, QPen zPen)
+    template<typename LineVisitor>
+        requires std::is_invocable_r_v<void, LineVisitor, glm::vec3, glm::vec3, int /*id, x=0 y=1 z=2*/>
+    void traverseGrid(glm::vec3 center, float lineSpacing, int linesCount, const LineVisitor& lineVisitor)
     {
         const float lineLength = lineSpacing * (linesCount) * 2.0;
 
-        auto drawLinesAtLevel = [&](glm::vec3 midPos, glm::vec3 normalizedDir, glm::vec3 differenceDir)
+        auto drawLinesAtLevel = [&](glm::vec3 midPos, glm::vec3 normalizedDir, glm::vec3 differenceDir, int axisId)
         {
             for (int i = -linesCount; i <= linesCount; ++i)
             {
@@ -165,19 +188,21 @@ public:
                 glm::vec3 thisLineBegin = thisMidpos - normalizedDir * lineLength * 0.5f;
                 glm::vec3 thisLineEnd   = thisMidpos + normalizedDir * lineLength * 0.5f;
 
-                drawWorldLine(p, thisLineBegin, thisLineEnd);
+                lineVisitor(thisLineBegin, thisLineEnd, axisId);
             }
         };
 
         auto drawLinesAlongOtherAxis = [&]( glm::vec3 masterMidPos,
                                             glm::vec3 masterDifferenceDir,
-                                            glm::vec3 subNormalizedDir,     glm::vec3 subDifferenceDir)
+                                            glm::vec3 subNormalizedDir,
+                                            glm::vec3 subDifferenceDir,
+                                            int       axisId)
         {
             for (int i = -linesCount; i <= linesCount; ++i)
             {
                 glm::vec3 thisMidpos = masterMidPos + masterDifferenceDir * lineSpacing * float(i);
 
-                drawLinesAtLevel(thisMidpos, subNormalizedDir, subDifferenceDir);
+                drawLinesAtLevel(thisMidpos, subNormalizedDir, subDifferenceDir, axisId);
             }
         };
 
@@ -187,19 +212,52 @@ public:
 
       
         //Layers on Y, containing lines in X direction, that are spaced by Z
-        p.setPen(xPen);
-        drawLinesAlongOtherAxis(center, YAxis, XAxis, ZAxis);
+        drawLinesAlongOtherAxis(center, YAxis, XAxis, ZAxis, 0);
 
-        p.setPen(zPen);
-        drawLinesAlongOtherAxis(center, YAxis, ZAxis, XAxis);
+        drawLinesAlongOtherAxis(center, YAxis, ZAxis, XAxis, 2);
 
-        p.setPen(yPen);
-        drawLinesAlongOtherAxis(center, XAxis, YAxis, ZAxis);
+        drawLinesAlongOtherAxis(center, XAxis, YAxis, ZAxis, 1);
     }
 
     void drawStandardGrid(QPainter& p)
     {
-        drawGrid(p, {}, 1, 1, QPen(Qt::cyan), QPen(Qt::magenta), QPen(Qt::yellow));
+        const float cellsize    = 0.5f;
+        const int   linesCount  = 2;
+        const float gradMaxDist = linesCount * cellsize;
+
+        auto makeGrad = [&](QColor beginColor)
+        {
+            beginColor.setAlpha(200);
+
+            QColor endColor = beginColor;
+            endColor.setAlpha(0);
+
+            return LineGradientInfo{
+                beginColor,
+                endColor,
+                gradMaxDist
+            };
+        };
+
+        static auto xGrad = makeGrad(QColor(255, 25, 0));
+        static auto yGrad = makeGrad(QColor(15, 225, 0));
+        static auto zGrad = makeGrad(QColor(25, 25, 255));
+
+
+        //drawWorldLineWithGradient(p, { -1, 1, 0 }, { 1,1,0 }, xGrad);
+        //return;
+
+        auto drawLine = [&](glm::vec3 worldA, glm::vec3 worldB, int axisId)
+        {
+            drawWorldLineWithGradient(p, worldA, worldB, axisId == 0 ? xGrad : (axisId == 1 ? yGrad : zGrad));
+        };
+
+        
+        glm::vec3 camInCellSpace = camera.getPos() / cellsize;
+        glm::vec3 closestCellCoordInCellSpace = glm::round(camInCellSpace);
+        glm::vec3 closestCell = closestCellCoordInCellSpace * cellsize;
+
+        traverseGrid(closestCell, cellsize, linesCount, drawLine);
     }
 
     void drawAxes(QPainter& p, glm::vec3 pos, glm::vec3 dirX, glm::vec3 dirY, glm::vec3 dirZ, qreal lineWidth = 3)
@@ -223,8 +281,10 @@ public:
         p.setPen(linePen);
     }
 
+    
+
     //uses current pen
-    void drawWorldLine(QPainter& painter, glm::vec3 worldBegin, glm::vec3 worldEnd)
+    void drawWorldLine(QPainter& painter, glm::vec3 worldBegin, glm::vec3 worldEnd, LineGradientInfo* grad = nullptr)
     {
         auto clippedLine = worldLineToScreen(camera.getViewProjection(), worldBegin, worldEnd);
         if (!clippedLine) return;
@@ -238,13 +298,46 @@ public:
         painter.drawLine(beginPix, endPix);
     }
 
+    void drawWorldLineWithGradient(QPainter& painter, glm::vec3 worldBegin, glm::vec3 worldEnd, const LineGradientInfo& grad)
+    {
+        auto lineRes = worldLineToScreenAndWorldClip(camera.getViewProjection(),
+                                                     camera.getInvertedViewProjection(),
+                                                     worldBegin,
+                                                     worldEnd);
+        if (!lineRes) return;
+
+        Vec2Pair clippedLineNdc     = lineRes->first;
+        Vec3Pair clippedLineWorld   = lineRes->second;
+
+        QPointF beginPix     = pixCoordOfNdcCoord(rect(), clippedLineNdc.first);
+        QPointF endPix       = pixCoordOfNdcCoord(rect(), clippedLineNdc.second);
+
+        float   distToBegin  = glm::distance(camera.getPos(), clippedLineWorld.first);
+        float   distToEnd    = glm::distance(camera.getPos(), clippedLineWorld.second);
+
+        QColor  colorAtBegin = mixColors(grad.colorAtZeroDist, grad.colorAtMaxDist, distToBegin / grad.maxWorldDist);
+        QColor  colorAtEnd   = mixColors(grad.colorAtZeroDist, grad.colorAtMaxDist, distToEnd   / grad.maxWorldDist);
+
+        auto    gradient = QLinearGradient(beginPix, endPix);
+        gradient.setColorAt(0.0, colorAtBegin);
+        gradient.setColorAt(1.0, colorAtEnd);
+
+        auto pen = painter.pen();
+        pen.setBrush(QBrush(gradient));
+        painter.setPen(pen);
+
+        // 3. Draw the line
+        painter.drawLine(beginPix, endPix);
+    }
+
     // Tries to print text within rectangle that is like rect() but starts at startY;
     // Prints text on multiple lines if needed.
     // returns 'endY' - coordinates of last line actually printed.
-    int printText(QPainter& p, const QString& text, int startY = 0)
+    int printText(QPainter& p, const QString& text, QColor color = Qt::white, int startY = 0)
     {
         static const QFont fixedFont("Arial", 12);
         p.setFont(fixedFont);
+        p.setPen(color);
 
         QRect requestedRect = rect();
         requestedRect.setTop(startY);
@@ -263,6 +356,18 @@ signals:
     void cameraChanged(const BasicPlaneCamera& camera);
 
 private:
+    void setCursorVisible(bool visible)
+    {
+        if (visible)
+        {
+            QApplication::restoreOverrideCursor();
+        }
+        else
+        {
+            QApplication::setOverrideCursor(QCursor(Qt::BlankCursor));
+        }
+    }
+
     void setUpdatesEnabled(bool enabled)
     {
         if      ( enabled && !updateTimer.isActive()) updateTimer.start();
@@ -383,7 +488,7 @@ private:
 
     float moveSpeed = 0.0025;
 
-    QPoint lastMousePos;
+    QPoint lastClickPos;
 
     RenderFunc renderFunc;
 };
@@ -422,9 +527,16 @@ public:
 
         int controlsLayoutColumn = 1 + int(CAMERAWIDGET_ENABLE_DEBUGVIEWPORT);
 
-        //all controls on the right
+        //layout for all controls on the right
         controlsLayout = new QGridLayout();
         layout->addLayout(controlsLayout, 0, controlsLayoutColumn);
+
+        //the controls:
+        {
+            
+        }
+
+        setMinimumSize(400, 200);
     }
 
 private:
@@ -442,7 +554,7 @@ private:
         }
 
         int textY = 0;
-        textY = vp.printText(p, QString::fromStdString(vp.getCamera().toString()), textY);
+        textY = vp.printText(p, QString::fromStdString(vp.getCamera().toString()), Qt::white, textY);
     }
 
 private:
