@@ -51,8 +51,8 @@ QPushButton* CameraWidget::makeStdLeftButton(const QString& buttonText, QWidget*
 
 CameraWidget::AngleControl CameraWidget::makeAngleControl(const QString& angleName)
 {
-    QWidget* control = new QWidget(this);
-    QHBoxLayout* layout = new QHBoxLayout(control);
+    QWidget*        control     = new QWidget(this);
+    QHBoxLayout*        layout  = new QHBoxLayout(control);
     initLayoutSpacing(layout, 0, ControlLayoutSpacing);
 
     QPushButton* resetBtn = makeStdLeftButton(angleName, control);
@@ -65,6 +65,7 @@ CameraWidget::AngleControl CameraWidget::makeAngleControl(const QString& angleNa
 
     QDoubleSpinBox* spinBox = new QDoubleSpinBox(control);
 
+    //master changes the other silently
     connect(slider, &QSlider::valueChanged, slider, [slider, spinBox](int)
     {
         QSignalBlocker block(spinBox);
@@ -72,15 +73,17 @@ CameraWidget::AngleControl CameraWidget::makeAngleControl(const QString& angleNa
         spinBox->setValue(degrees);
     });
 
+    //slave changes the other loudly
+    connect(spinBox, &QDoubleSpinBox::valueChanged, slider, [slider](double angDeg)
+    {
+        setSliderValue11(slider, radTo11(glm::radians(angDeg)));
+    });
+
     connect(resetBtn, &QPushButton::clicked, slider, [slider]()
     {
         setSliderValue11(slider, 0.0);
     });
 
-    connect(spinBox, &QDoubleSpinBox::valueChanged, slider, [slider](double angDeg)
-    {
-        setSliderValue11(slider, radTo11(glm::radians(angDeg)));
-    });
 
     layout->addWidget(resetBtn);
     layout->addWidget(slider);
