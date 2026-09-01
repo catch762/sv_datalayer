@@ -46,6 +46,8 @@ public:
                                                 Qt::Key_A,
                                                 Qt::Key_S,
                                                 Qt::Key_D,
+                                                Qt::Key_Q,
+                                                Qt::Key_E,
                                                 Qt::Key_Up,
                                                 Qt::Key_Down,
                                                 Qt::Key_Left,
@@ -147,6 +149,15 @@ public:
     const BasicPlaneCamera& getCamera() const
     {
         return camera;
+    }
+
+    template<typename CameraChangerFunc>
+        requires std::is_invocable_v<CameraChangerFunc, BasicPlaneCamera&>
+    void changeCamera(const CameraChangerFunc& changerFunc)
+    {
+        changerFunc(camera);
+        emit cameraChanged(camera);
+        update();
     }
 
     void setRenderFunc(const RenderFunc& func)
@@ -453,10 +464,18 @@ private:
         {
             deltaYaw -= 1;
         }
+        if (keysPressed.contains(Qt::Key_Q))
+        {
+            deltaRoll -= 1;
+        }
+        if (keysPressed.contains(Qt::Key_E))
+        {
+            deltaRoll += 1;
+        }
 
         glm::vec3 pitchYawRollDeltasRadians = { deltaPitch, deltaYaw, deltaRoll };
 
-        pitchYawRollDeltasRadians *= 0.003;
+        pitchYawRollDeltasRadians *= 0.008;
 
         if (glm::length(pitchYawRollDeltasRadians) > 0.00001)
         {
@@ -505,7 +524,35 @@ public:
     CameraWidget(QWidget* parent = nullptr);
 
 private:
+    void initControls();
+
+    struct AngleControl
+    {
+        QWidget*        control                 = nullptr;
+        QPushButton*        angleResetButton    = nullptr;
+        QSlider*            angleSlider         = nullptr; //master representation
+        QDoubleSpinBox*     angleSpinbox        = nullptr; //slave
+
+        float getRadians() const
+        {
+            return ang11ToRad(getSliderValue11(angleSlider));
+        }
+        void setRadiansSilently(float radians)
+        {
+            QSignalBlocker block1(angleSlider);
+            QSignalBlocker block2(angleSpinbox);
+
+            setSliderValue11(angleSlider, radTo11(radians));
+            angleSpinbox->setValue(glm::degrees(radians));
+        }
+    };
+    QPushButton* makeStdLeftButton(const QString& buttonText, QWidget* parent = nullptr);
+    AngleControl makeAngleControl(const QString& angleName);
+
+    void updateUiFromCamera();
+
     static void renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender = nullptr);
+
 
 private:
     QGridLayout*    layout                  = nullptr;
@@ -513,5 +560,11 @@ private:
 #if CAMERAWIDGET_ENABLE_DEBUGVIEWPORT
     CameraViewport*     cameraViewportDbg  = nullptr;
 #endif
-    QGridLayout*        controlsLayout      = nullptr;
+
+    
+
+    QHBoxLayout*        controlsShowHideButtonsLayout   = nullptr;
+    QVBoxLayout*        controlsLayout                  = nullptr;
+    AngleControl            pitchControl;
+
 };
