@@ -34,7 +34,7 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
 
     initControls();
 
-    setMinimumSize(400, 200);
+    resize(1300, 400);
 }
 
 const int ControlHeight = 20;
