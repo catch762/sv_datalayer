@@ -11,7 +11,7 @@ CameraViewport::CameraViewport(QWidget* parent) : QWidget(parent)
 
     updateTimer.setSingleShot(false);
     updateTimer.setInterval(0);
-    connect(&updateTimer, &QTimer::timeout, this, &CameraViewport::onUpdate);
+    connect(&updateTimer, &QTimer::timeout, this, &CameraViewport::doUpdate);
 }
 
 int CameraViewport::getKey(QKeyEvent* event)
@@ -83,8 +83,11 @@ void CameraViewport::mouseMoveEvent(QMouseEvent* event)
 
     if (!posDelta.isNull())
     {
-        applyMousePitchYawChange(posDelta);
-        update();
+        if (auto changed = applyMousePitchYawChange(posDelta))
+        {
+            emit cameraChanged(camera);
+            update();
+        }
     }
 
     QPoint lastClickPosGlobal = mapToGlobal(lastClickPos);
@@ -294,7 +297,7 @@ void CameraViewport::setUpdatesEnabled(bool enabled)
     else if (!enabled && updateTimer.isActive()) updateTimer.stop();
 }
 
-void CameraViewport::applyMousePitchYawChange(QPoint mouseDelta)
+bool CameraViewport::applyMousePitchYawChange(QPoint mouseDelta)
 {
     glm::vec3 pitchYawRoll = glm::vec3(-mouseDelta.y(), -mouseDelta.x(), 0);
     //glm::vec3 pitchYawRoll = glm::vec3(-mouseDelta.y(), 0, mouseDelta.x());
@@ -304,8 +307,9 @@ void CameraViewport::applyMousePitchYawChange(QPoint mouseDelta)
     if (glm::length(pitchYawRoll) > 0.000001)
     {
         camera.addAngles(pitchYawRoll);
-        emit cameraChanged(camera);
+        return true;
     }
+    else return false;
 }
 
 //returns true if camera changed
@@ -393,7 +397,7 @@ bool CameraViewport::applyRotationByKeys()
     else return false;
 }
 
-void CameraViewport::onUpdate()
+void CameraViewport::doUpdate()
 {
     bool changed1 = applyMovementByKeys();
     bool changed2 = applyRotationByKeys();

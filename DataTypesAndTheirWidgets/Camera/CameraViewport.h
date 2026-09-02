@@ -14,6 +14,20 @@ struct CameraData
 };
 SV_REGTYPENAME(CameraData);
 
+
+//*************************************************************************************
+//
+// CameraViewport looks like rectangle with what camera sees, no any other ui elements.
+// 
+// It owns its BasicPlaneCamera and provides controlling via keys/mouse,
+// as long as you clicked on a widget.
+//
+// It also provides all the drawing functions like drawLine, etc.
+// 
+// But its other class responsibility to decide what to actually draw, this is done
+// via setting RenderFunc on CameraViewport.
+// 
+//*************************************************************************************
 class CameraViewport : public QWidget
 {
     Q_OBJECT
@@ -64,48 +78,7 @@ public:
 
     template<typename LineVisitor>
         requires std::is_invocable_r_v<void, LineVisitor, glm::vec3, glm::vec3, int /*id, x=0 y=1 z=2*/>
-    void traverseGrid(glm::vec3 center, float lineSpacing, int linesCount, const LineVisitor& lineVisitor)
-    {
-        const float lineLength = lineSpacing * (linesCount) * 2.0;
-
-        auto drawLinesAtLevel = [&](glm::vec3 midPos, glm::vec3 normalizedDir, glm::vec3 differenceDir, int axisId)
-            {
-                for (int i = -linesCount; i <= linesCount; ++i)
-                {
-                    glm::vec3 thisMidpos = midPos + differenceDir * lineSpacing * float(i);
-                    glm::vec3 thisLineBegin = thisMidpos - normalizedDir * lineLength * 0.5f;
-                    glm::vec3 thisLineEnd = thisMidpos + normalizedDir * lineLength * 0.5f;
-
-                    lineVisitor(thisLineBegin, thisLineEnd, axisId);
-                }
-            };
-
-        auto drawLinesAlongOtherAxis = [&](glm::vec3 masterMidPos,
-            glm::vec3 masterDifferenceDir,
-            glm::vec3 subNormalizedDir,
-            glm::vec3 subDifferenceDir,
-            int       axisId)
-            {
-                for (int i = -linesCount; i <= linesCount; ++i)
-                {
-                    glm::vec3 thisMidpos = masterMidPos + masterDifferenceDir * lineSpacing * float(i);
-
-                    drawLinesAtLevel(thisMidpos, subNormalizedDir, subDifferenceDir, axisId);
-                }
-            };
-
-        const glm::vec3 XAxis(1, 0, 0);
-        const glm::vec3 YAxis(0, 1, 0);
-        const glm::vec3 ZAxis(0, 0, 1);
-
-
-        //Layers on Y, containing lines in X direction, that are spaced by Z
-        drawLinesAlongOtherAxis(center, YAxis, XAxis, ZAxis, 0);
-
-        drawLinesAlongOtherAxis(center, YAxis, ZAxis, XAxis, 2);
-
-        drawLinesAlongOtherAxis(center, XAxis, YAxis, ZAxis, 1);
-    }
+    void traverseGrid(glm::vec3 center, float lineSpacing, int linesCount, const LineVisitor& lineVisitor);
 
     void drawStandardGrid(QPainter& p);
 
@@ -133,14 +106,13 @@ private:
     void setCursorVisible(bool visible);
 
     void setUpdatesEnabled(bool enabled);
-    void applyMousePitchYawChange(QPoint mouseDelta);
-    //returns true if camera changed
-    bool applyMovementByKeys();
 
-    //returns true if camera changed
+    //These applySomething functions return true if camera was actually changed
+    bool applyMousePitchYawChange(QPoint mouseDelta);
+    bool applyMovementByKeys();
     bool applyRotationByKeys();
 
-    void onUpdate();
+    void doUpdate();
 
 private:
     BasicPlaneCamera camera;
@@ -155,3 +127,49 @@ private:
 
     RenderFunc renderFunc;
 };
+
+
+template<typename LineVisitor>
+        requires std::is_invocable_r_v<void, LineVisitor, glm::vec3, glm::vec3, int /*id, x=0 y=1 z=2*/>
+void CameraViewport::traverseGrid(glm::vec3 center, float lineSpacing, int linesCount, const LineVisitor& lineVisitor)
+{
+    const float lineLength = lineSpacing * (linesCount) * 2.0;
+
+    auto drawLinesAtLevel = [&](glm::vec3 midPos, glm::vec3 normalizedDir, glm::vec3 differenceDir, int axisId)
+        {
+            for (int i = -linesCount; i <= linesCount; ++i)
+            {
+                glm::vec3 thisMidpos = midPos + differenceDir * lineSpacing * float(i);
+                glm::vec3 thisLineBegin = thisMidpos - normalizedDir * lineLength * 0.5f;
+                glm::vec3 thisLineEnd = thisMidpos + normalizedDir * lineLength * 0.5f;
+
+                lineVisitor(thisLineBegin, thisLineEnd, axisId);
+            }
+        };
+
+    auto drawLinesAlongOtherAxis = [&](glm::vec3 masterMidPos,
+        glm::vec3 masterDifferenceDir,
+        glm::vec3 subNormalizedDir,
+        glm::vec3 subDifferenceDir,
+        int       axisId)
+        {
+            for (int i = -linesCount; i <= linesCount; ++i)
+            {
+                glm::vec3 thisMidpos = masterMidPos + masterDifferenceDir * lineSpacing * float(i);
+
+                drawLinesAtLevel(thisMidpos, subNormalizedDir, subDifferenceDir, axisId);
+            }
+        };
+
+    const glm::vec3 XAxis(1, 0, 0);
+    const glm::vec3 YAxis(0, 1, 0);
+    const glm::vec3 ZAxis(0, 0, 1);
+
+
+    //Layers on Y, containing lines in X direction, that are spaced by Z
+    drawLinesAlongOtherAxis(center, YAxis, XAxis, ZAxis, 0);
+
+    drawLinesAlongOtherAxis(center, YAxis, ZAxis, XAxis, 2);
+
+    drawLinesAlongOtherAxis(center, XAxis, YAxis, ZAxis, 1);
+}
