@@ -75,3 +75,46 @@ private:
     QPushButton* angleResetButton = nullptr;
     SliderAndSpinbox* angleWidget = nullptr;
 };
+
+class PositionControl : public QWidget
+{
+    Q_OBJECT
+public:
+    PositionControl(const QString& buttonText, QWidget* parent = nullptr) : QWidget(parent)
+    {
+        QHBoxLayout* layout = CWControls::makeStdLayout(this);
+
+        activateButton = CWControls::makeStdLeftButton(buttonText, this);
+        posWidget = new SpinboxesVec3({}, this);
+
+        connect(posWidget, &SpinboxesVec3::valueChanged, this, &PositionControl::valueChanged);
+
+        connect(activateButton, &QPushButton::clicked, this, [this]()
+        {
+            emit activated(getValue());
+        });
+
+        layout->addWidget(activateButton);
+        layout->addWidget(posWidget);
+    }
+
+    glm::vec3 getValue() const
+    {
+        return posWidget->getValue();
+    }
+    void setValue(glm::vec3 val)
+    {
+        posWidget->setValue(val);
+    }
+
+signals:
+    //emitted when its changed on posWidget, regardless of activateButton
+    void valueChanged(glm::vec3 val);
+
+    //emitted when button clicked
+    void activated(glm::vec3 curVal);
+
+private:
+    QPushButton* activateButton = nullptr;
+    SpinboxesVec3* posWidget = nullptr;
+};

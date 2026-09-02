@@ -9,6 +9,7 @@
 #define CAMERAWIDGET_ENABLE_DEBUGVIEWPORT 1
 
 class AngleControl;
+class PositionControl;
 
 class CameraWidget : public QWidget
 {
@@ -35,5 +36,7 @@ private:
     QHBoxLayout*        controlsShowHideButtonsLayout   = nullptr;
     QVBoxLayout*        controlsLayout                  = nullptr;
     AngleControl*           pitchControl                = nullptr;
+    PositionControl*        posControl                  = nullptr; 
+    PositionControl*        lookatControl               = nullptr; 
 
 };

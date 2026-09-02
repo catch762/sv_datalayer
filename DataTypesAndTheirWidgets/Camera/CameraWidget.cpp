@@ -44,16 +44,26 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
 void CameraWidget::initControls()
 {
     pitchControl = new AngleControl("Pitch", this);
-
-    connect(pitchControl, &AngleControl::angleChanged, this, [this](double angleRadians)
     {
-        cameraViewport->changeCamera([angleRadians](auto& camera)
-        {
-            camera.setRoll(angleRadians);
-        });
-    });
+        connect(pitchControl, &AngleControl::angleChanged, this, [this](double angleRadians)
+            {
+                cameraViewport->changeCamera([angleRadians](auto& camera)
+                    {
+                        camera.setRoll(angleRadians);
+                    });
+            });
 
-    controlsLayout->addWidget(pitchControl);
+        controlsLayout->addWidget(pitchControl);
+    }
+
+    posControl = new PositionControl("Pos", this);
+    {
+        controlsLayout->addWidget(posControl);
+    }
+    lookatControl = new PositionControl("LookAt", this);
+    {
+        controlsLayout->addWidget(lookatControl);
+    }
 }
 
 void CameraWidget::updateUiFromCamera()
