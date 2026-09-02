@@ -1,4 +1,6 @@
 #include "CameraWidget.h"
+#include "CameraWidgetControls.h"
+
 
 CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
 {
@@ -37,83 +39,29 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
     resize(1300, 400);
 }
 
-const int ControlHeight = 20;
-const int LeftmostControlWidth = 50;
-const int RightControlWidth = 150;
-const int ControlLayoutSpacing = 8;
 
-QPushButton* CameraWidget::makeStdLeftButton(const QString& buttonText, QWidget* parent)
-{
-    QPushButton* btn = new QPushButton(buttonText, parent);
-    btn->setFixedSize(LeftmostControlWidth, ControlHeight);
-    return btn;
-}
-
-CameraWidget::AngleControl CameraWidget::makeAngleControl(const QString& angleName)
-{
-    QWidget*        control     = new QWidget(this);
-    QHBoxLayout*        layout  = new QHBoxLayout(control);
-    initLayoutSpacing(layout, 0, ControlLayoutSpacing);
-
-    QPushButton* resetBtn = makeStdLeftButton(angleName, control);
-
-    QSlider* slider = new QSlider(Qt::Horizontal, control);
-    slider->setFixedSize(RightControlWidth, ControlHeight);
-    slider->setMinimum(-1000);
-    slider->setMaximum(+1000);
-    slider->setValue(0);
-
-    QDoubleSpinBox* spinBox = new QDoubleSpinBox(control);
-
-    //master changes the other silently
-    connect(slider, &QSlider::valueChanged, slider, [slider, spinBox](int)
-    {
-        QSignalBlocker block(spinBox);
-        float degrees = glm::degrees(ang11ToRad(getSliderValue11(slider)));
-        spinBox->setValue(degrees);
-    });
-
-    //slave changes the other loudly
-    connect(spinBox, &QDoubleSpinBox::valueChanged, slider, [slider](double angDeg)
-    {
-        setSliderValue11(slider, radTo11(glm::radians(angDeg)));
-    });
-
-    connect(resetBtn, &QPushButton::clicked, slider, [slider]()
-    {
-        setSliderValue11(slider, 0.0);
-    });
-
-
-    layout->addWidget(resetBtn);
-    layout->addWidget(slider);
-    layout->addWidget(spinBox);
-
-    return { control, resetBtn, slider, spinBox };
-}
 
 void CameraWidget::initControls()
 {
-    pitchControl = makeAngleControl("Pitch");
+    pitchControl = new AngleControl("Pitch", this);
 
-    connect(pitchControl.angleSlider, &QSlider::valueChanged, this, [this](int)
+    connect(pitchControl, &AngleControl::angleChanged, this, [this](double angleRadians)
     {
-        float roll = pitchControl.getRadians();
-
-        cameraViewport->changeCamera([roll](auto& camera)
+        cameraViewport->changeCamera([angleRadians](auto& camera)
         {
-            camera.setRoll(roll);
+            camera.setRoll(angleRadians);
         });
     });
 
-    controlsLayout->addWidget(pitchControl.control);
+    controlsLayout->addWidget(pitchControl);
 }
 
 void CameraWidget::updateUiFromCamera()
 {
     const BasicPlaneCamera& camera = cameraViewport->getCamera();
 
-    pitchControl.setRadiansSilently( camera.getRoll() );
+    QSignalBlocker block(pitchControl);
+    pitchControl->setRadians( camera.getRoll() );
 }
 
 void CameraWidget::renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender)
