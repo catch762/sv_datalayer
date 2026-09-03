@@ -62,6 +62,24 @@ public:
 
     void setRenderFunc(const RenderFunc& func);
 
+    void setMoveSpeed(float newMoveSpeed)
+    {
+        moveSpeed = newMoveSpeed;
+    }
+    float getMoveSpeed() const
+    {
+        return moveSpeed;
+    }
+
+    void setMouseSens(float newMouseSens)
+    {
+        mouseSens = newMouseSens;
+    }
+    float getMouseSens() const
+    {
+        return mouseSens;
+    }
+
     //Painting methods:
 public:
     struct LineGradientInfo
@@ -122,6 +140,7 @@ private:
     QSet<int> keysPressed;
 
     float moveSpeed = 0.0025;
+    float mouseSens = 1.0;
 
     QPoint lastClickPos;
 

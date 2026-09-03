@@ -35,6 +35,7 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
     layout->addLayout(controlsLayout, 0, controlsLayoutColumn);
 
     initControls();
+    updateUiFromCamera();
 
     resize(1300, 400);
 }
@@ -43,35 +44,156 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
 
 void CameraWidget::initControls()
 {
-    pitchControl = new AngleControl("Pitch", this);
+    posControl = new PositionControl("Pos", this);
     {
-        connect(pitchControl, &AngleControl::angleChanged, this, [this](double angleRadians)
+        connect(posControl, &PositionControl::valueChanged, this, [this](glm::vec3 pos)
+        {
+            cameraViewport->changeCamera([pos](auto& camera)
             {
-                cameraViewport->changeCamera([angleRadians](auto& camera)
-                    {
-                        camera.setRoll(angleRadians);
-                    });
+                camera.setPos(pos);
             });
+        });
+
+        connect(posControl, &PositionControl::activatePressed, this, [this](glm::vec3)
+        {
+            cameraViewport->changeCamera([](auto& camera)
+            {
+                camera.setPos({1,1,1});
+                camera.lookAtWithoutRoll({ 0,0,0 });
+            });
+        });
+
+        controlsLayout->addWidget(posControl);
+    }
+
+    lookatControl = new PositionControl("Look at", this);
+    {
+        connect(lookatControl, &PositionControl::activatePressed, this, [this](glm::vec3 pos)
+        {
+            cameraViewport->changeCamera([pos](auto& camera)
+            {
+                camera.lookAtWithoutRoll(pos);
+            });
+        });
+
+        controlsLayout->addWidget(lookatControl);
+    }
+
+    yfovControl = new ValueControl("Y FOV", 0.1, 170.0, 45.0, this);
+    {
+        connect(yfovControl, &ValueControl::valueChanged, this, [this](double degrees)
+        {
+            cameraViewport->changeCamera([degrees](auto& camera)
+            {
+                camera.setYFov(glm::radians(degrees));
+            });
+        });
+
+        controlsLayout->addWidget(yfovControl);
+    }
+
+    pitchControl = new ValueControl("Pitch", -180, 180, 0, this);
+    {
+        connect(pitchControl, &ValueControl::valueChanged, this, [this](double degrees)
+        {
+            cameraViewport->changeCamera([degrees](auto& camera)
+            {
+                camera.setPitch(glm::radians(degrees));
+            });
+        });
 
         controlsLayout->addWidget(pitchControl);
     }
+    yawControl = new ValueControl("Yaw", -180, 180, 0, this);
+    {
+        connect(yawControl, &ValueControl::valueChanged, this, [this](double degrees)
+        {
+            cameraViewport->changeCamera([degrees](auto& camera)
+            {
+                camera.setYaw(glm::radians(degrees));
+            });
+        });
 
-    posControl = new PositionControl("Pos", this);
-    {
-        controlsLayout->addWidget(posControl);
+        controlsLayout->addWidget(yawControl);
     }
-    lookatControl = new PositionControl("LookAt", this);
+    rollControl = new ValueControl("Roll", -180, 180, 0, this);
     {
-        controlsLayout->addWidget(lookatControl);
+        connect(rollControl, &ValueControl::valueChanged, this, [this](double degrees)
+        {
+            cameraViewport->changeCamera([degrees](auto& camera)
+            {
+                camera.setRoll(glm::radians(degrees));
+            });
+        });
+
+        controlsLayout->addWidget(rollControl);
     }
+
+
+    speedControl = new ValueControl("Speed", 0, 1, 0.2, this);
+    {
+        connect(speedControl, &ValueControl::valueChanged, this, [this](double speed01)
+        {
+            cameraViewport->setMoveSpeed(CWControls::moveSpeedFromSpeed01(speed01));
+        });
+
+        controlsLayout->addWidget(speedControl);
+    }
+
+    msensControl = new ValueControl("Mouse sens", 0.1, 2, 1, this);
+    {
+        connect(msensControl, &ValueControl::valueChanged, this, [this](double sens)
+        {
+            cameraViewport->setMouseSens(sens);
+        });
+
+        controlsLayout->addWidget(msensControl);
+    }
+
+    scaleConstraintControl = new ScaleConstraintControl(this);
+    {
+        controlsLayout->addWidget(scaleConstraintControl);
+    }
+
+    controlsLayout->addStretch();
 }
 
 void CameraWidget::updateUiFromCamera()
 {
     const BasicPlaneCamera& camera = cameraViewport->getCamera();
 
-    QSignalBlocker block(pitchControl);
-    pitchControl->setRadians( camera.getRoll() );
+    {
+        QSignalBlocker block(posControl);
+        posControl->setValue(camera.getPos());
+    }
+
+    {
+        QSignalBlocker block(yfovControl);
+        pitchControl->setValue(glm::degrees(camera.getYFov()));
+    }
+
+    {
+        QSignalBlocker block(pitchControl);
+        pitchControl->setValue(glm::degrees(camera.getPitch()));
+    }
+    {
+        QSignalBlocker block(yawControl);
+        yawControl->setValue(glm::degrees(camera.getYaw()));
+    }
+    {
+        QSignalBlocker block(rollControl);
+        rollControl->setValue(glm::degrees(camera.getRoll()));
+    }
+
+    {
+        QSignalBlocker block(speedControl);
+        speedControl->setValue(CWControls::speed01FromMoveSpeed(cameraViewport->getMoveSpeed()));
+    }
+
+    {
+        QSignalBlocker block(msensControl);
+        msensControl->setValue(cameraViewport->getMouseSens());
+    }
 }
 
 void CameraWidget::renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender)

@@ -302,7 +302,7 @@ bool CameraViewport::applyMousePitchYawChange(QPoint mouseDelta)
     glm::vec3 pitchYawRoll = glm::vec3(-mouseDelta.y(), -mouseDelta.x(), 0);
     //glm::vec3 pitchYawRoll = glm::vec3(-mouseDelta.y(), 0, mouseDelta.x());
 
-    pitchYawRoll *= 0.008;
+    pitchYawRoll *= 0.008 * mouseSens;
 
     if (glm::length(pitchYawRoll) > 0.000001)
     {
