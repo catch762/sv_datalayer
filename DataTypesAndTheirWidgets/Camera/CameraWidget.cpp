@@ -5,6 +5,7 @@
 CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
 {
     layout = new QVBoxLayout(this);
+    initLayoutSpacing(layout, 2, 2);
 
     //viewport on the left
     cameraViewport = new CameraViewport(this);
@@ -28,8 +29,9 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(cameraViewportDbg, 1);
 #endif
 
-    //layout for all controls on the right
+    //layout for all controls
     controlsLayout = new QVBoxLayout();
+    initLayoutSpacing(controlsLayout, 0, 2);
     {
         //layout->addLayout(controlsLayout);
 
@@ -37,9 +39,11 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
         updateUiFromCamera();
     }
 
-    initControlsShowHideButtonsAndLayout();
+
+    controlsShowHideButtonsLayout = new QHBoxLayout();
+    initLayoutSpacing(controlsShowHideButtonsLayout, 0, 2);
     {
-        //controlsLayout->insertLayout(0, controlsShowHideButtonsLayout);
+        initControlsShowHideButtons();
     }
 
     layout->addLayout(controlsShowHideButtonsLayout);
@@ -214,11 +218,8 @@ void CameraWidget::updateUiFromCamera()
     }
 }
 
-void CameraWidget::initControlsShowHideButtonsAndLayout()
+void CameraWidget::initControlsShowHideButtons()
 {
-    controlsShowHideButtonsLayout = new QHBoxLayout();
-    initLayoutSpacing(controlsShowHideButtonsLayout, 0, 2);
-
     auto add = [this](QToolButton* w)
     {
         controlsShowHideButtonsLayout->addWidget(w);

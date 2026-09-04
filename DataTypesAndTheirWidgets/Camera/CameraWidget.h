@@ -19,7 +19,7 @@ public:
 
 private:
     void initControls();
-    void initControlsShowHideButtonsAndLayout();
+    void initControlsShowHideButtons();
 
     void updateUiFromCamera();
 
