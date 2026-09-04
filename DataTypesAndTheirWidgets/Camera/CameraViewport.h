@@ -121,6 +121,8 @@ signals:
     void cameraChanged(const BasicPlaneCamera& camera);
 
 private:
+    bool hasPressedKeyForActionThatNeedsUpdatingWidget();
+
     void setCursorVisible(bool visible);
 
     void setUpdatesEnabled(bool enabled);
@@ -129,6 +131,8 @@ private:
     bool applyMousePitchYawChange(QPoint mouseDelta);
     bool applyMovementByKeys();
     bool applyRotationByKeys();
+
+    float getShiftOrAltSpeedModifier();
 
     void doUpdate();
 

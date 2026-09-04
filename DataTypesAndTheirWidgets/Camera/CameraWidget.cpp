@@ -4,14 +4,14 @@
 
 CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
 {
-    layout = new QGridLayout(this);
+    layout = new QVBoxLayout(this);
 
     //viewport on the left
     cameraViewport = new CameraViewport(this);
     cameraViewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     cameraViewport->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, nullptr));
     connect(cameraViewport, &CameraViewport::cameraChanged, this, &CameraWidget::updateUiFromCamera);
-    layout->addWidget(cameraViewport, 0, 0);
+    layout->addWidget(cameraViewport, 1);
 
     //optional debug viewport in the middle
 #if CAMERAWIDGET_ENABLE_DEBUGVIEWPORT
@@ -25,19 +25,33 @@ CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
             cameraViewportDbg->update();
         });
 
-    layout->addWidget(cameraViewportDbg, 0, 1);
+    layout->addWidget(cameraViewportDbg, 1);
 #endif
-
-    int controlsLayoutColumn = 1 + int(CAMERAWIDGET_ENABLE_DEBUGVIEWPORT);
 
     //layout for all controls on the right
     controlsLayout = new QVBoxLayout();
-    layout->addLayout(controlsLayout, 0, controlsLayoutColumn);
+    {
+        //layout->addLayout(controlsLayout);
 
-    initControls();
-    updateUiFromCamera();
+        initControls();
+        updateUiFromCamera();
+    }
 
-    resize(1300, 400);
+    initControlsShowHideButtonsAndLayout();
+    {
+        //controlsLayout->insertLayout(0, controlsShowHideButtonsLayout);
+    }
+
+    layout->addLayout(controlsShowHideButtonsLayout);
+    layout->addLayout(controlsLayout);
+
+    //Initial controls visibility:
+    posControlShow->toggle();
+    lookatControlShow->toggle();
+    yfovControlShow->toggle();
+    pitchControlShow->toggle();
+    yawControlShow->toggle();
+    rollControlShow->toggle();
 }
 
 
@@ -83,6 +97,7 @@ void CameraWidget::initControls()
     {
         connect(yfovControl, &ValueControl::valueChanged, this, [this](double degrees)
         {
+                posControl->log();
             cameraViewport->changeCamera([degrees](auto& camera)
             {
                 camera.setYFov(glm::radians(degrees));
@@ -155,6 +170,9 @@ void CameraWidget::initControls()
         controlsLayout->addWidget(scaleConstraintControl);
     }
 
+    //hide all controls by default
+    iterateImmediateWidgets(controlsLayout, [](QWidget* w) { w->hide(); });
+
     controlsLayout->addStretch();
 }
 
@@ -194,6 +212,31 @@ void CameraWidget::updateUiFromCamera()
         QSignalBlocker block(msensControl);
         msensControl->setValue(cameraViewport->getMouseSens());
     }
+}
+
+void CameraWidget::initControlsShowHideButtonsAndLayout()
+{
+    controlsShowHideButtonsLayout = new QHBoxLayout();
+    initLayoutSpacing(controlsShowHideButtonsLayout, 0, 2);
+
+    auto add = [this](QToolButton* w)
+    {
+        controlsShowHideButtonsLayout->addWidget(w);
+        return w;
+    };
+
+    
+    posControlShow              = add(CWControls::makeEnableControlButton("Pos",    posControl,             this));
+    lookatControlShow           = add(CWControls::makeEnableControlButton("LookAt", lookatControl,          this));
+    yfovControlShow             = add(CWControls::makeEnableControlButton("Fov",    yfovControl,            this));
+    pitchControlShow            = add(CWControls::makeEnableControlButton("P°",     pitchControl,           this));
+    yawControlShow              = add(CWControls::makeEnableControlButton("Y°",     yawControl,             this));
+    rollControlShow             = add(CWControls::makeEnableControlButton("R°",     rollControl,            this));
+    speedControlShow            = add(CWControls::makeEnableControlButton("Speed",  speedControl,           this));
+    msensControlShow            = add(CWControls::makeEnableControlButton("Sens",   msensControl,           this));
+    scaleConstraintControlShow  = add(CWControls::makeEnableControlButton("SLim",   scaleConstraintControl, this));
+
+    controlsShowHideButtonsLayout->addStretch();
 }
 
 void CameraWidget::renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender)

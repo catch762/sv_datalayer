@@ -1,5 +1,6 @@
 #pragma once
 #include "sv_qtcommon.h"
+#include <QToolButton>
 
 class CWControls
 {
@@ -36,6 +37,19 @@ public:
         btn->setChecked(false);
 
         return btn;
+    }
+
+    static QToolButton* makeEnableControlButton(const QString& text, QWidget* controlWidget, QWidget* parent)
+    {
+        auto* button = new QToolButton(parent);
+        button->setText(text);
+        button->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextOnly);
+        button->setArrowType(Qt::ArrowType::NoArrow);
+        button->setCheckable(true);
+        
+        QObject::connect(button, &QToolButton::toggled, controlWidget, &QWidget::setVisible);
+
+        return button;
     }
 
 public:
@@ -108,6 +122,8 @@ public:
         activateButton = CWControls::makeStdLeftButton(buttonText, this);
         posWidget = new SpinboxesVec3({}, this);
 
+        //SV_LOG(widgetInfo(posWidget));
+
         connect(posWidget, &SpinboxesVec3::valueChanged, this, &PositionControl::valueChanged);
 
         connect(activateButton, &QPushButton::clicked, this, [this]()
@@ -126,6 +142,13 @@ public:
     void setValue(glm::vec3 val)
     {
         posWidget->setValue(val);
+    }
+
+    void log()
+    {
+        SV_LOG(widgetInfo(this));
+        SV_LOG(widgetInfo(activateButton));
+        SV_LOG(widgetInfo(posWidget));
     }
 
 signals:

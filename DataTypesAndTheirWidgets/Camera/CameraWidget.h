@@ -19,6 +19,7 @@ public:
 
 private:
     void initControls();
+    void initControlsShowHideButtonsAndLayout();
 
     void updateUiFromCamera();
 
@@ -26,7 +27,7 @@ private:
 
 
 private:
-    QGridLayout*    layout                  = nullptr;
+    QVBoxLayout*    layout                  = nullptr;
     CameraViewport*     cameraViewport      = nullptr;
 #if CAMERAWIDGET_ENABLE_DEBUGVIEWPORT
     CameraViewport*     cameraViewportDbg  = nullptr;
@@ -35,6 +36,15 @@ private:
     
 
     QHBoxLayout*        controlsShowHideButtonsLayout   = nullptr;
+    QToolButton*            posControlShow              = nullptr;
+    QToolButton*            lookatControlShow           = nullptr;
+    QToolButton*            yfovControlShow             = nullptr;
+    QToolButton*            pitchControlShow            = nullptr;
+    QToolButton*            yawControlShow              = nullptr;
+    QToolButton*            rollControlShow             = nullptr;
+    QToolButton*            speedControlShow            = nullptr;
+    QToolButton*            msensControlShow            = nullptr;
+    QToolButton*            scaleConstraintControlShow  = nullptr;
     QVBoxLayout*        controlsLayout                  = nullptr;
     PositionControl*        posControl                  = nullptr; 
     PositionControl*        lookatControl               = nullptr; 

@@ -16,13 +16,52 @@ CameraViewport::CameraViewport(QWidget* parent) : QWidget(parent)
 
 int CameraViewport::getKey(QKeyEvent* event)
 {
-    //or nativeScanCode() or nativeVirtualKey() ?
-    return event->key();
+    // The problem is, when i change system language i no longer get same key code in event.
+    // There are 3 ways to get key: key() or nativeScanCode() or nativeVirtualKey()
+
+    // There is simply no good built-in-Qt cross-platform way to check
+    // "is user pressing fucking W key regardless of his OS and layout language"
+
+    // So i go with VK codes because they kinda match usual key() except for shift/control/alt.
+    // This probably will break on linux and to fix this i need to reinvent a bicycle and
+    // make another abstraction layer which i have no desire to do at the moment.
+
+    auto k  = event->key();
+    auto sc = event->nativeScanCode();
+    auto vk = event->nativeVirtualKey();
+
+    //SV_LOG(std::format("k {} sc {} vk {}", k, sc, vk));
+
+    const int VK_SHIFT   = 16;
+    const int VK_CONTROL = 17;
+    const int VK_ALT     = 18;
+
+    // Return code in same Qt format as typically in event->key()
+    switch (vk)
+    {
+        case VK_SHIFT:      return Qt::Key_Shift;
+        case VK_CONTROL:    return Qt::Key_Control;
+        case VK_ALT:        return Qt::Key_Alt;
+        default:            return vk;
+    }
+}
+
+bool CameraViewport::hasPressedKeyForActionThatNeedsUpdatingWidget()
+{
+    for (auto pressedKey : keysPressed)
+    {
+        if (pressedKey != Qt::Key_Shift && pressedKey != Qt::Key_Alt)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void CameraViewport::keyPressEvent(QKeyEvent* event)
 {
-    static const QSet<int> keysToTrack = { Qt::Key_W,
+    static const QSet<int> keysToTrack = {  Qt::Key_W,
                                             Qt::Key_A,
                                             Qt::Key_S,
                                             Qt::Key_D,
@@ -33,7 +72,9 @@ void CameraViewport::keyPressEvent(QKeyEvent* event)
                                             Qt::Key_Left,
                                             Qt::Key_Right,
                                             Qt::Key_Space,
-                                            Qt::Key_Control };
+                                            Qt::Key_Control,
+                                            Qt::Key_Shift,
+                                            Qt::Key_Alt };
 
     auto theKey = getKey(event);
 
@@ -41,7 +82,10 @@ void CameraViewport::keyPressEvent(QKeyEvent* event)
     {
         keysPressed.insert(theKey);
 
-        setUpdatesEnabled(true);
+        //so that we receive release even if we switch focus to other widget/window
+        grabKeyboard(); 
+
+        setUpdatesEnabled(hasPressedKeyForActionThatNeedsUpdatingWidget());
     }
     else
     {
@@ -57,7 +101,12 @@ void CameraViewport::keyReleaseEvent(QKeyEvent* event)
     {
         keysPressed.remove(theKey);
 
-        setUpdatesEnabled(!keysPressed.isEmpty());
+        if (keysPressed.isEmpty())
+        {
+            releaseKeyboard();
+        }
+
+        setUpdatesEnabled(hasPressedKeyForActionThatNeedsUpdatingWidget());
     }
     else
     {
@@ -344,7 +393,7 @@ bool CameraViewport::applyMovementByKeys()
         moveUpward -= 1;
     }
 
-    auto moveVec = glm::vec3{ moveRight, moveUpward, moveForward } * moveSpeed;
+    auto moveVec = glm::vec3{ moveRight, moveUpward, moveForward } * moveSpeed * getShiftOrAltSpeedModifier();
 
     if (glm::length(moveVec) > 0.000001)
     {
@@ -395,6 +444,16 @@ bool CameraViewport::applyRotationByKeys()
         return true;
     }
     else return false;
+}
+
+float CameraViewport::getShiftOrAltSpeedModifier()
+{
+    float modifier = 1.0;
+
+    if (keysPressed.contains(Qt::Key_Shift)) modifier *= 8;
+    if (keysPressed.contains(Qt::Key_Alt  )) modifier /= 8;
+
+    return modifier;
 }
 
 void CameraViewport::doUpdate()
