@@ -22,7 +22,7 @@ public:
     {
         QPushButton* btn = new QPushButton(buttonText, parent);
 
-        btn->setStyleSheet(defaultPushButtonStyleWithoutMargins());
+        btn->setStyleSheet(myDefaultPushButtonStyle());
 
         btn->setFixedSize(LeftmostControlWidth, ControlHeight);
         return btn;
@@ -37,8 +37,6 @@ public:
 
         return btn;
     }
-
-    static QPushButton* makeToggleControl
 
 public:
     static constexpr float maxMoveSpeed = 0.075;
