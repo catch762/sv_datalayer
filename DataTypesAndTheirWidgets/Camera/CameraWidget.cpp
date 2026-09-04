@@ -242,7 +242,7 @@ void CameraWidget::initControlsShowHideButtons()
 
 void CameraWidget::renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender)
 {
-    vp.fillWithColor(p, additionalCameraToRender ? QColor(0, 0, 0) : QColor(55, 55, 55));
+    vp.fillWithColor(p, additionalCameraToRender ? QColor(10, 10, 10) : QColor(25, 25, 25));
 
     vp.drawStandardGrid(p);
 
