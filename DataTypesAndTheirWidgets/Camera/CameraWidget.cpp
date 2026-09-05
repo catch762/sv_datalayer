@@ -101,7 +101,7 @@ void CameraWidget::initControls()
     {
         connect(yfovControl, &ValueControl::valueChanged, this, [this](double degrees)
         {
-                posControl->log();
+                //posControl->log();
             cameraViewport->changeCamera([degrees](auto& camera)
             {
                 camera.setYFov(glm::radians(degrees));

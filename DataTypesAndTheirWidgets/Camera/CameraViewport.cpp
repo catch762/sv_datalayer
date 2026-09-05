@@ -83,7 +83,7 @@ void CameraViewport::keyPressEvent(QKeyEvent* event)
         keysPressed.insert(theKey);
 
         //so that we receive release even if we switch focus to other widget/window
-        grabKeyboard(); 
+        //grabKeyboard(); 
 
         setUpdatesEnabled(hasPressedKeyForActionThatNeedsUpdatingWidget());
     }
@@ -103,7 +103,7 @@ void CameraViewport::keyReleaseEvent(QKeyEvent* event)
 
         if (keysPressed.isEmpty())
         {
-            releaseKeyboard();
+            //releaseKeyboard();
         }
 
         setUpdatesEnabled(hasPressedKeyForActionThatNeedsUpdatingWidget());
