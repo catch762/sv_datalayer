@@ -191,7 +191,7 @@ void CameraWidget::updateUiFromCamera()
 
     {
         QSignalBlocker block(yfovControl);
-        pitchControl->setValue(glm::degrees(camera.getYFov()));
+        yfovControl->setValue(glm::degrees(camera.getYFov()));
     }
 
     {
