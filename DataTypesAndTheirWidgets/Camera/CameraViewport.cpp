@@ -22,7 +22,7 @@ int CameraViewport::getKey(QKeyEvent* event)
     // There is simply no good built-in-Qt cross-platform way to check
     // "is user pressing fucking W key regardless of his OS and layout language"
 
-    // So i go with VK codes because they kinda match usual key() except for shift/control/alt.
+    // So i go with VK codes because they kinda match usual key() except for [shift/control/alt...]
     // This probably will break on linux and to fix this i need to reinvent a bicycle and
     // make another abstraction layer which i have no desire to do at the moment.
 
@@ -32,9 +32,13 @@ int CameraViewport::getKey(QKeyEvent* event)
 
     //SV_LOG(std::format("k {} sc {} vk {}", k, sc, vk));
 
-    const int VK_SHIFT   = 16;
-    const int VK_CONTROL = 17;
-    const int VK_ALT     = 18;
+    const int VK_SHIFT      = 16;
+    const int VK_CONTROL    = 17;
+    const int VK_ALT        = 18;
+    const int VK_LEFT       = 37;
+    const int VK_UP         = 38;
+    const int VK_RIGHT      = 39;
+    const int VK_DOWN       = 40;
 
     // Return code in same Qt format as typically in event->key()
     switch (vk)
@@ -42,6 +46,10 @@ int CameraViewport::getKey(QKeyEvent* event)
         case VK_SHIFT:      return Qt::Key_Shift;
         case VK_CONTROL:    return Qt::Key_Control;
         case VK_ALT:        return Qt::Key_Alt;
+        case VK_LEFT:       return Qt::Key_Left;
+        case VK_RIGHT:      return Qt::Key_Right;
+        case VK_DOWN:       return Qt::Key_Down;
+        case VK_UP:         return Qt::Key_Up;
         default:            return vk;
     }
 }
@@ -175,11 +183,11 @@ void CameraViewport::paintEvent(QPaintEvent* event)
     }
 }
 
-BasicPlaneCamera& CameraViewport::getCamera()
+BasicFPSCamera& CameraViewport::getCamera()
 {
     return camera;
 }
-const BasicPlaneCamera& CameraViewport::getCamera() const
+const BasicFPSCamera& CameraViewport::getCamera() const
 {
     return camera;
 }
@@ -194,7 +202,7 @@ void CameraViewport::drawWorldAxes(QPainter& p)
     drawAxes(p, { 0,0,0 }, { 1,0,0 }, { 0,1,0 }, { 0,0,1 });
 }
 
-void CameraViewport::drawCameraAxes(QPainter& p, const BasicPlaneCamera& camera)
+void CameraViewport::drawCameraAxes(QPainter& p, const BasicFPSCamera& camera)
 {
     drawAxes(p, camera.getPos(), camera.getDirRight(), camera.getDirUp(), camera.getDir());
 }

@@ -19,7 +19,7 @@ SV_REGTYPENAME(CameraData);
 //
 // CameraViewport looks like rectangle with what camera sees, no any other ui elements.
 // 
-// It owns its BasicPlaneCamera and provides controlling via keys/mouse,
+// It owns its BasicFPSCamera and provides controlling via keys/mouse,
 // as long as you clicked on a widget.
 //
 // It also provides all the drawing functions like drawLine, etc.
@@ -48,11 +48,11 @@ public:
 
     void paintEvent(QPaintEvent* event) override;
 
-    BasicPlaneCamera& getCamera();
-    const BasicPlaneCamera& getCamera() const;
+    BasicFPSCamera& getCamera();
+    const BasicFPSCamera& getCamera() const;
 
     template<typename CameraChangerFunc>
-        requires std::is_invocable_v<CameraChangerFunc, BasicPlaneCamera&>
+        requires std::is_invocable_v<CameraChangerFunc, BasicFPSCamera&>
     void changeCamera(const CameraChangerFunc& changerFunc)
     {
         changerFunc(camera);
@@ -92,7 +92,7 @@ public:
     void drawWorldAxes(QPainter& p);
 
     //this draws camera forward dir as Z axis, although its -Z really
-    void drawCameraAxes(QPainter& p, const BasicPlaneCamera& camera);
+    void drawCameraAxes(QPainter& p, const BasicFPSCamera& camera);
 
     template<typename LineVisitor>
         requires std::is_invocable_r_v<void, LineVisitor, glm::vec3, glm::vec3, int /*id, x=0 y=1 z=2*/>
@@ -118,7 +118,7 @@ public:
     int printText(QPainter& p, const QString& text, QColor color = Qt::white, int startY = 0);
 
 signals:
-    void cameraChanged(const BasicPlaneCamera& camera);
+    void cameraChanged(const BasicFPSCamera& camera);
 
 private:
     bool hasPressedKeyForActionThatNeedsUpdatingWidget();
@@ -137,7 +137,7 @@ private:
     void doUpdate();
 
 private:
-    BasicPlaneCamera camera;
+    BasicFPSCamera camera;
 
     QTimer updateTimer;
 

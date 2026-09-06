@@ -182,7 +182,7 @@ void CameraWidget::initControls()
 
 void CameraWidget::updateUiFromCamera()
 {
-    const BasicPlaneCamera& camera = cameraViewport->getCamera();
+    const BasicFPSCamera& camera = cameraViewport->getCamera();
 
     {
         QSignalBlocker block(posControl);
