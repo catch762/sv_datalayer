@@ -1,6 +1,6 @@
 #pragma once
 #include "CameraViewport.h"
-
+#include "CameraData.h"
 
 
 // 1 or 0.

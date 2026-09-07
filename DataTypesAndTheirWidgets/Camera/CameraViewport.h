@@ -4,17 +4,6 @@
 #include <QTextLayout>
 #include <QApplication>
 
-//todo delete this its unused, only for stub
-struct CameraData
-{
-    glm::vec3 pos = {};
-    float	  roll = 0;
-    glm::vec3 dir = glm::vec3(0, 0, -1);
-    float	  fov = 45;
-};
-SV_REGTYPENAME(CameraData);
-
-
 //*************************************************************************************
 //
 // CameraViewport looks like rectangle with what camera sees, no any other ui elements.
