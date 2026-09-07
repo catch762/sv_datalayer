@@ -6,7 +6,7 @@
 // 1 or 0.
 // This adds second viewport, which renders same as first one, but with second camera,
 // and you also can see first camera in that view. Helps debugging camera rotation code.
-#define CAMERAWIDGET_ENABLE_DEBUGVIEWPORT 1
+#define CAMERAWIDGET_ENABLE_DEBUGVIEWPORT 0
 
 class ValueControl;
 class PositionControl;
@@ -14,8 +14,15 @@ class ScaleConstraintControl;
 
 class CameraWidget : public QWidget
 {
+    Q_OBJECT
 public:
-    CameraWidget(QWidget* parent = nullptr);
+    CameraWidget(const CameraDataOpt& camOpt = {}, QWidget* parent = nullptr);
+
+    CameraData getValue() const;
+    void setValue(const CameraData& cam);
+
+signals:
+    void valueChanged(const CameraData& cam);
 
 private:
     void initControls();
@@ -25,6 +32,7 @@ private:
 
     static void renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender = nullptr);
 
+    
 
 private:
     QVBoxLayout*    layout                  = nullptr;

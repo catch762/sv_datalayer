@@ -455,7 +455,42 @@ private:
         &EnumVecWidget::setValue> helper;
 };
 
+class CameraNodeWidget : public NodeWidget
+{
+public:
+    CameraNodeWidget(   DataNodeShared              node,
+                        const QString&              name = {},
+                        const WidgetOptionsJsonOpt& options = {},
+                        QWidget*                    parent = nullptr)
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+        helper.initWidgetWithInitialVal();
+    }
 
+    bool setNodeValueFromWidgetValue() override
+    {
+        return helper.setNodeValueFromWidgetValue();
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
+
+    /*
+    virtual WidgetOptionsJsonOpt makeContentWidgetOptions() const override
+    {
+        return helper.widget->makeOptions();
+    };
+    */
+
+private:
+    NodeWidgetHelper<CameraData,
+                    CameraWidget,
+                    &CameraWidget::valueChanged,
+                    &CameraWidget::getValue,
+                    &CameraWidget::setValue> helper;
+};
 
 template <class DerivedNodeWidgetType>
 NodeWidget* widgetMaker(DataNodeShared leaf, const WidgetOptionsJsonOpt& options)
@@ -482,4 +517,5 @@ void DefaultWidgetMakers::RegisterEverything()
     registerWidgetMakerForType<LimitedDoubleVec,    LimitedDoubleVecNodeWidget>();
     registerWidgetMakerForType<Enum,                EnumNodeWidget>();
     registerWidgetMakerForType<EnumVec,             EnumVecNodeWidget>();
+    registerWidgetMakerForType<CameraData,          CameraNodeWidget>();
 }

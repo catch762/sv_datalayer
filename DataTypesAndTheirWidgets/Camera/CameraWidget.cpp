@@ -2,16 +2,25 @@
 #include "CameraWidgetControls.h"
 
 
-CameraWidget::CameraWidget(QWidget* parent) : QWidget(parent)
+CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidget(parent)
 {
     layout = new QVBoxLayout(this);
     initLayoutSpacing(layout, 2, 2);
 
     //viewport on the left
     cameraViewport = new CameraViewport(this);
+    if (camOpt)
+    {
+        setOnCamera(cameraViewport->getCamera(), camOpt.value());
+    }
+
     cameraViewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     cameraViewport->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, nullptr));
-    connect(cameraViewport, &CameraViewport::cameraChanged, this, &CameraWidget::updateUiFromCamera);
+    connect(cameraViewport, &CameraViewport::cameraChanged, this, [this]()
+    {
+        updateUiFromCamera();
+        emit valueChanged(getValue());
+    });
     layout->addWidget(cameraViewport, 1);
 
     //optional debug viewport in the middle
@@ -178,6 +187,18 @@ void CameraWidget::initControls()
     iterateImmediateWidgets(controlsLayout, [](QWidget* w) { w->hide(); });
 
     controlsLayout->addStretch();
+}
+
+CameraData CameraWidget::getValue() const
+{
+    return getFromCamera(cameraViewport->getCamera());
+}
+void CameraWidget::setValue(const CameraData& camData)
+{
+    cameraViewport->changeCamera([&](auto& camera)
+    {
+        setOnCamera(camera, camData);
+    });
 }
 
 void CameraWidget::updateUiFromCamera()

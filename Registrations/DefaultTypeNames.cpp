@@ -52,4 +52,5 @@ void DefaultTypeNames::registerEverything()
 	TypeNames::registerNameFunction<LimitedDoubleVec>();
 	TypeNames::registerNameFunction<Enum>();
 	TypeNames::registerNameFunction<EnumVec>();
+	TypeNames::registerNameFunction<CameraData>();
 }
