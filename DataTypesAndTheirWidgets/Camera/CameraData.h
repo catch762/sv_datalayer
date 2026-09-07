@@ -1,6 +1,7 @@
 #pragma once
 #include "sv_qtcommon.h"
 #include "SerializationLogic/SerializerInterface.h"
+#include "Interpolation/InterpolationInterface.h"
 
 //Every var will be stored in vec4, so im packing multiple vars in vec4's to save space
 struct CameraData
@@ -10,6 +11,15 @@ struct CameraData
     glm::vec3 dirUp             = glm::vec3(0, 1, 0);
     glm::vec3 dirRight          = glm::vec3(1, 0, 0);
     glm::vec4 PitchYawRollYfov  = { 0.0f,  0.0f,  0.0f, glm::radians(45.0f) };
+
+    bool operator==(const CameraData& other) const
+    {
+        return  glmVecEquals(pos,               other.pos)      &&
+                glmVecEquals(dir,               other.dir)      &&
+                glmVecEquals(dirUp,             other.dirUp)    &&
+                glmVecEquals(dirRight,          other.dirRight) &&
+                glmVecEquals(PitchYawRollYfov,  other.PitchYawRollYfov);
+    }
 };
 SV_REGTYPENAME(CameraData);
 SV_DECL_OPT(CameraData);
@@ -70,5 +80,29 @@ public:
         return CameraData{
             *pos, *dir, *dirUp, *dirRight, *PitchYawRollYfov
         };
+    }
+};
+
+template<>
+class Interpolator<CameraData>
+{
+public:
+    static void interpolate(const CameraData&   A, 
+                            const CameraData&   B, 
+                            CameraData&         Result, 
+                            double              ratioAToB01)
+    {
+        //we cant just interpolate vectors, we have to interpolate all we can
+        //(angles) then set it on camera and get final dirs
+
+        CameraData temp{};
+        temp.pos                = glm::mix(A.pos,               B.pos,              ratioAToB01);
+        temp.PitchYawRollYfov   = glm::mix(A.PitchYawRollYfov,  B.PitchYawRollYfov, ratioAToB01);
+
+        BasicFPSCamera camera;
+
+        //Now this camera contains proper direction vectors
+        setOnCamera(camera, temp);
+        Result = getFromCamera(camera);
     }
 };

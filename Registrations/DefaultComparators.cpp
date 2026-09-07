@@ -18,5 +18,6 @@ void DefaultComparators::registerEverything()
     ComparisonSystem::registerDefaultEqualsForType<LimitedDoubleVec>();
     ComparisonSystem::registerDefaultEqualsForType<Enum>();
     ComparisonSystem::registerDefaultEqualsForType<EnumVec>();
+    ComparisonSystem::registerDefaultEqualsForType<CameraData>();
 
 }

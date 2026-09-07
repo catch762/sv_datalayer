@@ -15,6 +15,7 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
     }
 
     cameraViewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    cameraViewport->setMinimumHeight(120);
     cameraViewport->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, nullptr));
     connect(cameraViewport, &CameraViewport::cameraChanged, this, [this]()
     {
@@ -59,12 +60,12 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
     layout->addLayout(controlsLayout);
 
     //Initial controls visibility:
-    posControlShow->toggle();
-    lookatControlShow->toggle();
+    //posControlShow->toggle();
+    //lookatControlShow->toggle();
     yfovControlShow->toggle();
-    pitchControlShow->toggle();
-    yawControlShow->toggle();
-    rollControlShow->toggle();
+    //pitchControlShow->toggle();
+    //yawControlShow->toggle();
+    //rollControlShow->toggle();
 }
 
 
@@ -275,5 +276,5 @@ void CameraWidget::renderScene(CameraViewport& vp, QPainter& p, const CameraView
     }
 
     int textY = 0;
-    textY = vp.printText(p, QString::fromStdString(vp.getCamera().toString()), Qt::white, textY);
+    //textY = vp.printText(p, QString::fromStdString(vp.getCamera().toString()), Qt::white, textY);
 }

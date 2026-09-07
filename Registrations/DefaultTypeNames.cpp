@@ -24,6 +24,7 @@ void DefaultTypeNames::registerEverything()
 	SV_ASSERT(nameIs<Enum>("Enum"));
 	SV_ASSERT(nameIs<EnumVec>("EnumVec"));
 	SV_ASSERT(nameIs<BoolVec>("BoolVec"));
+	SV_ASSERT(nameIs<CameraData>("CameraData"));
 
 	/*
 #define CHECKT(T) if(typeName<T>()){ SV_LOG(#T " ok"); }else{SV_ERROR(#T " no name!");}
