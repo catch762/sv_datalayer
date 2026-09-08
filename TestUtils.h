@@ -15,7 +15,8 @@ inline DataNodeShared makeTreeWithAllDefaultTypes()
                 dncomp("mytypes", {
                     dnleaf("limiteddouble", LimitedDouble{6, 5, 7}),
                     dnleaf("limitedint",    LimitedInt{60,50,70}),
-                    dnleaf("enum",          Enum({{10, "ten"}, {20, "twenty"}, {100, "hundred"}}, 1))
+                    dnleaf("enum",          Enum({{10, "ten"}, {20, "twenty"}, {100, "hundred"}}, 1)),
+                    dnleaf("cameradata",    CameraData{})
                 }),
                 dncomp("vectypes", {
                     dnleaf("limiteddoublevec",  LimitedDoubleVec{LimitedDouble{6, 5, 7}, LimitedDouble{0,0,1}} ),

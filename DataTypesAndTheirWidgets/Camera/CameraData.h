@@ -2,6 +2,7 @@
 #include "sv_qtcommon.h"
 #include "SerializationLogic/SerializerInterface.h"
 #include "Interpolation/InterpolationInterface.h"
+#include "WidgetLogic/WidgetDefs.h"
 
 //Every var will be stored in vec4, so im packing multiple vars in vec4's to save space
 struct CameraData
@@ -54,17 +55,26 @@ class Serializer<CameraData>
 public:
     QJsonValue toJson(const CameraData& cd)
     {
-        QJsonArray res;
-        res << glmVecToJson(cd.pos)
-            << glmVecToJson(cd.dir)
-            << glmVecToJson(cd.dirUp)
-            << glmVecToJson(cd.dirRight)
-            << glmVecToJson(cd.PitchYawRollYfov);
-        return res;
+        QJsonObject obj;
+        obj[TypeFieldKey] = typeName<CameraData>();
+
+        QJsonArray data;
+        data    << glmVecToJson(cd.pos)
+                << glmVecToJson(cd.dir)
+                << glmVecToJson(cd.dirUp)
+                << glmVecToJson(cd.dirRight)
+                << glmVecToJson(cd.PitchYawRollYfov);
+
+        obj["data"] = data;
+
+        return obj;
     }
     std::optional<CameraData> fromJson(const QJsonValue& json)
     {
-        QJsonArrayOpt arr = convertJson<QJsonArray>(json);
+        QJsonObjectOpt obj = convertJson<QJsonObject>(json);
+        if (!obj) return std::nullopt;
+
+        QJsonArrayOpt arr = getFromJson<QJsonArray>(obj, "data");
         if (!arr) return std::nullopt;
 
         if (arr->size() != 5) return std::nullopt;
