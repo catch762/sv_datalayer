@@ -17,11 +17,7 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
     cameraViewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     cameraViewport->setMinimumHeight(120);
     cameraViewport->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, nullptr));
-    connect(cameraViewport, &CameraViewport::cameraChanged, this, [this]()
-    {
-        updateUiFromCamera();
-        emit valueChanged(getValue());
-    });
+    connect(cameraViewport, &CameraViewport::cameraChanged, this, &CameraWidget::onViewportCameraChanged);
     layout->addWidget(cameraViewport, 1);
 
     //optional debug viewport in the middle
@@ -30,7 +26,7 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
     cameraViewportDbg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     cameraViewportDbg->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, cameraViewport));
 
-    connect(cameraViewport, &CameraViewport::cameraChanged, this,
+    connect(this, &CameraWidget::filteredCameraChanged, this,
         [this]()
         {
             cameraViewportDbg->update();
@@ -68,7 +64,17 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
     //rollControlShow->toggle();
 }
 
+void CameraWidget::onViewportCameraChanged(const BasicFPSCamera& camera)
+{
+    if (scaleConstraintControl && scaleConstraintControl->scalingEnabled())
+    {
+        scaleConstraintControl->constrainCameraAndUpdatePhase(cameraViewport->getCamera());
+    }
 
+    updateUiFromCamera();
+    emit filteredCameraChanged(cameraViewport->getCamera());
+    emit valueChanged(getValue());
+}
 
 void CameraWidget::initControls()
 {
@@ -182,6 +188,15 @@ void CameraWidget::initControls()
     scaleConstraintControl = new ScaleConstraintControl(this);
     {
         controlsLayout->addWidget(scaleConstraintControl);
+
+        connect(scaleConstraintControl, &ScaleConstraintControl::settingsChanged,
+            this, [this](bool enabled, double, double)
+        {
+            cameraViewport->changeCamera([this](auto& camera)
+            {
+                scaleConstraintControl->constrainCameraAndUpdatePhase(camera);
+            });
+        });
     }
 
     //hide all controls by default
@@ -192,7 +207,7 @@ void CameraWidget::initControls()
 
 CameraData CameraWidget::getValue() const
 {
-    return getFromCamera(cameraViewport->getCamera());
+    return getFromCamera(cameraViewport->getCamera(), scaleConstraintControl->getModePhase());
 }
 void CameraWidget::setValue(const CameraData& camData)
 {
@@ -200,6 +215,7 @@ void CameraWidget::setValue(const CameraData& camData)
     {
         setOnCamera(camera, camData);
     });
+    scaleConstraintControl->setModePhase(camData.ModePhase);
 }
 
 void CameraWidget::updateUiFromCamera()

@@ -163,6 +163,7 @@ private:
     SpinboxesVec3* posWidget = nullptr;
 };
 
+//This control is highly experimental adhoc-for-nest-project shit.
 class ScaleConstraintControl : public QWidget
 {
     Q_OBJECT
@@ -180,8 +181,8 @@ public:
         scaleLabel  = new QLabel("Scale", this);
         scaleLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-        radiusSpinbox = makeStandardSpinbox(this, 0.0001, 1000.0, 1.0);
-        scaleSpinbox  = makeStandardSpinbox(this, 1.0, 100.0, 4.0);
+        radiusSpinbox = makeStandardSpinbox(this, 0.0001, 1000.0, 0.1666666, 7);
+        scaleSpinbox  = makeStandardSpinbox(this, 1.0, 100.0, 3.0);
 
         layout->addWidget(enabledBtn);
         layout->addWidget(radiusLabel);
@@ -201,6 +202,120 @@ public:
         connect(enabledBtn,     &QPushButton::toggled,          this, emitChanged);
     }
 
+    void constrainCameraAndUpdatePhase(BasicFPSCamera& camera)
+    {
+        auto [newPhase01u, constrainedCamPos] = constrainPos(camera.getPos(), getPhase(), getRadius(), getScale());
+
+        phase01u = newPhase01u;
+        camera.setPos(constrainedCamPos);
+    }
+
+    static std::pair<double /*newphase01u*/, glm::vec3 /*scaledpoint*/> constrainPos(   const glm::vec3 pos,
+                                                                                        const double    oldphase01u,
+                                                                                        const double    baseRadius,
+                                                                                        const double    scale)
+    {
+        SV_ASSERT(scale >= 1.0);
+
+        //********************************************************************
+        // 
+        // The following defines three zones:
+        // 
+        //  [zone +1]: [radiusPrev, radiusMin]
+        //  [zone  0]: [radiusMin,  radiusMax]
+        //  [zone -1]: [radiusMax,  radiusNext]
+        //
+        // We have to:
+        //      - calculate new phase01u (which is zone idx integer + ratio to next biggest zone from 0 to 1)
+        //      - return camera to zone 0.
+        // 
+        //********************************************************************
+        const double radiusPrev = baseRadius / scale;
+        const double radiusMin  = baseRadius;
+        const double radiusMax  = baseRadius * scale;
+        const double radiusNext = baseRadius * scale * scale;
+
+        //yes, we only calculate "horizontal plane radius" for now
+        const double radiusCur  = glm::length(glm::vec2(pos.x, pos.z));
+
+        //Lets limit it by "zone -1" to "zone +1"
+        const double radiusCurClamped = std::max(std::min(radiusCur, radiusNext), radiusPrev);
+
+        if (radiusCurClamped >= radiusMin && radiusCurClamped <= radiusMax)
+        {
+            //All in range.
+
+            const double newPhase01u = std::floor(oldphase01u) + getValue01Clamped(radiusCurClamped, radiusMax, radiusMin);
+
+            return { newPhase01u, pos };
+        }
+
+        //For smoother movement, we scale the distance travelled past the border?
+        //It kinda makes sense but im not sure tbh:
+
+        if (radiusCurClamped < radiusMin)
+        {
+            const double scaledDiff         = (radiusCurClamped - radiusMin) / scale;
+            const double radiusCurCorrected = radiusMin + scaledDiff;
+
+            const double phaseInZoneMinusOne = getValue01Clamped(radiusCurCorrected, radiusMin, radiusPrev);
+
+            const double newPhase01u = std::floor(oldphase01u) + 1.0 + phaseInZoneMinusOne;
+
+            return { newPhase01u, pos * float(scale) };
+        }
+        else // radiusCurClamped > radiusMax
+        {
+            const double scaledDiff         = (radiusCurClamped - radiusMax) * scale;
+            const double radiusCurCorrected = radiusMax + scaledDiff;
+
+            const double phaseInZonePlusOne = getValue01Clamped(radiusCurCorrected, radiusNext, radiusMax);
+
+            const double newPhase01u = std::floor(oldphase01u) - 1.0 + phaseInZonePlusOne;
+
+            return { newPhase01u, pos / float(scale) };
+        }
+    }
+
+    double getPhase() const
+    {
+        return phase01u;
+    }
+    void setPhase(double newPhase)
+    {
+        phase01u = newPhase;
+    }
+
+    double getRadius() const
+    {
+        return radiusSpinbox->value();
+    }
+    double getScale() const
+    {
+        return scaleSpinbox->value();
+    }
+
+    bool scalingEnabled() const
+    {
+        return enabledBtn->isChecked();
+    }
+    
+    glm::vec4 getModePhase() const
+    {
+        return glm::vec4{
+            scalingEnabled() ? 1.0f : 0.0f,
+            float(phase01u),
+            0.0f,
+            0.0f
+        };
+    }
+
+    void setModePhase(glm::vec4 ModePhase)
+    {
+        enabledBtn->setChecked(ModePhase.x > 0.5);
+        phase01u = ModePhase.y;
+    }
+
 signals:
     void settingsChanged(bool enabled, double radius, double scale);
 
@@ -210,4 +325,6 @@ private:
     QDoubleSpinBox* radiusSpinbox   = nullptr;
     QLabel*         scaleLabel      = nullptr;
     QDoubleSpinBox* scaleSpinbox    = nullptr;
+
+    double           phase01u = 0;
 };

@@ -22,9 +22,15 @@ public:
     void setValue(const CameraData& cam);
 
 signals:
+    //first camera viewport emits cameraChanged signal, then we apply some filtering logic
+    //(for example, constraints) and then we emit this final signal.
+    void filteredCameraChanged(const BasicFPSCamera& camera);
+
     void valueChanged(const CameraData& cam);
 
 private:
+    void onViewportCameraChanged(const BasicFPSCamera& camera);
+
     void initControls();
     void initControlsShowHideButtons();
 
