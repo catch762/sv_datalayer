@@ -465,6 +465,7 @@ public:
         : NodeWidget(node, name, options, parent), helper(this)
     {
         helper.initWidgetWithInitialVal();
+        helper.widget->applyOptions(options);
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -477,12 +478,10 @@ public:
         return helper.setWidgetValueFromNodeValue();
     }
 
-    /*
     virtual WidgetOptionsJsonOpt makeContentWidgetOptions() const override
     {
         return helper.widget->makeOptions();
     };
-    */
 
 private:
     NodeWidgetHelper<CameraData,

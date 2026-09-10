@@ -21,6 +21,10 @@ public:
     CameraData getValue() const;
     void setValue(const CameraData& cam);
 
+    WidgetOptionsJsonOpt makeOptions() const;
+
+    void applyOptions(const WidgetOptionsJsonOpt& options);
+
 signals:
     //first camera viewport emits cameraChanged signal, then we apply some filtering logic
     //(for example, constraints) and then we emit this final signal.
@@ -47,8 +51,6 @@ private:
     CameraViewport*     cameraViewportDbg  = nullptr;
 #endif
 
-    
-
     QHBoxLayout*        controlsShowHideButtonsLayout   = nullptr;
     QToolButton*            posControlShow              = nullptr;
     QToolButton*            lookatControlShow           = nullptr;
@@ -69,5 +71,4 @@ private:
     ValueControl*           speedControl                = nullptr;
     ValueControl*           msensControl                = nullptr;
     ScaleConstraintControl* scaleConstraintControl      = nullptr;
-
 };

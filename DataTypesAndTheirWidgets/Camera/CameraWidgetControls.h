@@ -53,7 +53,7 @@ public:
     }
 
 public:
-    static constexpr float maxMoveSpeed = 0.075;
+    static constexpr float maxMoveSpeed = 0.2;
     static float moveSpeedFromSpeed01(float speed01)
     {
         speed01 = std::clamp(speed01, 0.0f, 1.0f);
@@ -336,5 +336,5 @@ private:
     QLabel*         scaleLabel      = nullptr;
     QDoubleSpinBox* scaleSpinbox    = nullptr;
     QPushButton*    resetPhaseBtn   = nullptr;
-    double           phase01u = 0;
+    double          phase01u = 0;
 };

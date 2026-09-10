@@ -1,6 +1,8 @@
 #include "CameraWidget.h"
 #include "CameraWidgetControls.h"
 
+constexpr const char* MouseSensKey = "msens";
+constexpr const char* SpeedKey = "speed";
 
 CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidget(parent)
 {
@@ -71,6 +73,31 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
     //pitchControlShow->toggle();
     //yawControlShow->toggle();
     //rollControlShow->toggle();
+}
+
+WidgetOptionsJsonOpt CameraWidget::makeOptions() const
+{
+    WidgetOptionsJson options = {};
+    options[MouseSensKey]   = msensControl->getValue();
+    options[SpeedKey]       = speedControl->getValue();
+    return options;
+}
+
+void CameraWidget::applyOptions(const WidgetOptionsJsonOpt& options)
+{
+    if (!options) return;
+
+    if (auto sens = getFromJson<double>(*options, MouseSensKey))
+    {
+        msensControl->setValue(*sens);
+    }
+    else SV_ERROR("CameraWidget didnt find MouseSensKey in the options");
+
+    if (auto speed = getFromJson<double>(*options, SpeedKey))
+    {
+        speedControl->setValue(*speed);
+    }
+    else SV_ERROR("CameraWidget didnt find SpeedKey in the options");
 }
 
 void CameraWidget::onViewportCameraChanged(const BasicFPSCamera& camera)
