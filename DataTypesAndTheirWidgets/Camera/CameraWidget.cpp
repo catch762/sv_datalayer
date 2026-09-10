@@ -9,10 +9,12 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
 
     //viewport on the left
     cameraViewport = new CameraViewport(this);
+    /*
     if (camOpt)
     {
         setOnCamera(cameraViewport->getCamera(), camOpt.value());
     }
+    */
 
     cameraViewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     cameraViewport->setMinimumHeight(120);
@@ -42,6 +44,13 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
         //layout->addLayout(controlsLayout);
 
         initControls();
+
+        if (camOpt)
+        {
+            //this sets camera on viewport AND some controls
+            setValue(camOpt.value());
+        }
+
         updateUiFromCamera();
     }
 
@@ -190,7 +199,7 @@ void CameraWidget::initControls()
         controlsLayout->addWidget(scaleConstraintControl);
 
         connect(scaleConstraintControl, &ScaleConstraintControl::settingsChanged,
-            this, [this](bool enabled, double, double)
+            this, [this](bool enabled, double, double, double)
         {
             cameraViewport->changeCamera([this](auto& camera)
             {
@@ -211,11 +220,12 @@ CameraData CameraWidget::getValue() const
 }
 void CameraWidget::setValue(const CameraData& camData)
 {
+    scaleConstraintControl->setModePhase(camData.ModePhase);
     cameraViewport->changeCamera([&](auto& camera)
     {
         setOnCamera(camera, camData);
+        scaleConstraintControl->constrainCameraAndUpdatePhase(camera);
     });
-    scaleConstraintControl->setModePhase(camData.ModePhase);
 }
 
 void CameraWidget::updateUiFromCamera()

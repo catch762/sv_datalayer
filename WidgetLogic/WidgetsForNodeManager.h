@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "WidgetDefs.h"
 #include "NodeWidget.h"
+#include "DataLayerUtils.h"
 
 //******************************************************************************************
 //
@@ -41,12 +42,7 @@ public:
 
         container->push_back(WidgetEntry(widget));
 
-        SV_LOG(std::format("Registered widget (now {}) for node {}", container->size(), node));
-
-        if(node.lock()->getName() == "hello")
-        {
-            SV_LOG("this is it");
-        }
+        SV_LOG(DLLC::WidgetRegister, std::format("Registered widget (now {}) for node {}", container->size(), node));
     }
     
     static void updateAllWidgetsFromNodeState(ConstDataNodeWeak node);

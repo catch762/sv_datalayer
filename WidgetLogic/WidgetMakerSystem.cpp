@@ -88,7 +88,7 @@ NodeWidget* WidgetMakerSystem::createWidgetForNode( DataNodeShared              
 {
     SV_ASSERT(node);
 
-    SV_LOG(std::format("createWidgetForNode {} with options: {}", node, options ? jsonValueToString(*options) : QString("none")));
+    SV_LOG(DLLC::WidgetCreate, std::format("createWidgetForNode {} with options: {}", node, options ? jsonValueToString(*options) : QString("none")));
 
     NodeWidget* res = node->isLeaf() ? createWidgetForLeafNode                 (node, options) :
                                        recursivelyCreateWidgetsForCompositeNode(node, options);

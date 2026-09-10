@@ -4,7 +4,8 @@
 #include "Interpolation/InterpolationInterface.h"
 #include "WidgetLogic/WidgetDefs.h"
 
-//Every var will be stored in vec4, so im packing multiple vars in vec4's to save space
+//Every var will be stored in vec4, so im packing multiple vars in vec4's to save space.
+//What actually defines camera is 'PitchYawRoll' angles. Dir vectors is data DERIVED from angles.
 struct CameraData
 {
     glm::vec3 pos               = {};
@@ -31,7 +32,7 @@ struct CameraData
 SV_REGTYPENAME(CameraData);
 SV_DECL_OPT(CameraData);
 
-inline CameraData getFromCamera(const BasicFPSCamera& camera, Vec4Opt phase = std::nullopt)
+inline CameraData getFromCamera(const BasicFPSCamera& camera, Vec4Opt ModePhaseOpt = std::nullopt)
 {
     CameraData data;
     data.pos                = camera.getPos();
@@ -39,7 +40,7 @@ inline CameraData getFromCamera(const BasicFPSCamera& camera, Vec4Opt phase = st
     data.dirUp              = camera.getDirUp();
     data.dirRight           = camera.getDirRight();
     data.PitchYawRollYfov   = { camera.getPitch(), camera.getYaw(), camera.getRoll(), camera.getYFov()};
-    data.ModePhase          = phase.value_or(glm::vec4{});
+    data.ModePhase          = ModePhaseOpt.value_or(glm::vec4{});
 
     return data;
 }

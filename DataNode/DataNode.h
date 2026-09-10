@@ -444,7 +444,7 @@ private:
     static inline const QString valueKey    = "leafValue";  //mandatory for Leaf nodes
     static inline const QString childrenKey = "children";   //mandatory for Composite nodes
 
-    static inline const std::string logCategory = "DataNode";
+    static inline const char* logCategory = "DataNode";
 };
 
 SV_DECL_STD_FORMATTER(DataNode,             obj.basicInfo());

@@ -182,24 +182,36 @@ public:
         scaleLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
         radiusSpinbox = makeStandardSpinbox(this, 0.0001, 1000.0, 0.1666666, 7);
+        radiusSpinbox->setFixedWidth(65);
+
         scaleSpinbox  = makeStandardSpinbox(this, 1.0, 100.0, 3.0);
+
+        resetPhaseBtn = CWControls::makeStdLeftButton("Reset Ø", this);
+        resetPhaseBtn->setFixedWidth(55);
 
         layout->addWidget(enabledBtn);
         layout->addWidget(radiusLabel);
         layout->addWidget(radiusSpinbox);
         layout->addWidget(scaleLabel);
         layout->addWidget(scaleSpinbox);
+        layout->addWidget(resetPhaseBtn);
 
         auto emitChanged = [this]()
         {
             emit settingsChanged(enabledBtn->isChecked(),
                                  radiusSpinbox->value(),
-                                 scaleSpinbox->value());
+                                 scaleSpinbox->value(),
+                                 getPhase());
         };
 
         connect(radiusSpinbox,  &QDoubleSpinBox::valueChanged,  this, emitChanged);
         connect(scaleSpinbox,   &QDoubleSpinBox::valueChanged,  this, emitChanged);
         connect(enabledBtn,     &QPushButton::toggled,          this, emitChanged);
+        connect(resetPhaseBtn,  &QPushButton::clicked,          this, [this, emitChanged]()
+        {
+            phase01u = 0;
+            emitChanged();
+        });
     }
 
     void constrainCameraAndUpdatePhase(BasicFPSCamera& camera)
@@ -281,10 +293,6 @@ public:
     {
         return phase01u;
     }
-    void setPhase(double newPhase)
-    {
-        phase01u = newPhase;
-    }
 
     double getRadius() const
     {
@@ -305,8 +313,8 @@ public:
         return glm::vec4{
             scalingEnabled() ? 1.0f : 0.0f,
             float(phase01u),
-            0.0f,
-            0.0f
+            radiusSpinbox->value(),
+            scaleSpinbox->value()
         };
     }
 
@@ -314,10 +322,12 @@ public:
     {
         enabledBtn->setChecked(ModePhase.x > 0.5);
         phase01u = ModePhase.y;
+        radiusSpinbox->setValue(ModePhase.z);
+        scaleSpinbox->setValue(ModePhase.w);
     }
 
 signals:
-    void settingsChanged(bool enabled, double radius, double scale);
+    void settingsChanged(bool enabled, double radius, double scale, double phase01u);
 
 private:
     QPushButton*    enabledBtn      = nullptr;
@@ -325,6 +335,6 @@ private:
     QDoubleSpinBox* radiusSpinbox   = nullptr;
     QLabel*         scaleLabel      = nullptr;
     QDoubleSpinBox* scaleSpinbox    = nullptr;
-
+    QPushButton*    resetPhaseBtn   = nullptr;
     double           phase01u = 0;
 };
