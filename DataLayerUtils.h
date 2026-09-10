@@ -12,6 +12,6 @@ static constexpr auto MaxIntInUI    = std::numeric_limits<int>::max() / 10;
 class DLLC
 {
 public:
-	static inline const char* WidgetCreate = "wcreate";
-	static inline const char* WidgetRegister = "wreg";
+	static inline const char* WidgetCreate		= "wcreate";
+	static inline const char* WidgetRegister	= "wreg";
 };
