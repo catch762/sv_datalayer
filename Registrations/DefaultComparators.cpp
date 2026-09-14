@@ -19,5 +19,5 @@ void DefaultComparators::registerEverything()
     ComparisonSystem::registerDefaultEqualsForType<Enum>();
     ComparisonSystem::registerDefaultEqualsForType<EnumVec>();
     ComparisonSystem::registerDefaultEqualsForType<CameraData>();
-
+    ComparisonSystem::registerDefaultEqualsForType<QColor>();
 }

@@ -13,4 +13,5 @@ void DefaultInterpolators::registerEverything()
     InterpolationSystem::registerTypeInterpolator<LimitedIntVec>();
     InterpolationSystem::registerTypeInterpolator<LimitedDoubleVec>();
     InterpolationSystem::registerTypeInterpolator<CameraData>();
+    InterpolationSystem::registerTypeInterpolator<QColor>();
 }

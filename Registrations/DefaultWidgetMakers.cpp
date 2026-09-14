@@ -64,11 +64,22 @@ bool setWidgetValueFromNode(Widget* widget, ConstDataNodeWeak weakNode)
     return true;
 }
 
+// So, we are making Widget for type T, how are we setting initial value?
+// If there is constructor like QLineEdit(QString) we just use that,
+// otherwise we would construct a widget then call some .setValue() func on it
+enum class WidgetInitializingStrat
+{
+    DontInitializeWidget,
+    PassInitialValueInConstructor,
+    SetInitialValueSeparately
+};
+
 template<typename ValueType,
          typename WidgetType,
          auto WidgetChangedSignal,
          auto WidgetGetValueMethod,
-         auto WidgetSetValueMethod
+         auto WidgetSetValueMethod,
+         WidgetInitializingStrat WidgetInitStrat = WidgetInitializingStrat::PassInitialValueInConstructor
 >
 class NodeWidgetHelper
 {
@@ -78,6 +89,15 @@ public:
         widgetWrapper = _widgetWrapper;
         SV_ASSERT(widgetWrapper);
         SV_ASSERT(nodeHasProperContent());
+
+        if constexpr (WidgetInitStrat == WidgetInitializingStrat::PassInitialValueInConstructor)
+        {
+            initWidgetWithInitialVal();
+        }
+        else if constexpr (WidgetInitStrat == WidgetInitializingStrat::SetInitialValueSeparately)
+        {
+            initWidgetAndSetValOnIt();
+        }
     }
 
     bool nodeHasProperContent()
@@ -100,6 +120,7 @@ public:
         return setWidgetValueFromNode<ValueType, WidgetSetValueMethod>(widget, node());
     }
 
+private:
     //You call either of 2 variants below, or init widget manually:
     //1) When widget doesnt have constructor which lets you pass value in it.
     void initWidgetAndSetValOnIt()
@@ -121,7 +142,6 @@ public:
         trackWidgetValueChanges();
     }
 
-private:
     DataNodeWeak node()
     {
         return widgetWrapper->getNode();
@@ -141,7 +161,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetAndSetValOnIt();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -159,7 +178,8 @@ private:
                      QCheckBox, 
                      &QCheckBox::stateChanged, 
                      &QCheckBox::isChecked, 
-                     &QCheckBox::setChecked> helper;
+                     &QCheckBox::setChecked,
+                     WidgetInitializingStrat::SetInitialValueSeparately> helper;
 };
 
 class BoolVecNodeWidget : public NodeWidget
@@ -171,7 +191,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -201,7 +220,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -231,7 +249,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -271,7 +288,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
         helper.widget->setupButtonsOnWrapperParent(this, options);
     }
 
@@ -317,7 +333,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -357,8 +372,6 @@ public:
                     QWidget* parent = nullptr )
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
-
         helper.widget->setupButtonsOnWrapperParent(this, options);
     }
 
@@ -404,7 +417,6 @@ public:
         QWidget* parent = nullptr)
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -434,7 +446,6 @@ public:
         QWidget* parent = nullptr)
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
     }
 
     bool setNodeValueFromWidgetValue() override
@@ -464,7 +475,6 @@ public:
                         QWidget*                    parent = nullptr)
         : NodeWidget(node, name, options, parent), helper(this)
     {
-        helper.initWidgetWithInitialVal();
         helper.widget->applyOptions(options);
     }
 
@@ -489,6 +499,35 @@ private:
                     &CameraWidget::valueChanged,
                     &CameraWidget::getValue,
                     &CameraWidget::setValue> helper;
+};
+
+class QColorNodeWidget : public NodeWidget
+{
+public:
+    QColorNodeWidget(   DataNodeShared              node,
+                        const QString&              name = {},
+                        const WidgetOptionsJsonOpt& options = {},
+                        QWidget*                    parent = nullptr)
+        : NodeWidget(node, name, options, parent), helper(this)
+    {
+    }
+
+    bool setNodeValueFromWidgetValue() override
+    {
+        return helper.setNodeValueFromWidgetValue();
+    }
+
+    bool setWidgetValueFromNodeValue() override
+    {
+        return helper.setWidgetValueFromNodeValue();
+    }
+
+private:
+    NodeWidgetHelper<QColor,
+                    HSVAColorWidget,
+                    &HSVAColorWidget::colorChanged,
+                    &HSVAColorWidget::getColor,
+                    &HSVAColorWidget::setColor> helper;
 };
 
 template <class DerivedNodeWidgetType>
@@ -517,4 +556,5 @@ void DefaultWidgetMakers::RegisterEverything()
     registerWidgetMakerForType<Enum,                EnumNodeWidget>();
     registerWidgetMakerForType<EnumVec,             EnumVecNodeWidget>();
     registerWidgetMakerForType<CameraData,          CameraNodeWidget>();
+    registerWidgetMakerForType<QColor,              QColorNodeWidget>();
 }

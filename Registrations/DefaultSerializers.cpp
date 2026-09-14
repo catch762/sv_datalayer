@@ -26,5 +26,6 @@ void DefaultSerializers::RegisterEverything()
     system.registerSerialization<EnumVec>();
 
     system.registerSerialization<CameraData>();
+    system.registerSerialization<QColor>();
     
 }

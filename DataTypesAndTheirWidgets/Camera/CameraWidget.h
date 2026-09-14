@@ -40,7 +40,7 @@ private:
 
     void updateUiFromCamera();
 
-    static void renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender = nullptr);
+    void renderScene(CameraViewport& vp, QPainter& p, const CameraViewport* additionalCameraToRender = nullptr);
 
     
 

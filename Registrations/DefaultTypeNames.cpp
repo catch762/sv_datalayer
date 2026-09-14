@@ -54,4 +54,5 @@ void DefaultTypeNames::registerEverything()
 	TypeNames::registerNameFunction<Enum>();
 	TypeNames::registerNameFunction<EnumVec>();
 	TypeNames::registerNameFunction<CameraData>();
+	TypeNames::registerNameFunction<QColor>();
 }

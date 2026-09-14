@@ -3,6 +3,7 @@
 #include "SerializationLogic/SerializerInterface.h"
 #include "Interpolation/InterpolationInterface.h"
 #include "WidgetLogic/WidgetDefs.h"
+#include "CameraScaleConstraint.h"
 
 //Every var will be stored in vec4, so im packing multiple vars in vec4's to save space.
 //What actually defines camera is 'PitchYawRoll' angles. Dir vectors is data DERIVED from angles.
@@ -131,16 +132,24 @@ public:
         temp.pos                = glm::mix(A.pos,               B.pos,              ratioAToB01);
         temp.PitchYawRollYfov   = glm::mix(A.PitchYawRollYfov,  B.PitchYawRollYfov, ratioAToB01);
 
-        glm::vec4 ModePhase     = glm::mix(A.ModePhase,         B.ModePhase,        ratioAToB01);
-        bool A_phaseModeOn = A.ModePhase.x >= 0.5;
-        bool B_phaseModeOn = A.ModePhase.x >= 0.5;
-        if (A_phaseModeOn && B_phaseModeOn)
+        //its tricky, but lets start with initializing with mixed:
+        glm::vec4 ModePhase = glm::mix(A.ModePhase, B.ModePhase, ratioAToB01);
         {
-            ModePhase.x = 1.0;
-        }
-        else
-        {
-            ModePhase.x = 0.0;
+            bool A_phaseModeOn = A.ModePhase.x >= 0.5;
+            bool B_phaseModeOn = A.ModePhase.x >= 0.5;
+
+            if (A_phaseModeOn && B_phaseModeOn)
+            {
+                ModePhase.x = 1.0;
+
+                //see, if we are interpolating phases, then its phase which decides actual pos:
+
+                temp.pos = CameraScaleConstraint::applyPhase(temp.pos, ModePhase.y, ModePhase.z, ModePhase.w);
+            }
+            else
+            {
+                ModePhase.x = 0.0;
+            }
         }
 
         BasicFPSCamera camera;

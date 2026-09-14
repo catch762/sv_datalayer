@@ -20,7 +20,7 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
 
     cameraViewport->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     cameraViewport->setMinimumHeight(120);
-    cameraViewport->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, nullptr));
+    cameraViewport->setRenderFunc(std::bind(&CameraWidget::renderScene, this, std::placeholders::_1, std::placeholders::_2, nullptr));
     connect(cameraViewport, &CameraViewport::cameraChanged, this, &CameraWidget::onViewportCameraChanged);
     layout->addWidget(cameraViewport, 1);
 
@@ -28,7 +28,7 @@ CameraWidget::CameraWidget(const CameraDataOpt& camOpt, QWidget* parent) : QWidg
 #if CAMERAWIDGET_ENABLE_DEBUGVIEWPORT
     cameraViewportDbg = new CameraViewport(this);
     cameraViewportDbg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    cameraViewportDbg->setRenderFunc(std::bind(&CameraWidget::renderScene, std::placeholders::_1, std::placeholders::_2, cameraViewport));
+    cameraViewportDbg->setRenderFunc(std::bind(&CameraWidget::renderScene, this, std::placeholders::_1, std::placeholders::_2, cameraViewport));
 
     connect(this, &CameraWidget::filteredCameraChanged, this,
         [this]()
@@ -328,6 +328,9 @@ void CameraWidget::renderScene(CameraViewport& vp, QPainter& p, const CameraView
         vp.drawCameraAxes(p, additionalCameraToRender->getCamera());
     }
 
-    int textY = 0;
-    //textY = vp.printText(p, QString::fromStdString(vp.getCamera().toString()), Qt::white, textY);
+    if (scaleConstraintControl->scalingEnabled())
+    {
+        int textY = 0;
+        textY = vp.printText(p, QString("Phase: %1").arg(scaleConstraintControl->getPhase()), Qt::white, textY);
+    }
 }

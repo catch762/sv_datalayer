@@ -38,21 +38,25 @@ TEST_CASE("Interpolating trees")
         }
     };
 
-    const auto limd_A                 = LimitedDouble{60, 50, 70};
-    const auto limd_B                 = LimitedDouble{120, 100, 140};
-    const auto limd_ExpectedMixed     = LimitedDouble{90, 75, 105};
+    const auto limd_A                   = LimitedDouble{60, 50, 70};
+    const auto limd_B                   = LimitedDouble{120, 100, 140};
+    const auto limd_ExpectedMixed       = LimitedDouble{90, 75, 105};
 
-    const auto limint_A               = LimitedInt{50,0,100};
-    const auto limint_B               = LimitedInt{150,-10,300};
-    const auto limint_ExpectedMixed   = LimitedInt{100,-5,200};
+    const auto limint_A                 = LimitedInt{50,0,100};
+    const auto limint_B                 = LimitedInt{150,-10,300};
+    const auto limint_ExpectedMixed     = LimitedInt{100,-5,200};
 
-    const auto limdvec_A              = LimitedDoubleVec{LimitedDouble{10, 10, 50},     LimitedDouble{-10,100,-100}};
-    const auto limdvec_B              = LimitedDoubleVec{LimitedDouble{20, 20, 100},    LimitedDouble{-20,200,-200}};
-    const auto limdvec_ExpectedMixed  = LimitedDoubleVec{LimitedDouble{15, 15, 75},     LimitedDouble{-15,150,-150}};
+    const auto limdvec_A                = LimitedDoubleVec{LimitedDouble{10, 10, 50},     LimitedDouble{-10,100,-100}};
+    const auto limdvec_B                = LimitedDoubleVec{LimitedDouble{20, 20, 100},    LimitedDouble{-20,200,-200}};
+    const auto limdvec_ExpectedMixed    = LimitedDoubleVec{LimitedDouble{15, 15, 75},     LimitedDouble{-15,150,-150}};
 
-    const auto limivec_A              = LimitedIntVec   {LimitedInt{10,   0, 20},   LimitedInt{-10, 0,-20}};
-    const auto limivec_B              = LimitedIntVec   {LimitedInt{-100, 0, -200}, LimitedInt{-100,0,-200}};
-    const auto limivec_ExpectedMixed  = LimitedIntVec   {LimitedInt{-45,  0, -90},  LimitedInt{-55, 0,-110}};
+    const auto limivec_A                = LimitedIntVec   {LimitedInt{10,   0, 20},   LimitedInt{-10, 0,-20}};
+    const auto limivec_B                = LimitedIntVec   {LimitedInt{-100, 0, -200}, LimitedInt{-100,0,-200}};
+    const auto limivec_ExpectedMixed    = LimitedIntVec   {LimitedInt{-45,  0, -90},  LimitedInt{-55, 0,-110}};
+
+    const auto color_A                  = QColor(0,   0,    0,   255);
+    const auto color_B                  = QColor(200, 200,  200, 255);
+    const auto color_ExpectedMixed      = QColor(100, 100,  100, 255);
 
     checkVarsMixing(limd_A,     limd_B,     limd_ExpectedMixed);
     checkVarsMixing(limint_A,   limint_B,   limint_ExpectedMixed);
@@ -84,7 +88,8 @@ TEST_CASE("Interpolating trees")
                     dnleaf("limiteddouble",     limd_A),
                     dnleaf("limitedint",        limint_A),
                     dnleaf("limiteddoublevec",  limdvec_A),
-                    dnleaf("limitedintvec",     limivec_A)
+                    dnleaf("limitedintvec",     limivec_A),
+                    dnleaf("color",             color_A)
                 });
     };
     auto makeSubTreeForActualInterpolation_B = [&]()
@@ -93,7 +98,8 @@ TEST_CASE("Interpolating trees")
                     dnleaf("limiteddouble",     limd_B),
                     dnleaf("limitedint",        limint_B),
                     dnleaf("limiteddoublevec",  limdvec_B),
-                    dnleaf("limitedintvec",     limivec_B)
+                    dnleaf("limitedintvec",     limivec_B),
+                    dnleaf("color",             color_B)
                 });
     };
     auto makeSubTreeForActualInterpolation_ExpectedMixed = [&]()
@@ -102,7 +108,8 @@ TEST_CASE("Interpolating trees")
                     dnleaf("limiteddouble",     limd_ExpectedMixed),
                     dnleaf("limitedint",        limint_ExpectedMixed),
                     dnleaf("limiteddoublevec",  limdvec_ExpectedMixed),
-                    dnleaf("limitedintvec",     limivec_ExpectedMixed)
+                    dnleaf("limitedintvec",     limivec_ExpectedMixed),
+                    dnleaf("color",             color_ExpectedMixed)
                 });
     };
     

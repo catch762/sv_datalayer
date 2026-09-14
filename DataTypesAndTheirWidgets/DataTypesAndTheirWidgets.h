@@ -19,4 +19,6 @@
 
 #include "Camera/CameraWidget.h"
 
+#include "QColorAdaptation.h"
+
 //#include "VectorOfAnyTypeWidgetCreator.h"
