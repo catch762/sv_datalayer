@@ -302,13 +302,11 @@ bool visitStructurallyEqualTreesImpl(const Visitor& siblingVisitor, std::string 
                 }
             }
 
-            //First error on this line:
-            if (!visitStructurallyEqualTreesImpl<
-                CompareLeafValues,
-                Visitor,
-                decltype(*nodeFirst.tryGetChild(i)),
-                decltype(*nodesRest.tryGetChild(i))...
-            >(siblingVisitor, outMismatchInfo, _currentLevel + 1, *nodeFirst.tryGetChild(i), *nodesRest.tryGetChild(i)...))
+            if (!visitStructurallyEqualTreesImpl<CompareLeafValues,
+                                                 Visitor,
+                                                 decltype(*nodeFirst.tryGetChild(i)),
+                                                 decltype(*nodesRest.tryGetChild(i))...>
+                (siblingVisitor, outMismatchInfo, _currentLevel + 1, *nodeFirst.tryGetChild(i), *nodesRest.tryGetChild(i)...))
             {
                 //So, the call that decided that children were not equal did save
                 //error to 'outMismatchInfo' already - now we just silently return.
@@ -371,36 +369,3 @@ bool visitStructurallyEqualTrees(const Visitor&     siblingVisitor,
             nodeFirst, nodesRest...);
     }
 }
-
-/*
-inline void testvisitor()
-{
-
-    auto makeBaseTree = []()
-    {
-        return DataNode::makeComposite("a", {
-            DataNode::makeLeaf("a2-0", 5),
-            DataNode::makeLeaf("a2-1", 5),
-            DataNode::makeComposite("a2-2", {
-                DataNode::makeLeaf("a3-0", 5)
-            })
-        });
-    };
-
-    auto a = makeBaseTree();
-    auto b = makeBaseTree();
-    auto c = makeBaseTree();
-
-    c->tryGetChild(2)->tryGetCompositeData()->children[0].reset();
-
-    auto thevisit = [](const DataNode& a, const DataNode& b)
-    {
-        if (a.isLeaf())
-        {
-            SV_LOG(std::format("LEAVES {} AND {}", a, b));
-        }
-    };
-
-    treesAreStructurallyEqual_withMismatchLog(*a, *b, *c);
-}
-*/
