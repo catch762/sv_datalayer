@@ -100,7 +100,7 @@ NodeWidget::NodeWidget(DataNodeShared node,
         setNodeValueFromWidgetValue();
         if (auto notifier = NodeWidgetChangeNotifier::instance())
         {
-            emit notifier->someNodeWidgetChanged();
+            emit notifier->someNodeWidgetChanged(this);
         }
     });
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "sv_qtcommon.h"
 
+#include "DataNode/DataNodeHeader.h"
+
 //************************************************************************************************
 //
 // We, obviously, want to know when widget changes value. And do various things when it does.
@@ -13,6 +15,7 @@
 //
 //************************************************************************************************
 
+class NodeWidget;
 class NodeWidgetChangeNotifier : public QObject
 {
 	Q_OBJECT
@@ -46,7 +49,7 @@ public:
 
 signals:
 	//Emitted when any NodeWidget existing in entire app changes its value.
-	void someNodeWidgetChanged();
+	void someNodeWidgetChanged(NodeWidget* widget);
 
 private:
 	NodeWidgetChangeNotifier() : QObject()
