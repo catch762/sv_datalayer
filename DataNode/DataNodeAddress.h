@@ -34,7 +34,7 @@ SV_DECL_ALIASES(NodeAddressString);
 inline constexpr auto DataNodeAddressSeparator = "/";
 
 
-inline NodeAddressStringOrError getAbsAddress(const DataNodeShared& node)
+inline NodeAddressStringOrError getAbsAddress(const ConstDataNodeShared& node)
 {
 	if (!node)
 	{
@@ -43,7 +43,7 @@ inline NodeAddressStringOrError getAbsAddress(const DataNodeShared& node)
 
 	QString res;
 
-	DataNodeShared curNode = node;
+	ConstDataNodeShared curNode = node;
 
 	while (true)
 	{

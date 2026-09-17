@@ -2,13 +2,17 @@
 #include "DataNode.h"
 #include <functional>
 
+template <typename T>
+concept ValidNodeRefType = std::same_as<T, DataNode&> || std::same_as<T, const DataNode&>;
+
 //****************************************************************************************************************
 //
 // This is impl function which does all the work - i ll describe it in depth.
 // But you really should use helper functions below. You ll figure them out
 //
-// Function takes variable number of trees. So, you pass N trees. They are supposed to be
-// structurally equal. What this means is:
+// Function takes variable number of trees. So, you pass N trees. They are supposed
+// to be STRUCTURALLY EQUAL. What this means is:
+// 
 //     "Trees must have exact same structure - node types, node names, child count, leaf value types,
 //      basically everything, except one thing: while leaf nodes must have same value type,
 //      they may have different actual values"
@@ -33,19 +37,22 @@
 // 'nodeFirst, nodesRest'   - just pass your DataNode& trees one by one, there must be at least two.
 //
 //****************************************************************************************************************
-template <bool CompareLeafValues, class Visitor, class... OtherDataNodes>
-bool visitStructurallyEqualTreesImpl(const Visitor&             siblingVisitor,
-                                     std::string*               outMismatchInfo,
-                                     int                        _currentLevel,
-                                     const DataNode&            nodeFirst,
-                                     const OtherDataNodes&...   nodesRest);
+template <  bool CompareLeafValues,
+            class Visitor,
+            ValidNodeRefType NodeRefType,
+            ValidNodeRefType... OtherDataNodes  >
+bool visitStructurallyEqualTreesImpl(const Visitor&     siblingVisitor,
+                                     std::string*       outMismatchInfo,
+                                     int                _currentLevel,
+                                     NodeRefType        nodeFirst,
+                                     OtherDataNodes...  nodesRest);
 
 // 1) Const nodes version - just calls Impl
 template <bool CompareLeafValues, class Visitor, class... OtherDataNodes>
 bool visitStructurallyEqualConstTrees(const Visitor&             siblingVisitor,
-                                 std::string*               outMismatchInfo,
-                                 const DataNode&            nodeFirst,
-                                 const OtherDataNodes&...   nodesRest);
+                                      std::string*               outMismatchInfo,
+                                      const DataNode&            nodeFirst,
+                                      const OtherDataNodes&...   nodesRest);
 
 // 2) Non-const nodes version - wraps visitor and calls Impl
 template <bool CompareLeafValues, class Visitor, class... OtherDataNodes>
@@ -133,8 +140,11 @@ inline StringErrOpt visitTwoStructurallyEqualTrees_withMismatchInfo(const DataNo
 // IMPLEMENTATION FUNCTIONS:
 //********************************
 
-template <bool CompareLeafValues, class Visitor, class... OtherDataNodes>
-bool visitStructurallyEqualTreesImpl(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, const DataNode& nodeFirst, const OtherDataNodes&... nodesRest)
+template <  bool CompareLeafValues,
+            class Visitor,
+            ValidNodeRefType NodeRefType,
+            ValidNodeRefType... OtherDataNodes >
+bool visitStructurallyEqualTreesImpl(const Visitor& siblingVisitor, std::string *outMismatchInfo, int _currentLevel, NodeRefType nodeFirst, OtherDataNodes... nodesRest)
 {
     static_assert((std::is_same_v<OtherDataNodes, DataNode> && ...),
                   "All node arguments must be DataNode&");

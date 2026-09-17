@@ -7,10 +7,10 @@ class SerializerForDataNodeTreeAndItsWidgets
 {
 public:
 
-    static MapOfWidgetOptionsForNodes getOptionsFromWidgetsOfTree(DataNodeShared tree);
+    static MapOfWidgetOptionsForNodes getOptionsFromWidgetsOfTree(const ConstDataNodeShared& tree);
 
-    static QJsonValueOpt toJson(const DataNodeShared& tree);
-    static QJsonValueOpt toJson(const DataNodeShared& tree, const MapOfWidgetOptionsForNodes& options);
+    static QJsonValueOpt toJson(const ConstDataNodeShared& tree);
+    static QJsonValueOpt toJson(const ConstDataNodeShared& tree, const MapOfWidgetOptionsForNodes& options);
 
     //returns root node and widget for root node
     static std::tuple<DataNodeShared, NodeWidget*> jsonToRootNodeAndItsWidget(const QJsonValue& json);

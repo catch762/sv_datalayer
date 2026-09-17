@@ -6,13 +6,13 @@
 #include "WidgetLogic/WidgetMakerSystem.h"
 #include "WidgetLogic/NodeWidget.h"
 
-MapOfWidgetOptionsForNodes SerializerForDataNodeTreeAndItsWidgets::getOptionsFromWidgetsOfTree(DataNodeShared tree)
+MapOfWidgetOptionsForNodes SerializerForDataNodeTreeAndItsWidgets::getOptionsFromWidgetsOfTree(const ConstDataNodeShared& tree)
 {
     SV_ASSERT(tree);
 
     MapOfWidgetOptionsForNodes result;
 
-    tree->iterateRecoursively(tree, [&](const DataNodeShared& node)
+    tree->iterateRecoursively(tree, [&](const ConstDataNodeShared& node)
     {
         if (auto* nodeWidget = WidgetsForNodeManager::getSaveablePrimaryWidgetForNode(node))
         {
@@ -64,13 +64,13 @@ bool SerializerForDataNodeTreeAndItsWidgets::onNodeCreatedFromJson_saveOptions( 
     return true;
 }
 
-QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& tree)
+QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const ConstDataNodeShared& tree)
 {
     MapOfWidgetOptionsForNodes optionsMap = getOptionsFromWidgetsOfTree(tree);
     return toJson(tree, optionsMap);
 }
 
-QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const DataNodeShared& tree, const MapOfWidgetOptionsForNodes& optionsMap)
+QJsonValueOpt SerializerForDataNodeTreeAndItsWidgets::toJson(const ConstDataNodeShared& tree, const MapOfWidgetOptionsForNodes& optionsMap)
 {
     auto onJsonCreatedFromNodeAlsoInjectOptionsFromMap = [optionsMap](ConstDataNodeShared node, QJsonObject& jsonOfNode, int level)
     {

@@ -208,6 +208,10 @@ public:
         return parent.lock();
     }
 
+    ConstDataNodeShared tryGetParent() const
+    {
+        return parent.lock();
+    }
     
     const LeafValue* tryGetLeafvalue() const
     {
@@ -377,7 +381,7 @@ public:
     }
 
     //visitor is called on this and all inner subnodes
-    static void iterateRecoursively(const DataNodeShared& node, const std::function<void(const DataNodeShared& node)>& visitor)
+    static void iterateRecoursively(const ConstDataNodeShared& node, const std::function<void(const ConstDataNodeShared& node)>& visitor)
     {
         if (!node) return;
 
@@ -393,7 +397,7 @@ public:
     }
 
     //DataNode returned has empty parent, but other than that its deep copy with identical content
-    static DataNodeShared makeCopy(const DataNodeShared& node)
+    static DataNodeShared makeCopy(const ConstDataNodeShared& node)
     {
         SV_ASSERT(node);
         if (node->isLeaf())
