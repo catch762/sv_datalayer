@@ -43,7 +43,7 @@ public:
 			operation();
 		}
 
-		emit inst->someNodeWidgetChanged();
+		emit inst->someNodeWidgetChanged(nullptr);
 	}
 
 
